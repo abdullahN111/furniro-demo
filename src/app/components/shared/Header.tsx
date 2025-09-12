@@ -82,13 +82,20 @@ const Header = () => {
         <LgNavbar />
 
         <div className="hidden lg:flex text-[26px] gap-8 items-center">
-          <Link
-            href="/"
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenSearch((prev) => !prev);
+            }}
             className="cursor-pointer hover:shadow-[0_1px_0_rgba(0,0,0,0.2)] transition-shadow"
           >
             <FiSearch />
-          </Link>
-
+          </button>
+          {openSearch && (
+            <div className="absolute top-24 left-0 w-full bg-white z-[2000] p-4">
+              <SearchBox close={() => setOpenSearch(false)} />
+            </div>
+          )}
           <Link
             href="/"
             onClick={(e) => {

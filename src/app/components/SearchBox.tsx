@@ -89,3 +89,4 @@ export default function SearchBox({ close }: { close?: () => void }) {
     </div>
   );
 }
+
