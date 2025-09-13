@@ -92,7 +92,7 @@ const Header = () => {
             <FiSearch />
           </button>
           {openSearch && (
-            <div className="absolute top-24 left-0 w-full bg-white z-[2000] p-4">
+            <div className="absolute top-24 left-0 w-full z-[2000] p-4">
               <SearchBox close={() => setOpenSearch(false)} />
             </div>
           )}
@@ -161,7 +161,7 @@ const Header = () => {
             <FiSearch />
           </button>
           {openSearch && (
-            <div className="absolute top-24 left-0 w-full bg-white z-[2000] p-4">
+            <div className="absolute top-24 left-0 w-full z-[2000] p-4">
               <SearchBox close={() => setOpenSearch(false)} />
             </div>
           )}

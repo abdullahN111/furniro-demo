@@ -21,7 +21,6 @@ const ProductCard = ({ showProducts }: { showProducts?: number }) => {
       try {
         const fetchedProducts = await fetchProducts();
         setProducts(fetchedProducts);
-        // console.log("Fetched Products:", fetchedProducts);
         setError(null);
       } catch (err) {
         setError(
@@ -41,7 +40,7 @@ const ProductCard = ({ showProducts }: { showProducts?: number }) => {
         <p className="text-red-500 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
         >
           Try Again
         </button>
@@ -50,52 +49,44 @@ const ProductCard = ({ showProducts }: { showProducts?: number }) => {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 sm:gap-8 my-6 mx-4 lg:mx-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-8 px-4">
       {isLoading
-        ? Array.from({ length: 4 }).map((_, index) => (
+        ? Array.from({ length: showProducts || 8 }).map((_, index) => (
             <div
               key={index}
-              className="relative flex flex-col w-[250px] sm:w-auto h-[300px] bg-gray-100 rounded-sm shadow-md overflow-hidden sm:mx-10 md:mx-2 lg:mx-0 animate-pulse"
+              className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse"
             >
-              <div className="relative w-full h-0 pb-[75%] bg-gray-300"></div>
-              <div className="flex flex-col gap-2 p-4">
-                <div className="h-6 bg-gray-300 rounded w-3/4 mb-2">
-                  <span className="text-gray-600 text-xs">
-                    Loading product...
-                  </span>
-                </div>
-                <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+              <div className="w-full h-64 bg-gray-200"></div>
+              <div className="p-4 space-y-3">
+                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
               </div>
             </div>
           ))
         : products.slice(0, showProducts).map((card) => (
             <div
               key={card._id}
-              className="relative flex flex-col w-[240px] sm:w-auto h-[350px] lg:h-[360px] xl:h-[380px] bg-[#F4F5F7] rounded-sm shadow-md overflow-hidden sm:mx-10 md:mx-2 lg:mx-0 transition-transform duration-300"
+              className="group bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
             >
-              <div className="relative w-full h-0 pb-[75%] group cursor-pointer">
+              <div className="relative h-64 overflow-hidden">
                 <Image
                   src={card.image}
                   alt={card.title}
                   fill
-                  // objectFit="cover"
-                  sizes="100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
+                
                 {card.dicountPercentage && (
-                  <div
-                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-sm text-white rounded-full"
-                    style={{
-                      backgroundColor: card.dicountPercentage.color,
-                    }}
-                  >
+                  <div className="absolute top-3 right-3 w-12 h-12 flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full">
                     {card.dicountPercentage.text}
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center gap-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-black bg-opacity-0 flex flex-col items-center justify-center gap-4 opacity-0 group-hover:bg-opacity-70 group-hover:opacity-100 transition-all duration-300">
                   <button
-                    className="text-[#B88E2F] bg-white text-sm font-semibold py-2 px-8 rounded-sm hover:bg-[#96741E] hover:text-white transition duration-300"
+                    className="text-[#B88E2F] bg-white text-sm font-semibold py-3 px-8 rounded hover:bg-[#B88E2F] hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
                     onClick={() => {
                       if (card.inventoryInStock > 0) {
                         addToCart({
@@ -110,50 +101,57 @@ const ProductCard = ({ showProducts }: { showProducts?: number }) => {
                   >
                     Add to Cart
                   </button>
-                  <div className="flex gap-4">
-                    <button className="text-white flex items-center gap-[2px] hover:text-[#B88E2F] transition duration-300 text-sm">
-                      <span>
-                        <IoShareSocialOutline />
-                      </span>{" "}
+                  <div className="flex gap-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100">
+                    <button className="text-white flex flex-col items-center hover:text-[#B88E2F] transition-colors duration-300 text-xs">
+                      <IoShareSocialOutline className="text-lg mb-1" />
                       Share
                     </button>
                     <button
-                      className={`${
+                      className={`flex flex-col items-center transition-colors duration-300 text-xs ${
                         card.inventoryInStock && card.inventoryInStock > 0
-                          ? "text-white"
-                          : "text-red-600 hover:text-red-500"
-                      } flex items-center gap-[2px] hover:text-[#B88E2F] transition duration-300 text-sm`}
+                          ? "text-white hover:text-[#B88E2F]"
+                          : "text-red-400"
+                      }`}
                     >
-                      <span>
-                        <MdOutlineInventory2 />
-                      </span>{" "}
+                      <MdOutlineInventory2 className="text-lg mb-1" />
                       Stock
                     </button>
-                    <button className="text-white flex items-center gap-[2px] hover:text-[#B88E2F] transition duration-300 text-sm">
-                      <span>
-                        <FaRegHeart />
-                      </span>{" "}
+                    <button className="text-white flex flex-col items-center hover:text-[#B88E2F] transition-colors duration-300 text-xs">
+                      <FaRegHeart className="text-lg mb-1" />
                       Like
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 p-4">
+              <div className="p-5">
                 <Link href={`/add-to-cart/${card.slug.current}`}>
-                  <h4 className="text-2xl font-semibold text-[#3A3A3A] hover:underline cursor-pointer">
+                  <h4 className="text-lg font-semibold text-gray-800 hover:text-[#B88E2F] transition-colors duration-300 line-clamp-1 mb-2">
                     {card.title}
                   </h4>
                 </Link>
-                <p className="text-base text-[#898989]">{card.featured}</p>
-                <h5 className="text-xl font-semibold text-[#3A3A3A]">
-                  $ {card.price}.00{" "}
-                  {card.oldPrice && (
-                    <span className="text-base text-[#B0B0B0] line-through font-normal">
-                      $ {card.oldPrice}
+                <p className="text-sm text-gray-500 mb-3 line-clamp-1">{card.featured}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xl font-bold text-gray-800">
+                      ${card.price}
+                    </span>
+                    {card.oldPrice && (
+                      <span className="text-sm text-gray-400 line-through ml-2">
+                        ${card.oldPrice}
+                      </span>
+                    )}
+                  </div>
+                  {card.inventoryInStock > 0 ? (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      In Stock
+                    </span>
+                  ) : (
+                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                      Out of Stock
                     </span>
                   )}
-                </h5>
+                </div>
               </div>
             </div>
           ))}
