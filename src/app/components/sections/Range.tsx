@@ -5,7 +5,7 @@ import RangeImage3 from "@/app/public/assets/images/products/RangeImage3.png";
 
 const Range = () => {
   return (
-    <section className="max-w-[1140px] mx-auto  my-16">
+    <section className="max-w-[1440px] mx-auto  my-16">
       <div className="flex flex-col items-center justify-center px-4 gap-1 mb-12 lg:mb-16">
         <h2 className="text-3xl font-bold">Browse The Range</h2>
         <p className="text-xl text-center text-[#666666]">
