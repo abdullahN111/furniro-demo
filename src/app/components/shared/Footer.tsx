@@ -33,14 +33,14 @@ const Footer = () => {
             <div className="flex flex-col gap-[52px] items-start">
               <h6 className="text-[#9F9F9F] text-base">Help</h6>
               <ul className="flex flex-col gap-[44px]">
-                <Link href="/" className="cursor-pointer">
+                <Link href="/payment-options" className="cursor-pointer">
                   <li className="text-base cursor-pointer">Payment Options</li>
                 </Link>
-                <Link href="/" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Returns</li>
+                <Link href="/return-policy" className="cursor-pointer">
+                  <li className="text-base cursor-pointer">Return Policy</li>
                 </Link>
-                <Link href="/" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Privacy Polices</li>
+                <Link href="/privacy-policy" className="cursor-pointer">
+                  <li className="text-base cursor-pointer">Privacy Policy</li>
                 </Link>
               </ul>
             </div>
