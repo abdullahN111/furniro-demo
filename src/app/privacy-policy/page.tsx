@@ -19,13 +19,13 @@ const PrivacyPolicy = () => {
   ];
 
   return (
-    <section className="bg-[#FFFFFF] max-w-[1440px] mx-auto mb-12 shadow-md">
+    <section className="bg-[#FFFFFF] max-w-[1440px] mx-auto mb-12">
       <SecondaryHeader routeName="Privacy Policy" />
 
       <div className="max-w-6xl mx-auto p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 mt-6">
           <div className="lg:w-64 lg:shrink-0">
-            <div className="hidden lg:block sticky top-24 bg-white shadow-lg rounded-lg p-3">
+            <div className="hidden lg:block sticky top-24 bg-white shadow-lg rounded-lg p-4">
               <h3 className="font-bold text-lg mb-4 text-[#B88E2F]">
                 Quick Navigation
               </h3>
@@ -34,10 +34,14 @@ const PrivacyPolicy = () => {
                   <li key={section.id}>
                     <button
                       onClick={() => {
-                        document
-                          .getElementById(section.id)
-                          ?.scrollIntoView({ behavior: "smooth" });
-                        setActiveSection(section.id);
+                        const element = document.getElementById(section.id);
+                        if (element) {
+                          window.scrollTo({
+                            top: element.offsetTop - 120,
+                            behavior: "smooth",
+                          });
+                          setActiveSection(section.id);
+                        }
                       }}
                       className={`w-full text-left px-3 py-2 rounded transition-colors ${
                         activeSection === section.id
@@ -56,10 +60,14 @@ const PrivacyPolicy = () => {
               <div className="relative">
                 <select
                   onChange={(e) => {
-                    document
-                      .getElementById(e.target.value)
-                      ?.scrollIntoView({ behavior: "smooth" });
-                    setActiveSection(e.target.value);
+                    const element = document.getElementById(e.target.value);
+                    if (element) {
+                      window.scrollTo({
+                        top: element.offsetTop - 120,
+                        behavior: "smooth",
+                      });
+                      setActiveSection(e.target.value);
+                    }
                   }}
                   value={activeSection}
                   className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] appearance-none bg-white text-gray-700 font-medium"
@@ -90,7 +98,7 @@ const PrivacyPolicy = () => {
           <div className="space-y-8">
             <div
               id="introduction"
-              className="bg-gradient-to-r from-[#FFE0B2] to-[#FFC1C1] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#FFE0B2] to-[#FFC1C1] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
                 Privacy Policy
@@ -114,7 +122,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="information-collection"
-              className="bg-gradient-to-r from-[#CDE7FE] to-[#A5D6FF] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#CDE7FE] to-[#A5D6FF] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Information We Collect
@@ -158,7 +166,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="how-we-use"
-              className="bg-gradient-to-r from-[#FDE2E4] to-[#FAD1D1] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#FDE2E4] to-[#FAD1D1] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 How We Use Your Information
@@ -205,7 +213,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="data-sharing"
-              className="bg-gradient-to-r from-[#FFF1D0] to-[#FFD59E] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#FFF1D0] to-[#FFD59E] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Data Sharing
@@ -233,7 +241,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="cookies"
-              className="bg-gradient-to-r from-[#D4EDDA] to-[#C3E6CB] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#D4EDDA] to-[#C3E6CB] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Cookies & Tracking Technologies
@@ -255,7 +263,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="data-security"
-              className="bg-gradient-to-r from-[#E2E3E5] to-[#D6D8DB] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#E2E3E5] to-[#D6D8DB] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Data Security
@@ -270,7 +278,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="your-rights"
-              className="bg-gradient-to-r from-[#F8D7DA] to-[#F1B0B7] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#F8D7DA] to-[#F1B0B7] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Your Rights
@@ -292,7 +300,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="changes"
-              className="bg-gradient-to-r from-[#D1ECF1] to-[#B6E3EA] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#D1ECF1] to-[#B6E3EA] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Changes to This Policy
@@ -307,7 +315,7 @@ const PrivacyPolicy = () => {
 
             <div
               id="contact"
-              className="bg-gradient-to-r from-[#FFE0B2] to-[#FFC1C1] p-4 lg:p-6 rounded-lg shadow-lg"
+              className="bg-gradient-to-r from-[#FFE0B2] to-[#FFC1C1] p-4 lg:p-8 rounded-lg shadow-lg"
             >
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
                 Contact Us

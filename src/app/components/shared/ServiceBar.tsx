@@ -5,7 +5,7 @@ import CustomerSupport from "@/app/components/svgs/CustomerSupport";
 
 const ServiceBar = () => {
   return (
-    <div className="h-auto lg:h-[270px] bg-[#FAF3EA] py-14 lg:py-0 px-4 lg:px-6 flex flex-col lg:flex-row items-center justify-center gap-20 lg:gap-10 mt-6 mb-16 shadow-md">
+    <div className="h-auto lg:h-[270px] bg-[#FAF3EA] py-14 lg:py-0 px-4 lg:px-6 flex flex-col lg:flex-row items-center justify-center gap-20 lg:gap-10 mt-6 shadow-md">
       <div className="flex gap-3 items-center">
         <div>
           <QualityTrophy />
