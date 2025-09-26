@@ -2,20 +2,20 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#FFFFFF]  border-t border-gray-300 mx-auto max-w-[1440px] px-9 lg:px-[80px] py-4 pt-12">
+    <footer className="bg-[#FFFFFF]  border-t border-gray-300 mx-auto max-w-[1440px] px-9 lg:px-[80px] py-4 pt-8">
       <div>
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[300px_352px_286px] gap-20 lg:gap-6">
-          <div className="flex flex-col gap-[52px] mr-[100px] lg:mr-[120px]">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[300px_352px_286px] gap-12 lg:gap-6">
+          <div className="flex flex-col gap-8 mr-[100px] lg:mr-[120px]">
             <h1 className="font-bold text-2xl">Furniro.</h1>
 
             <p className="max-w-[290px] text-base text-[#9F9F9F]">
               400 University Drive Suite 200 Coral Gables, FL 33134 USA
             </p>
           </div>
-          <div className="flex gap-28">
-            <div className="flex flex-col gap-[52px] items-start">
+          <div className="flex gap-20">
+            <div className="flex flex-col gap-8 items-start">
               <h6 className="text-[#9F9F9F] text-base">Links</h6>
-              <ul className="flex flex-col gap-[44px]">
+              <ul className="flex flex-col gap-6">
                 <Link href="/" className="cursor-pointer">
                   <li className="text-base cursor-pointer">Home</li>
                 </Link>
@@ -30,9 +30,9 @@ const Footer = () => {
                 </Link>
               </ul>
             </div>
-            <div className="flex flex-col gap-[52px] items-start">
+            <div className="flex flex-col gap-8 items-start">
               <h6 className="text-[#9F9F9F] text-base">Help</h6>
-              <ul className="flex flex-col gap-[44px]">
+              <ul className="flex flex-col gap-6">
                 <Link href="/payment-options" className="cursor-pointer">
                   <li className="text-base cursor-pointer">Payment Options</li>
                 </Link>
@@ -45,7 +45,7 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="flex flex-col gap-[50px] mr-4">
+          <div className="flex flex-col gap-8 mr-4">
             <h6 className="text-[#9F9F9F] text-base">Newsletter</h6>
             <div className="flex flex-wrap gap-[10px]">
               <input

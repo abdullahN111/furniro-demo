@@ -48,11 +48,11 @@ const About = () => {
 
       <div className="relative bg-gradient-to-br from-[#F9F1E7] to-[#FFE0B2] py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h1 className="text-5xl lg:text-6xl font-bold text-gray-800 mb-6">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">
             Crafting Spaces, Creating Stories
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            At Furniro, we don&apos;t just sell furniture—we help you create
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            At Furniro, we don&apos;t just sell furniture we help you create
             environments that inspire, comfort, and reflect your unique
             personality.
           </p>
