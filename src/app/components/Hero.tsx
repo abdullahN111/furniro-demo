@@ -24,7 +24,7 @@ const Hero = () => {
           New Collection
         </h1>
         <p className="text-[#333333] text-[15px] sm:text-base md:text-lg mb-12">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
+          Hero ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
           tellus, luctus nec ullamcorper mattis.
         </p>
         <button className="bg-[#B88E2F] text-white text-sm md:text-base px-[60px] py-[14px] md:px-[65px] md:py-[15px] lg:px-[70px] lg:py-[17px] text-center content-center rounded-sm shadow-md hover:bg-[#b88f2ff8] font-bold">
