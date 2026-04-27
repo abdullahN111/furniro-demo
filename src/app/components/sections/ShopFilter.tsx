@@ -9,14 +9,15 @@ const ShopFilter = ({
   setProductsPerPage,
   sortBy,
   setSortBy,
+  totalProducts,
 }: {
   productsPerPage: number;
   setProductsPerPage: (n: number) => void;
   sortBy: string;
   setSortBy: (s: string) => void;
+  totalProducts: number;
 }) => {
-  const totalProducts = 24; // ideally from API
-
+  // const totalPages = Math.ceil(totalProducts / productsPerPage);
   return (
     <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between py-5 px-4 lg:px-6 max-w-[1440px] bg-[#F9F1E7] w-full h-auto lg:h-24 gap-4 lg:gap-0 mb-16">
       <div className="flex items-center lg:gap-[26px]">
@@ -32,7 +33,7 @@ const ShopFilter = ({
         </div>
       </div>
 
-      <div className="flex sm:flex-row flex-col items-end sm:items-center gap-4 lg:gap-5">
+      <div className="flex flex-wrap justify-center lg:justify-end items-center gap-4">
         <div className="flex items-center gap-[10px]">
           <label className="text-base lg:text-lg">Show</label>
           <input

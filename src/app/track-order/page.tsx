@@ -1,7 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { client } from "@/sanity/lib/client";
 
 interface OrderItem {
   _key: string;
@@ -24,31 +24,27 @@ const OrderTracking = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [orderIdInput, setOrderIdInput] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
 
   const fetchOrderDetails = async (orderId: string) => {
     try {
-      const query = `*[_type == "order" && orderId == $orderId][0]{
-        orderId,
-        paymentMethod,
-        status,
-        total,
-        user,
-        items[]->{
-          title,
-          price,
-          _key
+      const res = await fetch("/api/track-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        itemQuantities
-      }`;
+        body: JSON.stringify({ orderId }),
+      });
 
-      const orderData = await client.fetch(query, { orderId });
+      const data = await res.json();
 
-      if (!orderData) {
+      if (!res.ok) {
         setOrderDetails(null);
-        setShowModal(true); 
+        setShowModal(true);
         return;
       }
-      
+
+      const orderData = data.order;
 
       setOrderDetails({
         ...orderData,
@@ -60,16 +56,31 @@ const OrderTracking = () => {
 
       setShowModal(true);
     } catch (error) {
-      console.error("Error fetching order details:", error);
-      alert("Order not found!");
+      console.error("Error:", error);
+      setOrderDetails(null);
+      setShowModal(true);
     }
   };
 
   useEffect(() => {
-    const lastOrderId = localStorage.getItem("lastOrderId"); 
+    const checkUser = async () => {
+      const res = await fetch("/api/account-info");
+      const data = await res.json();
+
+      if (!data.user) {
+        router.push("/login");
+      }
+    };
+
+    checkUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const lastOrderId = localStorage.getItem("lastOrderId");
     if (lastOrderId) {
       fetchOrderDetails(lastOrderId);
-      localStorage.removeItem("lastOrderId"); 
+      localStorage.removeItem("lastOrderId");
     }
   }, []);
 
@@ -100,63 +111,66 @@ const OrderTracking = () => {
         </button>
       </div>
 
-      
-      <div className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-150 ${showModal ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-    <div className="bg-white p-4 lg:p-8 mx-4 lg:mx-0 rounded-lg max-w-[500px] w-full shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-4">
-        {orderDetails ? "Order Details" : "Order Not Found"}
-      </h2>
-
-      {orderDetails ? (
-        <>
-          <div className="grid grid-cols-[60%_40%] gap-4 text-gray-700 text-[15px] border-b pb-4">
-            <p>
-              <strong>Order ID:</strong> {orderDetails.orderId}
-            </p>
-            <p>
-              <strong>Status:</strong> {orderDetails.status}
-            </p>
-            <p>
-              <strong>Payment:</strong> {orderDetails.paymentMethod}
-            </p>
-            <p>
-              <strong>Total:</strong> ${orderDetails.total.toFixed(2)}
-            </p>
-          </div>
-
-          <h3 className="mt-4 text-[17px] font-semibold">Products:</h3>
-          <div className="mt-2 space-y-3">
-            {orderDetails.items.map((item) => (
-              <div
-                key={item._key}
-                className="flex items-center justify-between border-b pb-2"
-              >
-                <span className="w-1/2">{item.title}</span>
-                <span className="w-1/4 text-center">
-                  Qty: {item.quantity}
-                </span>
-                <span className="w-1/4 text-right">
-                  ${item.price.toFixed(2)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <p className="text-center text-gray-600">No order found with this ID. Please check and try again.</p>
-      )}
-
-      <button
-        onClick={() => setShowModal(false)}
-        className="mt-6 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
+      <div
+        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-150 ${showModal ? "opacity-100" : "opacity-0 pointer-events-none"}`}
       >
-        Close
-      </button>
-      <p className="text-center mt-2 text-gray-600 text-sm">Save the Order ID or take screenshot before closing.</p>
-    </div>
-  </div>
+        <div className="bg-white p-4 lg:p-8 mx-4 lg:mx-0 rounded-lg max-w-[500px] w-full shadow-lg">
+          <h2 className="text-2xl font-bold text-center mb-4">
+            {orderDetails ? "Order Details" : "Order Not Found"}
+          </h2>
 
+          {orderDetails ? (
+            <>
+              <div className="grid grid-cols-[60%_40%] gap-4 text-gray-700 text-[15px] border-b pb-4">
+                <p>
+                  <strong>Order ID:</strong> {orderDetails.orderId}
+                </p>
+                <p>
+                  <strong>Status:</strong> {orderDetails.status}
+                </p>
+                <p>
+                  <strong>Payment:</strong> {orderDetails.paymentMethod}
+                </p>
+                <p>
+                  <strong>Total:</strong> ${orderDetails.total}
+                </p>
+              </div>
 
+              <h3 className="mt-4 text-[17px] font-semibold">Products:</h3>
+              <div className="mt-2 space-y-3">
+                {orderDetails.items.map((item) => (
+                  <div
+                    key={item._key}
+                    className="flex items-center justify-between border-b pb-2"
+                  >
+                    <span className="w-1/2">{item.title}</span>
+                    <span className="w-1/4 text-center">
+                      Qty: {item.quantity}
+                    </span>
+                    <span className="w-1/4 text-right">
+                      ${item.price}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-center text-gray-600">
+              No order found with this ID. Please check and try again.
+            </p>
+          )}
+
+          <button
+            onClick={() => setShowModal(false)}
+            className="mt-6 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
+          >
+            Close
+          </button>
+          <p className="text-center mt-2 text-gray-600 text-sm">
+            Save the Order ID or take screenshot before closing.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

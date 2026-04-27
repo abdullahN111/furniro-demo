@@ -41,7 +41,7 @@ const Page = () => {
         sorted.sort((a, b) => Number(a.price) - Number(b.price));
         break;
       case "price-high-low":
-        sorted.sort((a, b) => Number(a.price) - Number(b.price));
+        sorted.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case "title-a-z":
         sorted.sort((a, b) => a.title.localeCompare(b.title));
@@ -71,6 +71,7 @@ const Page = () => {
         setProductsPerPage={setProductsPerPage}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        totalProducts={sortedProducts.length}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-8 px-4">
@@ -96,6 +97,7 @@ const Page = () => {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         productsPerPage={productsPerPage}
+        totalProducts={sortedProducts.length}
       />
 
       <ServiceBar />

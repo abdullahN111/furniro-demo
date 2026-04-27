@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaRegHeart, FaShoppingBag, FaSignOutAlt } from "react-icons/fa";
+import { CgTrack } from "react-icons/cg";
 
 interface User {
   name?: string;
@@ -34,9 +35,8 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
       className="relative px-4 py-5 sm:py-6 sm:px-5 w-[280px] xsx:w-[320px] bg-white shadow-lg z-[1001] rounded-md flex flex-col"
       onClick={(e) => e.stopPropagation()}
     >
-     
       <div className="flex justify-end absolute right-3 top-3">
-        <button 
+        <button
           className="text-[#9F9F9F] hover:text-gray-700 transition-colors"
           onClick={close}
           aria-label="Close account menu"
@@ -45,7 +45,6 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
         </button>
       </div>
 
-    
       <div className="flex flex-col items-center justify-center gap-2 pt-6 pb-4">
         {user?.image && (
           <Image
@@ -66,28 +65,34 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
 
       <div className="border-t border-gray-200 my-2" />
 
-    
       <div className="flex flex-col space-y-2 py-2">
-        <Link 
-          href="/orders" 
+        <Link
+          href="/orders"
           className="flex items-center px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition-colors"
           onClick={close}
         >
           <FaShoppingBag className="mr-3 text-[#B88E2F]" />
           <span className="text-sm">My Orders</span>
         </Link>
-        
+
         <div className="flex items-center px-3 py-2 text-gray-500 cursor-not-allowed opacity-70">
           <FaRegHeart className="mr-3" />
           <span className="text-sm">Favorites</span>
         </div>
-        
-        
+        {user && (
+          <Link
+            href="/track-order"
+            className="flex items-center px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition-colors"
+            onClick={close}
+          >
+            <CgTrack className="mr-3 text-[#B88E2F]" />
+            <span className="text-sm">Track Order</span>
+          </Link>
+        )}
       </div>
 
       <div className="border-t border-gray-200 my-2" />
 
-      
       <div className="pt-2 pb-3">
         {user ? (
           <button
