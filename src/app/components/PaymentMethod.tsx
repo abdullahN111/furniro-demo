@@ -130,55 +130,6 @@ const PaymentMethod = ({
           />
         </div>
 
-        <SelectField
-          label="Country / Region"
-          id="country"
-          register={register}
-          errors={errors}
-          required
-        >
-          <option value="Pakistan">Pakistan</option>
-          <option value="India">India</option>
-          <option value="Bangladesh">Bangladesh</option>
-          <option value="Sri Lanka">Sri Lanka</option>
-        </SelectField>
-
-        <InputField
-          label="Street Address"
-          id="streetaddress"
-          register={register}
-          errors={errors}
-          required
-        />
-        <InputField
-          label="Town / City"
-          id="city"
-          register={register}
-          errors={errors}
-          required
-        />
-
-        <SelectField
-          label="Province"
-          id="province"
-          register={register}
-          errors={errors}
-          required
-        >
-          <option value="Sindh">Sindh</option>
-          <option value="Punjab">Punjab</option>
-          <option value="KPK">KPK</option>
-          <option value="Balochistan">Balochistan</option>
-        </SelectField>
-
-        <InputField
-          label="Zip Code"
-          id="zipcode"
-          register={register}
-          errors={errors}
-          required
-          pattern={/^[0-9]{5}$/}
-        />
         <InputField
           label="Phone"
           id="phone"
@@ -203,6 +154,56 @@ const PaymentMethod = ({
             value={session?.user?.email || ""}
           />
         </div>
+
+        <SelectField
+          label="Country / Region"
+          id="country"
+          register={register}
+          errors={errors}
+          required
+        >
+          <option value="Pakistan">Pakistan</option>
+          <option value="India">India</option>
+          <option value="Bangladesh">Bangladesh</option>
+          <option value="Sri Lanka">Sri Lanka</option>
+        </SelectField>
+
+        <SelectField
+          label="Province"
+          id="province"
+          register={register}
+          errors={errors}
+          required
+        >
+          <option value="Sindh">Sindh</option>
+          <option value="Punjab">Punjab</option>
+          <option value="KPK">KPK</option>
+          <option value="Balochistan">Balochistan</option>
+        </SelectField>
+
+        <InputField
+          label="Town / City"
+          id="city"
+          register={register}
+          errors={errors}
+          required
+        />
+        <InputField
+          label="Street Address"
+          id="streetaddress"
+          register={register}
+          errors={errors}
+          required
+        />
+
+        <InputField
+          label="Zip Code"
+          id="zipcode"
+          register={register}
+          errors={errors}
+          required
+          pattern={/^[0-9]{5}$/}
+        />
       </form>
     </div>
   );
