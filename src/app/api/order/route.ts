@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 import { v4 as uuidv4 } from "uuid";
+import { auth } from "@/auth/authSetup";
 
 interface OrderItem {
   productId: string;
@@ -18,9 +19,21 @@ const client = createClient({
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
     const body = await req.json();
     const { orderId, user, items, total, paymentMethod } = body;
 
+    const safeUser = {
+      ...user,
+      email: session.user.email, 
+    };
     const productRefs = items.map((item: OrderItem) => ({
       _key: uuidv4(),
       _type: "reference",
@@ -30,15 +43,14 @@ export async function POST(req: Request) {
     const itemPrices = items.map((item: OrderItem) => item.price);
     const itemQuantities = items.map((item: OrderItem) => item.quantity);
 
-
     const orderDoc = {
       _type: "order",
       orderId,
-      user,
-      items: productRefs, 
+      user: safeUser,
+      items: productRefs,
 
-      itemPrices, 
-      itemQuantities, 
+      itemPrices,
+      itemQuantities,
       total,
       paymentMethod,
       status: "Pending",
@@ -49,13 +61,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { success: true, orderId: createdOrder._id },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(
       { success: false, message: "Failed to create order" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
