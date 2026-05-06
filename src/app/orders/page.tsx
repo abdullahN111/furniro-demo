@@ -12,9 +12,15 @@ import Link from "next/link";
 const OrderCard = ({
   order,
   type,
+  selectionMode,
+  selectedProducts,
+  toggleProduct,
 }: {
   order: Order;
   type: "receive" | "delivered" | "review";
+  selectionMode?: boolean;
+  selectedProducts?: string[];
+  toggleProduct?: (id: string) => void;
 }) => {
   const [products, setProducts] = useState<ProductCardData[]>([]);
 
@@ -26,6 +32,7 @@ const OrderCard = ({
 
     loadProducts();
   }, []);
+
   const steps = ["Pending", "Processing", "Dispatched", "Shipped", "Delivered"];
   const currentIndex = steps.indexOf(order.status);
   return (
@@ -77,6 +84,17 @@ const OrderCard = ({
             className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-4 border-b border-gray-100 last:border-b-0"
           >
             <div className="flex items-start space-x-4 w-full lg:w-auto">
+              {selectionMode &&
+                type === "delivered" &&
+                selectedProducts &&
+                toggleProduct && (
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(item._id)}
+                    onChange={() => toggleProduct(item._id)}
+                    className="mr-2"
+                  />
+                )}
               <div className="relative w-20 h-20 flex-shrink-0">
                 <Image
                   src={item.productImage || "/placeholder-image.jpg"}
@@ -165,6 +183,19 @@ const Order = () => {
     "receive" | "delivered" | "review"
   >("receive");
 
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
+
+  const toggleProduct = (productId: string) => {
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : prev.length < 8
+          ? [...prev, productId]
+          : prev,
+    );
+  };
+
   useEffect(() => {
     const loadOrders = async () => {
       if (status === "loading") return;
@@ -186,6 +217,25 @@ const Order = () => {
 
     loadOrders();
   }, [session, status]);
+
+  const createGallery = async () => {
+    if (selectedProducts.length < 4) {
+      alert("Please select at least 4 products to create a gallery");
+      return;
+    }
+
+    await fetch("/api/gallery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userEmail: session?.user?.email,
+        products: selectedProducts,
+      }),
+    });
+
+    setSelectionMode(false);
+    setSelectedProducts([]);
+  };
 
   if (status === "loading" || loading) {
     return (
@@ -275,10 +325,36 @@ const Order = () => {
                 </p>
               ))}
 
+            {activeTab === "delivered" && (
+              <div className="mb-4 flex gap-3">
+                <button
+                  onClick={() => setSelectionMode((prev) => !prev)}
+                  className="bg-gray-800 text-white px-4 py-2 rounded"
+                >
+                  {selectionMode ? "Cancel" : "Create Gallery"}
+                </button>
+
+                {selectionMode && (
+                  <button
+                    onClick={createGallery}
+                    className="bg-[#B88E2F] text-white px-4 py-2 rounded"
+                  >
+                    Save Gallery ({selectedProducts.length}/8)
+                  </button>
+                )}
+              </div>
+            )}
             {activeTab === "delivered" &&
               (deliveredOrders.length > 0 ? (
                 deliveredOrders.map((order) => (
-                  <OrderCard key={order._id} order={order} type="delivered" />
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    type="delivered"
+                    selectionMode={selectionMode}
+                    selectedProducts={selectedProducts}
+                    toggleProduct={toggleProduct}
+                  />
                 ))
               ) : (
                 <p className="text-gray-500 text-center">No delivered orders</p>

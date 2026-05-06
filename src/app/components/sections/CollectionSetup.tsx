@@ -1,27 +1,120 @@
+"use client";
+
 import Image from "next/image";
 import { FiShare2 } from "react-icons/fi";
-
-import CollectionImage1 from "@/app/public/assets/images/featured/Rectangle 37.png";
-import CollectionImage2 from "@/app/public/assets/images/featured/Rectangle 40.png";
-import CollectionImage3 from "@/app/public/assets/images/featured/Rectangle 43.png";
-import CollectionImage4 from "@/app/public/assets/images/featured/Rectangle 45.png";
-import CollectionImage5 from "@/app/public/assets/images/featured/Rectangle 39.png";
-import CollectionImage6 from "@/app/public/assets/images/featured/Rectangle 41.png";
-import CollectionImage7 from "@/app/public/assets/images/featured/Rectangle 44.png";
-import CollectionImage8 from "@/app/public/assets/images/featured/Rectangle 38.png";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import jsPDF from "jspdf";
+import { placeholderImages } from "@/app/Data/gallery";
 
 const CollectionSetup = () => {
-  const images = [
-    CollectionImage1, CollectionImage2, CollectionImage3, CollectionImage4,
-    CollectionImage5, CollectionImage6, CollectionImage7, CollectionImage8
-  ];
+  const { data: session } = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [images, setImages] = useState<any[]>([]);
+  const [hasGallery, setHasGallery] = useState(false);
+
+  useEffect(() => {
+    async function fetchGallery() {
+      if (!session?.user?.email) return;
+
+      const res = await fetch(`/api/gallery?email=${session.user.email}`);
+      const data = await res.json();
+
+      if (data.gallery?.products?.length >= 4) {
+        setImages(data.gallery.products);
+        setHasGallery(true);
+      }
+    }
+
+    fetchGallery();
+  }, [session]);
+
+  const displayImages = hasGallery
+    ? images
+    : placeholderImages.map((img) => ({ image: img }));
+
+  const downloadPDF = async () => {
+    const pdf = new jsPDF();
+
+    let y = 10;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    pdf.text("My Furniture Gallery", pageWidth / 2, y, { align: "center" });
+
+    y += 15;
+
+    for (let i = 0; i < displayImages.length; i++) {
+      const img = displayImages[i].image;
+
+      try {
+        const res = await fetch(img);
+        const blob = await res.blob();
+
+        const reader = new FileReader();
+
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+
+        const boxWidth = 180;
+const boxHeight = 100;
+
+const imgProps = pdf.getImageProperties(base64);
+
+const imgRatio = imgProps.width / imgProps.height;
+const boxRatio = boxWidth / boxHeight;
+
+let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+
+if (imgRatio > boxRatio) {
+  drawHeight = boxHeight;
+  drawWidth = boxHeight * imgRatio;
+  offsetX = -(drawWidth - boxWidth) / 2;
+} else {
+  drawWidth = boxWidth;
+  drawHeight = boxWidth / imgRatio;
+  offsetY = -(drawHeight - boxHeight) / 2;
+}
+
+
+const pageHeight = pdf.internal.pageSize.getHeight();
+if (y + boxHeight > pageHeight - 10) {
+  pdf.addPage();
+  y = 10;
+}
+
+pdf.saveGraphicsState();
+
+pdf.rect(10, y, boxWidth, boxHeight);
+pdf.clip();
+
+pdf.addImage(
+  base64,
+  "JPEG",
+  10 + offsetX,
+  y + offsetY,
+  drawWidth,
+  drawHeight
+);
+
+pdf.restoreGraphicsState();
+
+y += boxHeight + 10;
+      } catch (err) {
+        console.error("Image failed:", err);
+      }
+    }
+
+    pdf.save("furniro_gallery.pdf");
+  };
 
   return (
     <section className="max-w-[1440px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
- 
-    
-
-  
       <div className="text-center mb-8">
         <h5 className="text-lg font-medium text-gray-600 mb-2">
           Share your setup with
@@ -30,33 +123,33 @@ const CollectionSetup = () => {
           <FiShare2 className="text-[#B88E2F]" />
           #FuniroFurniture
         </h2>
+
+        {!hasGallery && (
+          <p className="text-gray-500 mt-2">
+            Order your first furniture and create your gallery
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6 mb-12">
-        {images.map((image, index) => (
-          <div 
-            key={index} 
-            className="relative w-full aspect-square overflow-hidden group cursor-pointer"
-          >
+        {displayImages.slice(0, 8).map((item, index) => (
+          <div key={index} className="relative w-full aspect-square">
             <Image
-              src={image}
-              alt={`Setup ${index + 1}`}
+              src={item.image}
+              alt={`Setup ${index}`}
               fill
-              className="object-cover rounded-md shadow-md transition-all duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+              className="object-cover rounded-md"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-              <button className="opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-[#B88E2F] px-4 py-2 rounded-md font-medium">
-                View
-              </button>
-            </div>
           </div>
         ))}
       </div>
 
       <div className="text-center">
-        <button className="bg-[#B88E2F] hover:bg-[#a57d28] text-white font-medium py-3 px-8 rounded-md transition-colors duration-300 shadow-md hover:shadow-lg">
-          Share Your Setup
+        <button
+          onClick={downloadPDF}
+          className="bg-[#B88E2F] text-white px-6 py-3 rounded"
+        >
+          Download Gallery
         </button>
       </div>
     </section>
