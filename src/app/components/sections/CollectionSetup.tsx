@@ -82,14 +82,14 @@ const CollectionSetup = () => {
           const x = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
 
           const pageHeight = pdf.internal.pageSize.getHeight();
-          if (y + pdfHeight > pageHeight - 10) {
+          if (y + pdfHeight > pageHeight - 15) {
             pdf.addPage();
             y = 10;
           }
 
           pdf.addImage(base64, "JPEG", x, y, pdfWidth, pdfHeight);
 
-          y += pdfHeight + 10;
+          y += pdfHeight + 12;
         } catch (err) {
           console.error("Image failed:", err);
         }
@@ -132,7 +132,7 @@ const CollectionSetup = () => {
         ))}
       </div>
 
-      <div className="text-center">
+      <div className="text-center flex justify-center">
         <button
           onClick={downloadPDF}
           disabled={loading}
