@@ -12,6 +12,7 @@ const CollectionSetup = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [images, setImages] = useState<any[]>([]);
   const [hasGallery, setHasGallery] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -34,83 +35,70 @@ const CollectionSetup = () => {
     : placeholderImages.map((img) => ({ image: img }));
 
   const downloadPDF = async () => {
-    const pdf = new jsPDF();
+    if (loading) return;
 
-    let y = 10;
+    setLoading(true);
 
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(18);
+    try {
+      const pdf = new jsPDF();
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    pdf.text("My Furniture Gallery", pageWidth / 2, y, { align: "center" });
+      let y = 10;
 
-    y += 15;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(18);
 
-    for (let i = 0; i < displayImages.length; i++) {
-      const img = displayImages[i].image;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      pdf.text("My Furniture Gallery", pageWidth / 2, y, { align: "center" });
 
-      try {
-        const res = await fetch(img);
-        const blob = await res.blob();
+      y += 15;
 
-        const reader = new FileReader();
+      for (let i = 0; i < displayImages.length; i++) {
+        const img = displayImages[i].image;
 
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+        try {
+          const res = await fetch(img);
+          const blob = await res.blob();
 
-        const boxWidth = 180;
-const boxHeight = 100;
+          const reader = new FileReader();
 
-const imgProps = pdf.getImageProperties(base64);
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
 
-const imgRatio = imgProps.width / imgProps.height;
-const boxRatio = boxWidth / boxHeight;
+          const imgProps = pdf.getImageProperties(base64);
 
-let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+          const maxWidth = 180;
+          const maxHeight = 120;
 
+          let pdfWidth = maxWidth;
+          let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-if (imgRatio > boxRatio) {
-  drawHeight = boxHeight;
-  drawWidth = boxHeight * imgRatio;
-  offsetX = -(drawWidth - boxWidth) / 2;
-} else {
-  drawWidth = boxWidth;
-  drawHeight = boxWidth / imgRatio;
-  offsetY = -(drawHeight - boxHeight) / 2;
-}
+          if (pdfHeight > maxHeight) {
+            pdfHeight = maxHeight;
+            pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+          }
 
+          const x = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
 
-const pageHeight = pdf.internal.pageSize.getHeight();
-if (y + boxHeight > pageHeight - 10) {
-  pdf.addPage();
-  y = 10;
-}
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          if (y + pdfHeight > pageHeight - 10) {
+            pdf.addPage();
+            y = 10;
+          }
 
-pdf.saveGraphicsState();
+          pdf.addImage(base64, "JPEG", x, y, pdfWidth, pdfHeight);
 
-pdf.rect(10, y, boxWidth, boxHeight);
-pdf.clip();
-
-pdf.addImage(
-  base64,
-  "JPEG",
-  10 + offsetX,
-  y + offsetY,
-  drawWidth,
-  drawHeight
-);
-
-pdf.restoreGraphicsState();
-
-y += boxHeight + 10;
-      } catch (err) {
-        console.error("Image failed:", err);
+          y += pdfHeight + 10;
+        } catch (err) {
+          console.error("Image failed:", err);
+        }
       }
-    }
 
-    pdf.save("furniro_gallery.pdf");
+      pdf.save("furniro_gallery.pdf");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -147,9 +135,35 @@ y += boxHeight + 10;
       <div className="text-center">
         <button
           onClick={downloadPDF}
-          className="bg-[#B88E2F] text-white px-6 py-3 rounded"
+          disabled={loading}
+          className="bg-[#B88E2F] text-white px-6 py-3 rounded flex items-center justify-center gap-2 disabled:opacity-70"
         >
-          Download Gallery
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="white"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="white"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+              Downloading...
+            </>
+          ) : (
+            "Download Gallery"
+          )}
         </button>
       </div>
     </section>
