@@ -22,7 +22,7 @@ const OrderCard = ({
   selectedProducts?: string[];
   toggleProduct?: (id: string) => void;
 }) => {
-  const [, setProducts] = useState<ProductCardData[]>([]);
+  const [products, setProducts] = useState<ProductCardData[]>([]);
 
 
   useEffect(() => {
@@ -74,8 +74,8 @@ const OrderCard = ({
       </div>
 
       {order.items.map((item, index) => {
-        // const product = products.find((p) => p._id === item._id);
-        // const slug = product?.slug.current;
+        const product = products.find((p) => p._id === item._id);
+        const slug = product?.slug.current;
 
         return (
           <div
@@ -94,18 +94,22 @@ const OrderCard = ({
                     className="mr-2"
                   />
                 )}
-              <div className="relative w-20 h-20 flex-shrink-0">
-                <Image
-                  src={item.productImage || "/placeholder-image.jpg"}
-                  alt={item.title}
-                  fill
-                  className="object-cover rounded-md"
-                />
-              </div>
+              <Link href={`/add-to-cart/${slug}`}>
+                <div className="relative w-20 h-20 flex-shrink-0">
+                  <Image
+                    src={item.productImage || "/placeholder-image.jpg"}
+                    alt={item.title}
+                    fill
+                    className="object-cover rounded-md"
+                  />
+                </div>
+              </Link>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-gray-900 text-[13px] sm:text-sm line-clamp-2">
-                  {item.title}
-                </h4>
+                <Link href={`/add-to-cart/${slug}`}>
+                  <h4 className="font-medium text-gray-900 text-[13px] sm:text-sm line-clamp-2">
+                    {item.title}
+                  </h4>
+                </Link>
                 <p className="text-xs text-gray-500 mt-1">
                   Color Family: White Black
                 </p>
@@ -122,24 +126,26 @@ const OrderCard = ({
                   Qty: {order.itemQuantities[index]}
                 </p>
               </div>
-              <div className="lg:mt-2">
-                <Link
-                  href={`/track-order?orderId=${order.orderId}`}
-                  className="text-xs text-blue-600 hover:text-blue-800 lg:block hidden"
-                >
-                  View Details
-                </Link>
-              </div>
+
             </div>
           </div>
         );
       })}
 
       <div className="flex justify-between items-center pt-4">
+
         <div className="text-sm text-gray-500">
           Ordered on {new Date(order.createdAt).toLocaleDateString()}
         </div>
-        <div className="flex">
+        <div className="flex gap-2">
+
+          <Link
+            href={`/track-order?orderId=${order.orderId}`}
+            className="text-xs text-blue-600 hover:text-blue-800 lg:block hidden"
+          >
+            View Details
+          </Link>
+
           <button className="px-3 py-2 text-sm bg-[#B88E2F] text-white rounded-md hover:bg-[#a57d28]">
             Contact Seller
           </button>
