@@ -42,10 +42,10 @@ const OrderCard = ({
           <h3 className="font-semibold text-gray-800">Furniro</h3>
           <p
             className={`text-sm ${order.status === "Delivered"
-                ? "text-green-600"
-                : order.status === "Pending"
-                  ? "text-yellow-600"
-                  : "text-blue-600"
+              ? "text-green-600"
+              : order.status === "Pending"
+                ? "text-yellow-600"
+                : "text-blue-600"
               }`}
           >
             {order.status}
@@ -55,8 +55,8 @@ const OrderCard = ({
               <div key={step} className="flex items-center">
                 <span
                   className={`px-2 py-1 rounded-full ${index <= currentIndex
-                      ? "bg-[#B88E2F] text-white"
-                      : "bg-gray-200 text-gray-500"
+                    ? "bg-[#B88E2F] text-white"
+                    : "bg-gray-200 text-gray-500"
                     }`}
                 >
                   {step}
@@ -74,7 +74,7 @@ const OrderCard = ({
 
       {order.items.map((item, index) => {
         const product = products.find((p) => p._id === item._id);
-        const slug = product?.slug.current;
+        // const slug = product?.slug.current;
 
         return (
           <div
@@ -292,8 +292,8 @@ const Order = () => {
                 setActiveTab(tab.key as "receive" | "delivered" | "review")
               }
               className={`pb-2 text-sm font-medium ${activeTab === tab.key
-                  ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
-                  : "text-gray-500"
+                ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
+                : "text-gray-500"
                 }`}
             >
               {tab.label}
