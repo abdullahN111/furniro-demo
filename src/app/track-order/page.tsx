@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface OrderItem {
   _key: string;
@@ -25,6 +26,7 @@ const OrderTracking = () => {
   const [orderIdInput, setOrderIdInput] = useState("");
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const fetchOrderDetails = async (orderId: string) => {
     try {
@@ -77,12 +79,13 @@ const OrderTracking = () => {
   }, []);
 
   useEffect(() => {
-    const lastOrderId = localStorage.getItem("lastOrderId");
-    if (lastOrderId) {
-      fetchOrderDetails(lastOrderId);
-      localStorage.removeItem("lastOrderId");
+    const orderId = searchParams.get("orderId");
+
+    if (orderId) {
+      setOrderIdInput(orderId);
+      fetchOrderDetails(orderId);
     }
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="w-full max-w-[600px] mx-auto pt-10 pb-16 px-6 sm:px-8 lg:px-16 my-12 mb-16">

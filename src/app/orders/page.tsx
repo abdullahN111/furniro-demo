@@ -41,13 +41,12 @@ const OrderCard = ({
         <div>
           <h3 className="font-semibold text-gray-800">Furniro</h3>
           <p
-            className={`text-sm ${
-              order.status === "Delivered"
+            className={`text-sm ${order.status === "Delivered"
                 ? "text-green-600"
                 : order.status === "Pending"
                   ? "text-yellow-600"
                   : "text-blue-600"
-            }`}
+              }`}
           >
             {order.status}
           </p>
@@ -55,11 +54,10 @@ const OrderCard = ({
             {steps.map((step, index) => (
               <div key={step} className="flex items-center">
                 <span
-                  className={`px-2 py-1 rounded-full ${
-                    index <= currentIndex
+                  className={`px-2 py-1 rounded-full ${index <= currentIndex
                       ? "bg-[#B88E2F] text-white"
                       : "bg-gray-200 text-gray-500"
-                  }`}
+                    }`}
                 >
                   {step}
                 </span>
@@ -125,7 +123,7 @@ const OrderCard = ({
               </div>
               <div className="lg:mt-2">
                 <Link
-                  href={`/add-to-cart/${slug}`}
+                  href={`/track-order?orderId=${order.orderId}`}
                   className="text-xs text-blue-600 hover:text-blue-800 lg:block hidden"
                 >
                   View Details
@@ -293,11 +291,10 @@ const Order = () => {
               onClick={() =>
                 setActiveTab(tab.key as "receive" | "delivered" | "review")
               }
-              className={`pb-2 text-sm font-medium ${
-                activeTab === tab.key
+              className={`pb-2 text-sm font-medium ${activeTab === tab.key
                   ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
