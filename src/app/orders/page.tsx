@@ -137,11 +137,11 @@ const OrderCard = ({
         <div className="text-sm text-gray-500">
           Ordered on {new Date(order.createdAt).toLocaleDateString()}
         </div>
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-[6px]">
 
           <Link
             href={`/track-order?orderId=${order.orderId}`}
-            className="text-xs text-blue-600 hover:text-blue-800 lg:block hidden"
+            className="text-sm text-blue-600 hover:text-blue-800 lg:block hidden"
           >
             View Details
           </Link>
