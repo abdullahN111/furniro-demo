@@ -22,9 +22,8 @@ const OrderCard = ({
   selectedProducts?: string[];
   toggleProduct?: (id: string) => void;
 }) => {
-  /* eslint-disable no-unused-vars */
-  const [products, setProducts] = useState<ProductCardData[]>([]);
-  /* eslint-disable no-unused-vars */
+  const [, setProducts] = useState<ProductCardData[]>([]);
+
 
   useEffect(() => {
     async function loadProducts() {
