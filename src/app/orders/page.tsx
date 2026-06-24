@@ -22,7 +22,7 @@ const OrderCard = ({
   selectedProducts?: string[];
   toggleProduct?: (id: string) => void;
 }) => {
-  const [products, setProducts] = useState<ProductCardData[]>([]);
+  const [_, setProducts] = useState<ProductCardData[]>([]);
 
   useEffect(() => {
     async function loadProducts() {
