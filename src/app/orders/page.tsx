@@ -73,7 +73,7 @@ const OrderCard = ({
       </div>
 
       {order.items.map((item, index) => {
-        const product = products.find((p) => p._id === item._id);
+        // const product = products.find((p) => p._id === item._id);
         // const slug = product?.slug.current;
 
         return (
