@@ -242,6 +242,26 @@ const Order = () => {
     setSelectedProducts([]);
   };
 
+  const handleGalleryMode = async () => {
+    if (!selectionMode) {
+      const res = await fetch(
+        `/api/gallery?email=${session?.user?.email}`
+      );
+
+      const data = await res.json();
+
+      if (data.gallery?.products) {
+        setSelectedProducts(
+          data.gallery.products.map(
+            (product: { _id: string }) => product._id
+          )
+        );
+      }
+    }
+
+    setSelectionMode((prev) => !prev);
+  };
+
   if (status === "loading" || loading) {
     return (
       <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
@@ -332,7 +352,7 @@ const Order = () => {
             {activeTab === "delivered" && (
               <div className="mb-4 flex gap-3">
                 <button
-                  onClick={() => setSelectionMode((prev) => !prev)}
+                  onClick={handleGalleryMode}
                   className="bg-gray-800 text-white px-4 py-2 rounded"
                 >
                   {selectionMode ? "Cancel" : "Create Gallery"}
