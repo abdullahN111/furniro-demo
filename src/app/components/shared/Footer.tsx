@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-[#FFFFFF]  border-t border-gray-300 mx-auto max-w-[1440px] px-9 lg:px-[80px] py-4 pt-8">
       <div>
@@ -68,7 +69,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="h-14 content-center">
-        <p className="text-base">2023 Furniro. All rights reserved.</p>
+        <p className="text-base">{currentYear} Furniro. All rights reserved.</p>
       </div>
     </footer>
   );
