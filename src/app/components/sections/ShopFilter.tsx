@@ -39,27 +39,8 @@ const ShopFilter = ({
           <select
             value={productsPerPage}
             onChange={(e) => setProductsPerPage(Number(e.target.value))}
-            className="
-    h-11
-    min-w-[80px]
-    px-4
-    pr-10
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    text-gray-700
-    shadow-sm
-    cursor-pointer
-    transition-all
-    duration-200
-    hover:border-[#B88E2F]
-    hover:shadow-md
-    focus:outline-none
-    focus:ring-2
-    focus:ring-[#B88E2F]/30
-    focus:border-[#B88E2F]
-  "
+            className="h-11 min-w-[160px] px-4 pr-10 rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm cursor-pointer transition-all duration-200 hover:border-[#B88E2F] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/30 focus:border-[#B88E2F]"
+
           >
             <option value={8}>8</option>
             <option value={12}>12</option>
@@ -74,27 +55,7 @@ const ShopFilter = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="
-    h-11
-    min-w-[160px]
-    px-4
-    pr-10
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    text-gray-700
-    shadow-sm
-    cursor-pointer
-    transition-all
-    duration-200
-    hover:border-[#B88E2F]
-    hover:shadow-md
-    focus:outline-none
-    focus:ring-2
-    focus:ring-[#B88E2F]/30
-    focus:border-[#B88E2F]
-  "
+            className="h-11 min-w-[160px] px-4 pr-10 rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm cursor-pointer transition-all duration-200 hover:border-[#B88E2F] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/30 focus:border-[#B88E2F]"
           >
             <option value="new">New</option>
             <option value="old">Old</option>
