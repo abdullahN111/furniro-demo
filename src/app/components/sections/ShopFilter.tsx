@@ -51,10 +51,10 @@ const ShopFilter = ({
             onChange={(e) => setSortBy(e.target.value)}
             className="text-base lg:text-lg text-[#9F9F9F] focus:outline-none w-[150px] lg:w-[188px] px-3 lg:px-5 h-[44px]"
           >
-            <option value="default">Default</option>
-            <option value="low-high">Price: Low to High</option>
-            <option value="high-low">Price: High to Low</option>
-            <option value="newest">Newest</option>
+            <option value="new">New</option>
+            <option value="old">Old</option>
+            <option value="low-price">Low Price</option>
+            <option value="high-price">High Price</option>
           </select>
         </div>
       </div>
