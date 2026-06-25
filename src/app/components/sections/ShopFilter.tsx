@@ -1,8 +1,8 @@
 "use client";
 
 import { LiaSlidersHSolid } from "react-icons/lia";
-import { HiViewGrid } from "react-icons/hi";
-import { LuGalleryVertical } from "react-icons/lu";
+// import { HiViewGrid } from "react-icons/hi";
+// import { LuGalleryVertical } from "react-icons/lu";
 
 const ShopFilter = ({
   productsPerPage,
@@ -19,29 +19,33 @@ const ShopFilter = ({
 }) => {
   // const totalPages = Math.ceil(totalProducts / productsPerPage);
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between py-5 px-4 lg:px-6 max-w-[1440px] bg-[#F9F1E7] w-full h-auto lg:h-24 gap-4 lg:gap-0 mb-16">
+    <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between py-5 px-4 lg:px-6 max-w-[1440px] bg-[#F9F1E7] rounded-xl shadow-sm border border-[#f0e4d3] w-full h-auto lg:h-24 gap-4 lg:gap-0 mb-16">
       <div className="flex items-center lg:gap-[26px]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-gray-200">
           <LiaSlidersHSolid className="text-2xl cursor-pointer" />
           <p className="text-lg">Filter</p>
         </div>
-        <HiViewGrid className="text-2xl cursor-pointer hidden lg:flex" />
-        <LuGalleryVertical className="text-2xl cursor-pointer hidden lg:flex" />
+        {/* <HiViewGrid className="text-2xl cursor-pointer hidden lg:flex" />
+        <LuGalleryVertical className="text-2xl cursor-pointer hidden lg:flex" /> */}
         <div className="mx-4 lg:mx-0 h-8 lg:h-10 w-px bg-[#9F9F9F]"></div>
-        <div className="text-base">
-          Showing {productsPerPage} per page (of {totalProducts})
+        <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200">
+          Showing {productsPerPage} of {totalProducts} products
         </div>
       </div>
 
       <div className="flex flex-wrap justify-center lg:justify-end items-center gap-4">
         <div className="flex items-center gap-[10px]">
           <label className="text-base lg:text-lg">Show</label>
-          <input
-            type="number"
+          <select
             value={productsPerPage}
-            onChange={(e) => setProductsPerPage(Number(e.target.value) || 10)}
-            className="text-base lg:text-lg text-[#9F9F9F] focus:outline-none w-[60px] px-2 lg:px-3 h-[44px]"
-          />
+            onChange={(e) => setProductsPerPage(Number(e.target.value))}
+            className="h-11 px-4 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
+          >
+            <option value={8}>8</option>
+            <option value={12}>12</option>
+            <option value={16}>16</option>
+            <option value={24}>24</option>
+          </select>
         </div>
 
         <div className="flex items-center gap-[10px]">
@@ -49,7 +53,7 @@ const ShopFilter = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-base lg:text-lg text-[#9F9F9F] focus:outline-none w-[150px] lg:w-[188px] px-3 lg:px-5 h-[44px]"
+            className="h-11 px-4 rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
           >
             <option value="new">New</option>
             <option value="old">Old</option>
