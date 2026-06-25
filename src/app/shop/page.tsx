@@ -13,7 +13,7 @@ import { ProductCardData, fetchProducts } from "@/app/Data";
 const Page = () => {
   const [products, setProducts] = useState<ProductCardData[]>([]);
   const [productsPerPage, setProductsPerPage] = useState(12);
-  const [sortBy, setSortBy] = useState("default");
+  const [sortBy, setSortBy] = useState("new");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,25 +36,31 @@ const Page = () => {
 
   const sortedProducts = useMemo(() => {
     const sorted = [...products];
+
     switch (sortBy) {
-      case "price-low-high":
+      case "low-price":
         sorted.sort((a, b) => Number(a.price) - Number(b.price));
         break;
-      case "price-high-low":
+
+      case "high-price":
         sorted.sort((a, b) => Number(b.price) - Number(a.price));
         break;
-      case "title-a-z":
-        sorted.sort((a, b) => a.title.localeCompare(b.title));
+
+      case "new":
+        sorted.reverse();
         break;
-      case "title-z-a":
-        sorted.sort((a, b) => b.title.localeCompare(a.title));
+
+      case "old":
+
         break;
+
       default:
+        sorted.reverse();
         break;
     }
+
     return sorted;
   }, [products, sortBy]);
-
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = sortedProducts.slice(
