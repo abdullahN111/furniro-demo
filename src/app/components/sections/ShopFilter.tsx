@@ -22,6 +22,7 @@ const ShopFilter = ({
   // const totalPages = Math.ceil(totalProducts / productsPerPage);
 
   const [sortOpen, setSortOpen] = useState(false);
+  const [showOpen, setShowOpen] = useState(false);
 
   const sortOptions = [
     { value: "new", label: "New" },
@@ -29,6 +30,14 @@ const ShopFilter = ({
     { value: "low-price", label: "Low Price" },
     { value: "high-price", label: "High Price" },
   ];
+
+  const showOptions = [
+    { value: 8, label: "8" },
+    { value: 12, label: "12" },
+    { value: 16, label: "16" },
+    { value: 24, label: "24" },
+  ];
+
 
 
   return (
@@ -49,47 +58,45 @@ const ShopFilter = ({
       <div className="flex flex-wrap justify-center lg:justify-end items-center gap-4">
         <div className="flex items-center gap-[10px]">
           <label className="text-base lg:text-lg">Show</label>
-          <div className="relative">
-            <select
-              value={productsPerPage}
-              onChange={(e) => setProductsPerPage(Number(e.target.value))}
-              className="
-    appearance-none
-    h-11
-    w-[90px]
-    px-4
-    pr-12
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    text-gray-700
-    shadow-sm
-    cursor-pointer
-    hover:border-[#B88E2F]
-    focus:outline-none
-    focus:ring-2
-    focus:ring-[#B88E2F]/30
-    transition-all duration-300
-hover:shadow-md
-hover:-translate-y-[1px]
-  "
+          <div className="relative w-[90px]">
+            <button
+              onClick={() => setShowOpen(!showOpen)}
+              className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between shadow-sm hover:border-[#B88E2F] transition-all"
             >
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-              <option value={16}>16</option>
-              <option value={24}>24</option>
-            </select>
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
-              ▼
-            </span>
+              <span>
+                {showOptions.find((o) => o.value === productsPerPage)?.label}
+              </span>
+              <span
+                className={`transition-transform duration-500 ${showOpen ? "rotate-180" : ""
+                  }`}
+              >
+                ▼
+              </span>
+            </button>
+
+            {showOpen && (
+              <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95">
+                {showOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setProductsPerPage(option.value);
+                      setShowOpen(false);
+                    }}
+                    className="text-base w-full text-left p-3 hover:bg-[#F9F1E7] transition-colors"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
 
         <div className="flex items-center gap-[10px]">
           <label className="text-base lg:text-lg">Sort by</label>
-          <div className="relative w-[130px]">
+          <div className="relative w-[120px]">
             <button
               onClick={() => setSortOpen(!sortOpen)}
               className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between shadow-sm hover:border-[#B88E2F] transition-all"
@@ -98,7 +105,7 @@ hover:-translate-y-[1px]
                 {sortOptions.find((o) => o.value === sortBy)?.label}
               </span>
               <span
-                className={`transition-transform duration-200 ${sortOpen ? "rotate-180" : ""
+                className={`transition-transform duration-500 ${sortOpen ? "rotate-180" : ""
                   }`}
               >
                 ▼
@@ -114,7 +121,7 @@ hover:-translate-y-[1px]
                       setSortBy(option.value);
                       setSortOpen(false);
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-[#F9F1E7] transition-colors"
+                    className="text-base w-full text-left p-3 hover:bg-[#F9F1E7] transition-colors"
                   >
                     {option.label}
                   </button>
