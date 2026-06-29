@@ -46,14 +46,20 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
       </div>
 
       <div className="flex flex-col items-center justify-center gap-2 pt-6 pb-4">
-        {user?.image && (
-          <Image
-            src={user.image}
-            alt={user.name || "User"}
-            width={70}
-            height={70}
-            className="rounded-full object-cover border-2 border-gray-200"
-          />
+        {user && (
+          user.image ? (
+            <Image
+              src={user.image}
+              alt={user.name || "User"}
+              width={70}
+              height={70}
+              className="rounded-full object-cover border-2 border-gray-200"
+            />
+          ) : (
+            <div className="w-[70px] h-[70px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-3xl font-bold">
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+          )
         )}
         <p className="text-[17px] font-medium text-center text-gray-800">
           {user?.name || "Guest User"}

@@ -119,14 +119,20 @@ const Header = () => {
               toggleAccountInfo();
             }}
           >
-            {user?.image ? (
-              <Image
-                src={user.image}
-                alt={user.name || "User"}
-                width={31}
-                height={31}
-                className="rounded-full object-cover"
-              />
+            {user ? (
+              user.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name || "User"}
+                  width={31}
+                  height={31}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-[31px] h-[31px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-sm font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+              )
             ) : (
               <TbUserExclamation />
             )}
@@ -185,14 +191,20 @@ const Header = () => {
               toggleAccountInfo();
             }}
           >
-            {user?.image ? (
-              <Image
-                src={user.image}
-                alt={user.name || "User"}
-                width={31}
-                height={31}
-                className="rounded-full object-cover"
-              />
+            {user ? (
+              user.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name || "User"}
+                  width={31}
+                  height={31}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-[31px] h-[31px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-sm font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+              )
             ) : (
               <TbUserExclamation />
             )}
