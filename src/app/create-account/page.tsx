@@ -73,24 +73,8 @@ const CreateAccountPage = () => {
     };
 
     return (
-        <div className="flex flex-col lg:flex-row py-16">
-            <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-5 sm:px-8 lg:px-16 text-center bg-white lg:shadow-none border-b lg:border-none border-gray-200 py-8 lg:py-0">
-                <Image
-                    src={Logo}
-                    alt="Furniro Logo"
-                    width={90}
-                    height={90}
-                    className="mb-4"
-                />
-                <h2 className="text-3xl md:text-4xl lg:text-[44px] font-extrabold text-[#B88E2F] mb-4">
-                    Furniro
-                </h2>
-                <p className="text-base lg:text-lg max-w-md leading-relaxed text-gray-700">
-                    Elevate your living space with timeless, high-quality furniture.
-                    Explore our collection today and experience the perfect blend of style
-                    and comfort.
-                </p>
-            </div>
+        <div className="flex justify-center py-16">
+
 
             <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-5 sm:px-8 lg:px-16 bg-white lg:rounded-lg py-8 lg:py-0 min-h-[80vh]">
                 <div className="text-center w-full max-w-sm">
