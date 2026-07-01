@@ -8,6 +8,10 @@ export default auth((req) => {
     const loginUrl = new URL("/login", req.nextUrl.origin)
     return NextResponse.redirect(loginUrl)
   }
+  if (req.auth && pathname === "/login" || req.auth && pathname === "/create-account") {
+    const homeUrl = new URL("/", req.nextUrl.origin)
+    return NextResponse.redirect(homeUrl)
+  }
 
   return NextResponse.next()
 })

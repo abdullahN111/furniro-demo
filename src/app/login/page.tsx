@@ -50,8 +50,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row py-16">
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-5 sm:px-8 lg:px-16 text-center bg-white lg:shadow-none border-b lg:border-none border-gray-200 py-8 lg:py-0">
+    <div className="flex flex-col lg:flex-row py-12">
+      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4 sm:px-8 text-center bg-white lg:shadow-none border-b lg:border-none border-gray-200 py-6 lg:py-0">
         <Image
           src={Logo}
           alt="Furniro Logo"
@@ -59,7 +59,7 @@ const LoginPage = () => {
           height={90}
           className="mb-4"
         />
-        <h2 className="text-3xl md:text-4xl lg:text-[44px] font-extrabold text-[#B88E2F] mb-4">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-[#B88E2F] mb-4">
           Furniro
         </h2>
         <p className="text-base lg:text-lg max-w-md leading-relaxed text-gray-700">
@@ -69,7 +69,7 @@ const LoginPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-5 sm:px-8 lg:px-16 bg-white lg:rounded-lg py-8 lg:py-0 min-h-[80vh]">
+      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4 sm:px-8 bg-white lg:rounded-lg py-6 lg:py-0 min-h-[80vh]">
         <div className="text-center w-full max-w-sm">
           <h2 className="text-[26px] lg:text-3xl font-bold text-[#B88E2F] my-4">
             Unlock Your Home’s Elegance
@@ -80,7 +80,7 @@ const LoginPage = () => {
         </div>
 
 
-        <div className="w-full max-w-sm flex flex-col gap-6">
+        <div className="w-full max-w-sm flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-lg font-semibold">Email Address</label>
             <input
@@ -89,7 +89,7 @@ const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading || messageType === "success"}
               placeholder="Enter your email"
-              className="text-base text-[#333] border border-[#B88E2F] py-3 px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
+              className="text-base text-[#333] border border-[#B88E2F] py-[10px] px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
             />
           </div>
 
@@ -101,12 +101,12 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading || messageType === "success"}
               placeholder="Enter your password"
-              className="text-base text-[#333] border border-[#B88E2F] py-3 px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
+              className="text-base text-[#333] border border-[#B88E2F] py-[10px] px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
             />
           </div>
           {message && (
             <div
-              className={`rounded-md px-4 py-3 text-sm font-medium ${messageType === "success"
+              className={`rounded-md px-4 py-[10px] text-sm font-medium ${messageType === "success"
                 ? "bg-green-100 text-green-700 border border-green-300"
                 : "bg-red-100 text-red-700 border border-red-300"
                 }`}
@@ -117,7 +117,7 @@ const LoginPage = () => {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="text-white text-lg bg-[#B88E2F] hover:bg-[#b88f2ff8] rounded-md py-3 px-6 font-semibold shadow-md transition duration-300"
+            className="text-white text-lg bg-[#B88E2F] hover:bg-[#b88f2ff8] rounded-md py-[10px] px-6 font-semibold shadow-md transition duration-300"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
@@ -144,7 +144,7 @@ const LoginPage = () => {
 
           <button
             onClick={() => signIn("google")}
-            className="flex items-center justify-center gap-3 text-gray-700 bg-white border border-gray-700 hover:bg-[#ffffffa8] rounded-md py-3 px-6 font-semibold shadow-sm transition duration-300 w-full"
+            className="flex items-center justify-center gap-3 text-gray-700 bg-white border border-gray-700 hover:bg-[#ffffffa8] rounded-md py-[10px] px-6 font-semibold shadow-sm transition duration-300 w-full"
           >
             <svg
               className="w-5 h-5"
