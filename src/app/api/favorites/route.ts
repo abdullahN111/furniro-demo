@@ -91,3 +91,54 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+export async function GET(req: Request) {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const productId = searchParams.get("productId");
+
+    if (!productId) {
+      return NextResponse.json(
+        { success: false, message: "Product ID is required." },
+        { status: 400 }
+      );
+    }
+
+    const user = await serverClient.fetch(
+      `*[_type == "user" && email == $email][0]{
+        favorites
+      }`,
+      {
+        email: session.user.email,
+      }
+    );
+
+    const favorites = user?.favorites || [];
+
+    const isFavorite = favorites.some(
+      (fav: { _ref: string }) => fav._ref === productId
+    );
+
+    return NextResponse.json({
+      success: true,
+      isFavorite,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch favorite status." },
+      { status: 500 }
+    );
+  }
+}

@@ -7,7 +7,7 @@ import { FaRegHeart, FaHeart } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCardData } from "@/app/Data/index";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ProductCard = ({ card }: { card: ProductCardData }) => {
   const { addToCart } = useCart();
@@ -46,6 +46,26 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
       setLoadingFavorite(false);
     }
   };
+
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        const res = await fetch(
+          `/api/favorites?productId=${card._id}`
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setIsFavorite(data.isFavorite);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [card._id]);
 
   return (
     <div

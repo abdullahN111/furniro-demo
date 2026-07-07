@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { MdOutlineInventory2 } from "react-icons/md";
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 const ProductDetail = () => {
   const { addToCart } = useCart();
@@ -86,6 +86,26 @@ const ProductDetail = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        const res = await fetch(
+          `/api/favorites?productId=${product._id}`
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setIsFavorite(data.isFavorite);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [product._id]);
+
 
   return (
     <div className="w-full mx-auto py-10 mb-12 px-8 lg:px-16 flex flex-col lg:flex-row gap-10">
@@ -152,12 +172,11 @@ const ProductDetail = () => {
             disabled={loadingFavorite}
             className="relative group flex items-center gap-2 transition"
           >
-            <FaRegHeart
-              className={`text-xl transition-colors ${isFavorite
-                ? "text-[#B88E2F] fill-[#B88E2F]"
-                : "text-gray-700 hover:text-[#B88E2F]"
-                }`}
-            />
+            {isFavorite ? (
+              <FaHeart className="text-xl text-[#B88E2F]" />
+            ) : (
+              <FaRegHeart className="text-xl text-white group-hover/icon:text-[#B88E2F]" />
+            )}
 
             <span
               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
