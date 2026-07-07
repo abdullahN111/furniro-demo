@@ -32,7 +32,7 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
           </div>
         )}
 
-      
+
         <div className="absolute inset-0 bg-black bg-opacity-0 flex flex-col items-center justify-center gap-4 opacity-0 group-hover:bg-opacity-70 group-hover:opacity-100 transition-all duration-300">
           <button
             className="text-[#B88E2F] bg-white text-sm font-semibold py-3 px-8 rounded hover:bg-[#B88E2F] hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
@@ -50,30 +50,56 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
           >
             Add to Cart
           </button>
-          <div className="flex gap-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100">
-            <button className="text-white flex flex-col items-center hover:text-[#B88E2F] transition-colors duration-300 text-xs">
-              <IoShareSocialOutline className="text-lg mb-1" />
-              Share
+          <div className="flex gap-5 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100">
+
+            <button className="relative group/icon text-white hover:text-[#B88E2F] transition-colors">
+              <IoShareSocialOutline className="text-xl" />
+
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
+      rounded-md bg-gray-900 px-3 py-1 text-xs text-white
+      opacity-0 group-hover/icon:opacity-100 transition duration-200 pointer-events-none">
+                Share Product
+              </span>
             </button>
+
             <button
-              className={`flex flex-col items-center transition-colors duration-300 text-xs ${
-                card.inventoryInStock && card.inventoryInStock > 0
-                  ? "text-white hover:text-[#B88E2F]"
-                  : "text-red-400"
-              }`}
+              className={`relative group/icon transition-colors ${card.inventoryInStock > 0
+                ? "text-white hover:text-[#B88E2F]"
+                : "text-red-400"
+                }`}
             >
-              <MdOutlineInventory2 className="text-lg mb-1" />
-              Stock
+              <MdOutlineInventory2 className="text-xl" />
+
+              <span
+                className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
+      rounded-md px-3 py-1 text-xs text-white
+      opacity-0 group-hover/icon:opacity-100 transition duration-200 pointer-events-none
+      ${card.inventoryInStock > 0
+                    ? "bg-gray-900"
+                    : "bg-red-600"
+                  }`}
+              >
+                {card.inventoryInStock > 0
+                  ? `${card.inventoryInStock} in stock`
+                  : "Out of Stock"}
+              </span>
             </button>
-            <button className="text-white flex flex-col items-center hover:text-[#B88E2F] transition-colors duration-300 text-xs">
-              <FaRegHeart className="text-lg mb-1" />
-              Like
+
+            <button className="relative group/icon text-white hover:text-red-500 transition-colors">
+              <FaRegHeart className="text-xl" />
+
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
+      rounded-md bg-gray-900 px-3 py-1 text-xs text-white
+      opacity-0 group-hover/icon:opacity-100 transition duration-200 pointer-events-none">
+                Add to Favorites
+              </span>
             </button>
+
           </div>
         </div>
       </div>
 
-     
+
       <div className="p-5">
         <Link href={`/add-to-cart/${card.slug.current}`}>
           <h4 className="text-lg font-semibold text-gray-800 hover:text-[#B88E2F] transition-colors duration-300 line-clamp-1 mb-2">
