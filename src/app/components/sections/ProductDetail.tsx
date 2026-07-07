@@ -26,9 +26,6 @@ const ProductDetail = () => {
     loadProducts();
   }, []);
 
-  if (!products) {
-    return <p className="text-center my-16">Loading product details...</p>;
-  }
 
   const product = products?.find(
     (item) => item._id === id || item.slug?.current === id
@@ -52,6 +49,10 @@ const ProductDetail = () => {
 
     fetchFavoriteStatus();
   }, [product]);
+
+  if (!products) {
+    return <p className="text-center my-16">Loading product details...</p>;
+  }
 
   if (!product) {
     return (
