@@ -38,5 +38,16 @@ export const user = defineType({
             title: "Created At",
             type: "datetime",
         },
+        {
+            name: "favorites",
+            title: "Favorite Products",
+            type: "array",
+            of: [
+                {
+                    type: "reference",
+                    to: [{ type: "product" }],
+                },
+            ],
+        }
     ],
 });

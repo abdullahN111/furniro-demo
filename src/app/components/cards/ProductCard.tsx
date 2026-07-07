@@ -7,9 +7,43 @@ import { FaRegHeart } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCardData } from "@/app/Data/index";
+import { useState } from "react";
 
 const ProductCard = ({ card }: { card: ProductCardData }) => {
   const { addToCart } = useCart();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+
+  const handleFavorite = async () => {
+    if (loadingFavorite) return;
+
+    try {
+      setLoadingFavorite(true);
+
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: card._id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      setIsFavorite(data.isFavorite);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
 
   return (
     <div
@@ -62,7 +96,8 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
               </span>
             </button>
 
-            <button
+            <Link
+              href={`/add-to-cart/${card.slug.current}`}
               className={`relative group/icon transition-colors ${card.inventoryInStock > 0
                 ? "text-white hover:text-[#B88E2F]"
                 : "text-red-400"
@@ -83,18 +118,28 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
                   ? `${card.inventoryInStock} in stock`
                   : "Out of Stock"}
               </span>
-            </button>
+            </Link>
 
-            <button className="relative group/icon text-white hover:text-red-500 transition-colors">
-              <FaRegHeart className="text-xl" />
+            <button
+              onClick={handleFavorite}
+              disabled={loadingFavorite}
+              className="relative group/icon transition-colors"
+            >
+              <FaRegHeart
+                className={`text-xl transition-colors ${isFavorite
+                  ? "text-[#B88E2F] fill-[#B88E2F]"
+                  : "text-white group-hover/icon:text-[#B88E2F]"
+                  }`}
+              />
 
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
-      rounded-md bg-gray-900 px-3 py-1 text-xs text-white
-      opacity-0 group-hover/icon:opacity-100 transition duration-200 pointer-events-none">
-                Add to Favorites
+              <span
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
+    rounded-md bg-gray-900 px-3 py-1 text-xs text-white
+    opacity-0 group-hover/icon:opacity-100 transition duration-200 pointer-events-none"
+              >
+                {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               </span>
             </button>
-
           </div>
         </div>
       </div>

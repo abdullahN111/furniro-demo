@@ -14,6 +14,9 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const { id } = useParams<{ id: string }>();
   const [products, setProducts] = useState<ProductCardData[] | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+
 
   useEffect(() => {
     async function loadProducts() {
@@ -50,6 +53,39 @@ const ProductDetail = () => {
 
   const handleDecrement = () =>
     setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
+
+
+  const handleFavorite = async () => {
+    if (loadingFavorite) return;
+
+    try {
+      setLoadingFavorite(true);
+
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: product._id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      setIsFavorite(data.isFavorite);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
+
 
   return (
     <div className="w-full mx-auto py-10 mb-12 px-8 lg:px-16 flex flex-col lg:flex-row gap-10">
@@ -111,18 +147,33 @@ const ProductDetail = () => {
         <div className="flex flex-wrap items-center gap-6 pt-2">
 
 
-          <button className="relative group flex items-center gap-2 text-gray-700 hover:text-red-500 transition">
-            <FaRegHeart className="text-xl" />
+          <button
+            onClick={handleFavorite}
+            disabled={loadingFavorite}
+            className="relative group flex items-center gap-2 transition"
+          >
+            <FaRegHeart
+              className={`text-xl transition-colors ${isFavorite
+                ? "text-[#B88E2F] fill-[#B88E2F]"
+                : "text-gray-700 hover:text-[#B88E2F]"
+                }`}
+            />
 
             <span
               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-      whitespace-nowrap rounded-md bg-gray-900 px-3 py-1 text-xs text-white
-      opacity-0 group-hover:opacity-100 transition pointer-events-none"
+    whitespace-nowrap rounded-md bg-gray-900 px-3 py-1 text-xs text-white
+    opacity-0 group-hover:opacity-100 transition pointer-events-none"
             >
-              Add to Favorites
+              {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             </span>
 
-            <span className="text-sm">Favorite</span>
+            <span className="text-sm">
+              {loadingFavorite
+                ? "Saving..."
+                : isFavorite
+                  ? "Favorited"
+                  : "Favorite"}
+            </span>
           </button>
 
           <button className="relative group flex items-center gap-2 text-gray-700 hover:text-[#B88E2F] transition">
