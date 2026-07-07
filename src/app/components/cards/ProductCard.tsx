@@ -3,7 +3,7 @@
 import { useCart } from "@/app/context/CartContext";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { MdOutlineInventory2 } from "react-icons/md";
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCardData } from "@/app/Data/index";
@@ -125,12 +125,11 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
               disabled={loadingFavorite}
               className="relative group/icon transition-colors"
             >
-              <FaRegHeart
-                className={`text-xl transition-colors ${isFavorite
-                  ? "text-[#B88E2F] fill-[#B88E2F]"
-                  : "text-white group-hover/icon:text-[#B88E2F]"
-                  }`}
-              />
+              {isFavorite ? (
+                <FaHeart className="text-xl text-[#B88E2F]" />
+              ) : (
+                <FaRegHeart className="text-xl text-white group-hover/icon:text-[#B88E2F]" />
+              )}
 
               <span
                 className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap
