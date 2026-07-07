@@ -15,6 +15,7 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
   const [loadingFavorite, setLoadingFavorite] = useState(false);
 
   const handleFavorite = async () => {
+    console.log("clicked");
     if (loadingFavorite) return;
 
     try {
@@ -37,6 +38,7 @@ const ProductCard = ({ card }: { card: ProductCardData }) => {
         return;
       }
 
+      console.log("API returned:", data.isFavorite);
       setIsFavorite(data.isFavorite);
     } catch (error) {
       console.error(error);
