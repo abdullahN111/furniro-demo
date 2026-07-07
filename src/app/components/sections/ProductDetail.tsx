@@ -30,9 +30,28 @@ const ProductDetail = () => {
     return <p className="text-center my-16">Loading product details...</p>;
   }
 
-  const product = products.find(
+  const product = products?.find(
     (item) => item._id === id || item.slug?.current === id
   );
+
+  useEffect(() => {
+    if (!product) return;
+
+    const fetchFavoriteStatus = async () => {
+      try {
+        const res = await fetch(`/api/favorites?productId=${product._id}`);
+        const data = await res.json();
+
+        if (res.ok) {
+          setIsFavorite(data.isFavorite);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [product]);
 
   if (!product) {
     return (
@@ -85,26 +104,6 @@ const ProductDetail = () => {
       setLoadingFavorite(false);
     }
   };
-
-  useEffect(() => {
-    const fetchFavoriteStatus = async () => {
-      try {
-        const res = await fetch(
-          `/api/favorites?productId=${product._id}`
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-          setIsFavorite(data.isFavorite);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchFavoriteStatus();
-  }, [product._id]);
 
 
   return (
