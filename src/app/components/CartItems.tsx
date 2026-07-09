@@ -54,7 +54,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
                   className="rounded-md object-cover w-[75px] h-[75px]"
                 />
               </div>
-              <div className="mx-0 text-center sm:text-start sm:mr-4 w-[150px] sm:w-[110px] sm:break-words line-clamp-1">
+              <div className="mx-0 text-center sm:text-start sm:mr-3 w-[150px] sm:w-[120px] sm:break-words line-clamp-2">
                 <p className="text-[15px] font-semibold">{item.name}</p>
                 <div>
                   <p className="flex items-center justify-center sm:justify-start gap-2">
