@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth/authSetup";
 import { serverClient } from "@/sanity/lib/serverClient";
 
-
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
     if (!productId) {
       return NextResponse.json(
         { success: false, message: "Product ID is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const user = await serverClient.fetch(
@@ -29,20 +28,20 @@ export async function POST(req: Request) {
       }`,
       {
         email: session.user.email,
-      }
+      },
     );
 
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const favorites = user.favorites || [];
 
     const alreadyFavorite = favorites.some(
-      (fav: { _ref: string }) => fav._ref === productId
+      (fav: { _ref: string }) => fav._ref === productId,
     );
 
     if (alreadyFavorite) {
@@ -50,7 +49,7 @@ export async function POST(req: Request) {
         .patch(user._id)
         .set({
           favorites: favorites.filter(
-            (fav: { _ref: string }) => fav._ref !== productId
+            (fav: { _ref: string }) => fav._ref !== productId,
           ),
         })
         .commit();
@@ -61,7 +60,6 @@ export async function POST(req: Request) {
         message: "Removed from favorites.",
       });
     }
-
 
     await serverClient
       .patch(user._id)
@@ -81,8 +79,6 @@ export async function POST(req: Request) {
       isFavorite: true,
       message: "Added to favorites.",
     });
-
-
   } catch (error) {
     console.error("Error adding favorite:", error);
     return NextResponse.json(
@@ -92,53 +88,30 @@ export async function POST(req: Request) {
   }
 }
 
+export async function GET() {
+  const session = await auth();
 
-export async function GET(req: Request) {
-  try {
-    const session = await auth();
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const { searchParams } = new URL(req.url);
-    const productId = searchParams.get("productId");
-
-    if (!productId) {
-      return NextResponse.json(
-        { success: false, message: "Product ID is required." },
-        { status: 400 }
-      );
-    }
-
-    const user = await serverClient.fetch(
-      `*[_type == "user" && email == $email][0]{
-        favorites
-      }`,
-      {
-        email: session.user.email,
-      }
-    );
-
-    const favorites = user?.favorites || [];
-
-    const isFavorite = favorites.some(
-      (fav: { _ref: string }) => fav._ref === productId
-    );
-
-    return NextResponse.json({
-      success: true,
-      isFavorite,
-    });
-  } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch favorite status." },
-      { status: 500 }
-    );
+  if (!session?.user?.email) {
+    return NextResponse.json([]);
   }
+
+  const favorites = await serverClient.fetch(
+    `*[_type=="user" && email==$email][0]{
+      favorites[]->{
+        _id,
+        title,
+        price,
+        slug,
+        productImage,
+        featured,
+        dicountPercentage,
+        inventoryInStock
+      }
+    }.favorites`,
+    {
+      email: session.user.email,
+    },
+  );
+
+  return NextResponse.json(favorites || []);
 }
