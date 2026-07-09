@@ -27,9 +27,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
     >
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-4">
-          <h3 className="text-xl sm:text-[22px] font-semibold">
-            Shopping Cart
-          </h3>
+          <h3 className="text-lg sm:text-xl font-semibold">Shopping Cart</h3>
           <div className="border border-[#D9D9D9] w-[110%] sm:w-[140%]"></div>
         </div>
         <button
@@ -40,7 +38,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
         </button>
       </div>
 
-      <div className="flex flex-col gap-6 my-6 h-[280px] overflow-y-auto">
+      <div className="flex flex-col gap-8 sm:gap-6 my-6 h-[280px] overflow-y-auto">
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
             <div
@@ -56,7 +54,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
                   className="rounded-md object-cover w-[75px] h-[75px]"
                 />
               </div>
-              <div className="mx-0 text-center sm:text-start sm:mr-4 w-[150px] sm:w-[110px] sm:break-words line-clamp-2">
+              <div className="mx-0 text-center sm:text-start sm:mr-4 w-[150px] sm:w-[110px] sm:break-words line-clamp-1">
                 <p className="text-[15px] font-semibold">{item.name}</p>
                 <div>
                   <p className="flex items-center justify-center sm:justify-start gap-2">
