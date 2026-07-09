@@ -22,6 +22,7 @@ const ClientAccountInfo = ({
   favoriteCount: number;
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [orderCount, setOrderCount] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,6 +30,10 @@ const ClientAccountInfo = ({
         const res = await fetch("/api/account-info");
         const data = await res.json();
         setUser(data.user);
+
+        const orderRes = await fetch("/api/orders/count");
+        const orderData = await orderRes.json();
+        setOrderCount(orderData.count);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
       }
@@ -82,8 +87,15 @@ const ClientAccountInfo = ({
           className="flex items-center px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition-colors"
           onClick={close}
         >
-          <FaShoppingBag className="mr-3 text-[#B88E2F]" />
-          <span className="text-sm">My Orders</span>
+          <div className="flex items-center">
+            <FaShoppingBag className="mr-3 text-[#B88E2F]" />
+            <span className="text-sm">My Orders</span>
+          </div>
+          {orderCount > 0 && (
+            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {orderCount}
+            </span>
+          )}
         </Link>
 
         <Link
