@@ -118,7 +118,7 @@ const Header = () => {
           </Link>
           <Link
             href="/"
-            className="cursor-pointer hover:shadow-[0_1px_0_rgba(0,0,0,0.2)] transition-shadow"
+            className="relative cursor-pointer hover:shadow-[0_1px_0_rgba(0,0,0,0.2)] transition-shadow"
             onClick={(e) => {
               e.preventDefault();
               toggleAccountInfo();
@@ -140,6 +140,12 @@ const Header = () => {
               )
             ) : (
               <TbUserExclamation />
+            )}
+
+            {favoriteCount > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                {favoriteCount}
+              </div>
             )}
           </Link>
         </div>
@@ -190,7 +196,7 @@ const Header = () => {
           </button>
           <Link
             href="/"
-            className="cursor-pointer hover:shadow-[0_1px_0_rgba(0,0,0,0.2)] transition-shadow"
+            className="relative cursor-pointer hover:shadow-[0_1px_0_rgba(0,0,0,0.2)] transition-shadow"
             onClick={(e) => {
               e.preventDefault();
               toggleAccountInfo();
@@ -212,6 +218,12 @@ const Header = () => {
               )
             ) : (
               <TbUserExclamation />
+            )}
+
+            {favoriteCount > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                {favoriteCount}
+              </div>
             )}
           </Link>
         </div>
