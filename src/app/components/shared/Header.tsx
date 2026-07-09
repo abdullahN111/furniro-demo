@@ -43,7 +43,7 @@ const Header = () => {
       const favData = await favRes.json();
       setFavoriteCount(favData.count);
 
-      const orderRes = await fetch("/api/orders/count");
+      const orderRes = await fetch("/api/order/count");
       const orderData = await orderRes.json();
       setOrderCount(orderData.count);
     };

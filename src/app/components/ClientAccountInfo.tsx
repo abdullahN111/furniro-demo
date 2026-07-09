@@ -31,7 +31,7 @@ const ClientAccountInfo = ({
         const data = await res.json();
         setUser(data.user);
 
-        const orderRes = await fetch("/api/orders/count");
+        const orderRes = await fetch("/api/order/count");
         const orderData = await orderRes.json();
         setOrderCount(orderData.count);
       } catch (error) {
