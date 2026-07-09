@@ -143,7 +143,7 @@ const Header = () => {
             )}
 
             {favoriteCount > 0 && (
-              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+              <div className="absolute top-[-8px] right-[-8px] bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {favoriteCount}
               </div>
             )}
