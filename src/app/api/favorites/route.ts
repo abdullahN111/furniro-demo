@@ -102,10 +102,11 @@ export async function GET() {
         title,
         price,
         slug,
-        "image": productImage.asset->url,
         featured,
         dicountPercentage,
-        inventoryInStock
+        isNew,
+        inventoryInStock,
+        "image": productImage.asset->url
       }
     }.favorites`,
     {

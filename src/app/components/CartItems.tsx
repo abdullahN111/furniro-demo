@@ -22,12 +22,14 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
 
   return (
     <div
-      className="relative p-4 sm:p-6 w-[220px] h-[500px] sm:w-full max-w-[340px] bg-white shadow-lg z-[1001] rounded-es-md"
+      className="relative p-4 sm:p-6 w-[210px] h-[500px] sm:w-full max-w-[340px] bg-white shadow-lg z-[1001] rounded-es-md"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-5">
-          <h3 className="text-xl sm:text-2xl font-semibold">Shopping Cart</h3>
+        <div className="flex flex-col gap-4">
+          <h3 className="text-xl sm:text-[22px] font-semibold">
+            Shopping Cart
+          </h3>
           <div className="border border-[#D9D9D9] w-[110%] sm:w-[140%]"></div>
         </div>
         <button
@@ -38,7 +40,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
         </button>
       </div>
 
-      <div className="flex flex-col gap-8 sm:gap-5 my-7 h-[280px] overflow-y-auto">
+      <div className="flex flex-col gap-6 my-6 h-[280px] overflow-y-auto">
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
             <div
@@ -51,10 +53,10 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
                   alt={item.name}
                   width={80}
                   height={80}
-                  className="rounded-md object-cover w-[80px] h-[80px]"
+                  className="rounded-md object-cover w-[75px] h-[75px]"
                 />
               </div>
-              <div className="mx-0 text-center sm:text-start sm:mr-6 w-[150px] sm:w-[100px] sm:break-words line-clamp-2">
+              <div className="mx-0 text-center sm:text-start sm:mr-4 w-[150px] sm:w-[110px] sm:break-words line-clamp-2">
                 <p className="text-[15px] font-semibold">{item.name}</p>
                 <div>
                   <p className="flex items-center justify-center sm:justify-start gap-2">
