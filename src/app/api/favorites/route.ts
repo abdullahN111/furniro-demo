@@ -102,7 +102,7 @@ export async function GET() {
         title,
         price,
         slug,
-        productImage,
+        "image": productImage.asset->url,
         featured,
         dicountPercentage,
         inventoryInStock
