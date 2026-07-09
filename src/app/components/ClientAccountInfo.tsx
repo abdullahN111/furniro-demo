@@ -14,7 +14,13 @@ interface User {
   image?: string;
 }
 
-const ClientAccountInfo = ({ close }: { close: () => void }) => {
+const ClientAccountInfo = ({
+  close,
+  favoriteCount,
+}: {
+  close: () => void;
+  favoriteCount: number;
+}) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -46,8 +52,8 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
       </div>
 
       <div className="flex flex-col items-center justify-center gap-2 pt-6 pb-4">
-        {user && (
-          user.image ? (
+        {user &&
+          (user.image ? (
             <Image
               src={user.image}
               alt={user.name || "User"}
@@ -59,8 +65,7 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
             <div className="w-[70px] h-[70px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-3xl font-bold">
               {user.name?.charAt(0).toUpperCase()}
             </div>
-          )
-        )}
+          ))}
         <p className="text-[17px] font-medium text-center text-gray-800">
           {user?.name || "Guest User"}
         </p>
@@ -81,10 +86,22 @@ const ClientAccountInfo = ({ close }: { close: () => void }) => {
           <span className="text-sm">My Orders</span>
         </Link>
 
-        <div className="flex items-center px-3 py-2 text-gray-500 cursor-not-allowed opacity-70">
-          <FaRegHeart className="mr-3" />
-          <span className="text-sm">Favorites</span>
-        </div>
+        <Link
+          href="/favorites"
+          onClick={close}
+          className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition"
+        >
+          <div className="flex items-center">
+            <FaRegHeart className="mr-3 text-[#B88E2F]" />
+            <span className="text-sm">Favorites</span>
+          </div>
+
+          {favoriteCount > 0 && (
+            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {favoriteCount}
+            </span>
+          )}
+        </Link>
         {user && (
           <Link
             href="/track-order"

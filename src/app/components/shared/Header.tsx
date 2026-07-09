@@ -30,12 +30,17 @@ const Header = () => {
   const [openAccountInfo, setOpenAccountInfo] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [openSearch, setOpenSearch] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
       const res = await fetch("/api/account-info");
       const data = await res.json();
       setUser(data.user);
+
+      const favRes = await fetch("/api/favorites/count");
+      const favData = await favRes.json();
+      setFavoriteCount(favData.count);
     };
     fetchUser();
   }, []);
@@ -224,7 +229,10 @@ const Header = () => {
         className={`fixed right-0 top-0 inset-0 w-full h-screen bg-black bg-opacity-20 z-[1000] flex justify-end 
         transition-all ease-in-out duration-300 ${openAccountInfo ? "opacity-100" : "opacity-0 pointer-events-none"}`}
       >
-        <ClientAccountInfo close={() => setOpenAccountInfo(false)} />
+        <ClientAccountInfo
+          close={() => setOpenAccountInfo(false)}
+          favoriteCount={favoriteCount}
+        />
       </div>
     </header>
   );
