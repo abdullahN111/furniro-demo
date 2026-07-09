@@ -84,7 +84,7 @@ const ClientAccountInfo = ({
       <div className="flex flex-col space-y-2 py-2">
         <Link
           href="/orders"
-          className="flex items-center px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition-colors"
+          className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition"
           onClick={close}
         >
           <div className="flex items-center">
