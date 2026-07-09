@@ -31,6 +31,7 @@ const Header = () => {
   const [user, setUser] = useState<User | null>(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -41,6 +42,10 @@ const Header = () => {
       const favRes = await fetch("/api/favorites/count");
       const favData = await favRes.json();
       setFavoriteCount(favData.count);
+
+      const orderRes = await fetch("/api/orders/count");
+      const orderData = await orderRes.json();
+      setOrderCount(orderData.count);
     };
     fetchUser();
   }, []);
@@ -142,9 +147,9 @@ const Header = () => {
               <TbUserExclamation />
             )}
 
-            {favoriteCount > 0 && (
-              <div className="absolute top-[-8px] right-[-8px] bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {favoriteCount}
+            {favoriteCount + orderCount > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                {favoriteCount + orderCount}
               </div>
             )}
           </Link>
@@ -220,9 +225,9 @@ const Header = () => {
               <TbUserExclamation />
             )}
 
-            {favoriteCount > 0 && (
+            {favoriteCount + orderCount > 0 && (
               <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
-                {favoriteCount}
+                {favoriteCount + orderCount}
               </div>
             )}
           </Link>
