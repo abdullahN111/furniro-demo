@@ -8,8 +8,13 @@ import { fetchProducts, ProductCardData } from "@/app/Data";
 import { useEffect, useState } from "react";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
-
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    selectedItems,
+    setSelectedItems,
+  } = useCart();
   const [products, setProducts] = useState<ProductCardData[]>([]);
 
   useEffect(() => {
@@ -21,17 +26,20 @@ const Cart = () => {
     loadProducts();
   }, []);
 
-  const cartTotal = cartItems.reduce((total, item) => {
-    const price = parseFloat(item.price.toString().replace(/[^0-9.]+/g, ""));
-    return total + (isNaN(price) ? 0 : price * item.quantity);
-  }, 0);
+  const cartTotal = cartItems
+    .filter((item) => selectedItems.includes(item.id))
+    .reduce((total, item) => {
+      const price = Number(item.price);
+      return total + price * item.quantity;
+    }, 0);
 
   return (
     <section className="max-w-[1440px] bg-white container mx-auto px-6 sm:px-24 md:px-8 xl:px-12 py-8">
       <div className="flex flex-col lg:flex-row gap-6 xl:gap-8">
         <div className="hidden md:block flex-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div className="bg-[#F9F1E7] px-6 py-4 grid grid-cols-12 gap-4 text-base font-semibold">
+            <div className="bg-[#F9F1E7] px-6 py-4 grid grid-cols-13 gap-4 text-base font-semibold">
+              <div className="col-span-1">-</div>
               <div className="col-span-5">Product</div>
               <div className="col-span-2 text-center">Price</div>
               <div className="col-span-3 text-center">Quantity</div>
@@ -50,8 +58,21 @@ const Cart = () => {
                 return (
                   <div
                     key={item.id}
-                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center"
+                    className="grid grid-cols-13 gap-4 px-6 py-4 items-center"
                   >
+                    <div className="col-span-1 flex justify-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() =>
+                          setSelectedItems((prev) =>
+                            prev.includes(item.id)
+                              ? prev.filter((id) => id !== item.id)
+                              : [...prev, item.id],
+                          )
+                        }
+                      />
+                    </div>
                     <div className="col-span-5 flex items-center space-x-4">
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <Link href={`/add-to-cart/${slug}`}>

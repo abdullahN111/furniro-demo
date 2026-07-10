@@ -14,10 +14,12 @@ export type CartItem = {
 
 type CartContextType = {
   cartItems: CartItem[];
+  selectedItems: string[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -30,6 +32,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const getKey = () => (userEmail ? `cart-${userEmail}` : "cart-guest");
 
@@ -85,12 +88,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     saveCart(cartItems);
   }, [cartItems]);
 
+  useEffect(() => {
+    setSelectedItems((prev) => {
+      const validIds = cartItems.map((item) => item.id);
+
+      const updated = prev.filter((id) => validIds.includes(id));
+
+      const newItems = validIds.filter((id) => !updated.includes(id));
+
+      return [...updated, ...newItems];
+    });
+  }, [cartItems]);
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i,
         );
       }
       return [...prev, item];
@@ -104,8 +118,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateQuantity = (id: string, quantity: number) => {
     setCartItems((prev) =>
       prev.map((i) =>
-        i.id === id ? { ...i, quantity: Math.max(1, quantity) } : i
-      )
+        i.id === id ? { ...i, quantity: Math.max(1, quantity) } : i,
+      ),
     );
   };
 
@@ -122,6 +136,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     <CartContext.Provider
       value={{
         cartItems,
+        selectedItems,
+        setSelectedItems,
         addToCart,
         removeFromCart,
         updateQuantity,
