@@ -109,6 +109,7 @@ const Page = () => {
               amount={cartTotal}
               clientSecret={clientSecret}
               isProcessing={isProcessing}
+              items={selectedCartItems}
             />
           </Elements>
         ) : (
@@ -117,6 +118,7 @@ const Page = () => {
             setSelectedOption={setSelectedOption}
             amount={cartTotal}
             isProcessing={isProcessing}
+            items={selectedCartItems}
           />
         )}
       </div>

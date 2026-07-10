@@ -38,9 +38,9 @@ const Cart = () => {
       <div className="flex flex-col lg:flex-row gap-6 xl:gap-8">
         <div className="hidden md:block flex-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div className="bg-[#F9F1E7] px-6 py-4 grid grid-cols-13 gap-4 text-base font-semibold">
+            <div className="bg-[#F9F1E7] px-6 py-4 grid grid-cols-12 gap-4 text-base font-semibold">
               <div className="col-span-1">-</div>
-              <div className="col-span-5">Product</div>
+              <div className="col-span-4">Product</div>
               <div className="col-span-2 text-center">Price</div>
               <div className="col-span-3 text-center">Quantity</div>
               <div className="col-span-2 text-right">Subtotal</div>
@@ -58,7 +58,7 @@ const Cart = () => {
                 return (
                   <div
                     key={item.id}
-                    className="grid grid-cols-13 gap-4 px-6 py-4 items-center"
+                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center"
                   >
                     <div className="col-span-1 flex justify-center">
                       <input
@@ -73,7 +73,7 @@ const Cart = () => {
                         }
                       />
                     </div>
-                    <div className="col-span-5 flex items-center space-x-4">
+                    <div className="col-span-4 flex items-center space-x-4">
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <Link href={`/add-to-cart/${slug}`}>
                           <Image

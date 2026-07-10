@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/app/context/CartContext";
 import { PaymentElement } from "@stripe/react-stripe-js";
+import { CartItem } from "../context/CartContext";
 
 interface PaymentDetailsProps {
   selectedOption: string;
@@ -10,6 +10,7 @@ interface PaymentDetailsProps {
   amount: number;
   clientSecret?: string;
   isProcessing: boolean;
+  items: CartItem[];
 }
 
 const PaymentDetails = ({
@@ -19,9 +20,9 @@ const PaymentDetails = ({
   amount,
   clientSecret,
   isProcessing,
+  items,
 }: PaymentDetailsProps) => {
-  const { cartItems } = useCart();
-  const cartTotal = cartItems.reduce((total, item) => {
+  const cartTotal = items.reduce((total, item) => {
     const price =
       typeof item.price === "string"
         ? parseFloat(item.price.replace(/[^0-9.]+/g, ""))
@@ -37,7 +38,7 @@ const PaymentDetails = ({
           <h5 className="text-[21px] lg:text-[22px] font-semibold">Subtotal</h5>
         </div>
 
-        {cartItems.map((item) => (
+        {items.map((item) => (
           <div key={item.id} className="flex items-center justify-between">
             <div className="flex items-center gap-[4px] sm:gap-[6px] lg:gap-2">
               <span className="text-[15px] lg:text-base text-[#9F9F9F]">
@@ -110,15 +111,15 @@ const PaymentDetails = ({
             </Link>
           </p>
         </div>
-       {clientSecret && (
-  <div
-    className={`w-full mt-4 transition-all duration-300 ${
-      selectedOption === "Stripe" ? "block" : "hidden"
-    }`}
-  >
-    <PaymentElement />
-  </div>
-)}
+        {clientSecret && (
+          <div
+            className={`w-full mt-4 transition-all duration-300 ${
+              selectedOption === "Stripe" ? "block" : "hidden"
+            }`}
+          >
+            <PaymentElement />
+          </div>
+        )}
 
         <button
           type="submit"
@@ -126,9 +127,7 @@ const PaymentDetails = ({
           className="block mx-auto w-[215px] sm:w-[230px] rounded-xl border border-black text-black px-2 py-3 text-xl hover:bg-[#fae9d3a6] transition my-5"
           disabled={isProcessing}
         >
-          {isProcessing
-            ? "Processing..."
-            : "Place Order"}
+          {isProcessing ? "Processing..." : "Place Order"}
         </button>
       </div>
     </div>
