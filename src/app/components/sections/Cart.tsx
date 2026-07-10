@@ -152,11 +152,8 @@ const Cart = () => {
             const slug = product?.slug.current;
 
             return (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-100 p-4"
-              >
-                <div className="flex items-center mb-3">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item.id)}
@@ -167,61 +164,45 @@ const Cart = () => {
                           : [...prev, item.id],
                       )
                     }
+                    className="mt-1 shrink-0"
                   />
-                  <div className="flex items-center space-x-3">
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <Link href={`/add-to-cart/${slug}`}>
-                        <Image
-                          src={item.image}
-                          alt="product"
-                          fill
-                          className="rounded-md object-cover"
-                          sizes="64px"
-                        />
-                      </Link>
+
+                  <div className="flex-1 flex justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-16 h-16 shrink-0">
+                        <Link href={`/add-to-cart/${slug}`}>
+                          <Image
+                            src={item.image}
+                            alt="product"
+                            fill
+                            className="rounded-md object-cover"
+                            sizes="64px"
+                          />
+                        </Link>
+                      </div>
+
+                      <div>
+                        <Link href={`/add-to-cart/${slug}`}>
+                          <h3 className="font-medium text-gray-800">
+                            {item.name}
+                          </h3>
+                        </Link>
+                        <p className="text-gray-600 text-sm">$ {item.price}</p>
+                      </div>
                     </div>
-                    <div>
-                      <Link href={`/add-to-cart/${slug}`}>
-                        <h3 className="font-medium text-gray-800">
-                          {item.name}
-                        </h3>
-                      </Link>
-                      <p className="text-gray-600 text-sm">$ {item.price}</p>
-                    </div>
+
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-gray-400 hover:text-red-500 self-start"
+                    >
+                      <MdCancel size={18} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-gray-400 hover:text-red-500"
-                  >
-                    <MdCancel size={18} />
-                  </button>
                 </div>
 
+                {/* Bottom Row */}
                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex items-center space-x-2 border border-gray-300 rounded-lg px-2 py-1">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="px-1 text-gray-600 hover:text-[#B88E2F]"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min={1}
-                      readOnly
-                      className="w-6 text-center border-none bg-transparent focus:outline-none"
-                    />
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="px-1 text-gray-600 hover:text-[#B88E2F]"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <span className="text-gray-800 font-medium">
-                    $ {subtotal}
-                  </span>
+                  ...
                 </div>
               </div>
             );
