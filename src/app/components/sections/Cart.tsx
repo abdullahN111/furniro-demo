@@ -204,36 +204,30 @@ const Cart = () => {
                 </div>
 
                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center space-x-2 border border-gray-300 rounded-lg px-2 py-1">
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                        className="px-1 text-gray-600 hover:text-[#B88E2F]"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        value={item.quantity}
-                        min={1}
-                        readOnly
-                        className="w-6 text-center border-none bg-transparent focus:outline-none"
-                      />
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        className="px-1 text-gray-600 hover:text-[#B88E2F]"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <span className="text-gray-800 font-medium">
-                      $ {subtotal}
-                    </span>
+                  <div className="flex items-center space-x-2 border border-gray-300 rounded-lg px-2 py-1">
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="px-1 text-gray-600 hover:text-[#B88E2F]"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      min={1}
+                      readOnly
+                      className="w-6 text-center border-none bg-transparent focus:outline-none"
+                    />
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="px-1 text-gray-600 hover:text-[#B88E2F]"
+                    >
+                      +
+                    </button>
                   </div>
+                  <span className="text-gray-800 font-medium">
+                    $ {subtotal}
+                  </span>
                 </div>
               </div>
             );
