@@ -49,9 +49,13 @@ const PaymentMethod = ({
     formState: { errors },
   } = useForm<FormData>();
 
-  const { cartItems, clearCart } = useCart();
+  const { cartItems, selectedItems, removeSelectedItems } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
+
+  const selectedCartItems = cartItems.filter((item) =>
+    selectedItems.includes(item.id),
+  );
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -67,12 +71,12 @@ const PaymentMethod = ({
       const orderDetails = {
         orderId,
         user: { ...data },
-        items: cartItems.map((item) => ({
+        items: selectedCartItems.map((item) => ({
           productId: item.id,
           price: Number(item.price),
           quantity: item.quantity,
         })),
-        total: cartItems.reduce(
+        total: selectedCartItems.reduce(
           (acc, item) => acc + parseFloat(String(item.price)) * item.quantity,
           0,
         ),
@@ -92,7 +96,7 @@ const PaymentMethod = ({
 
         if (response.ok) {
           localStorage.setItem("lastOrderId", orderId);
-          clearCart();
+          removeSelectedItems(selectedItems);
           router.push("/track-order");
         } else {
           console.error("Order submission failed:", result.message);

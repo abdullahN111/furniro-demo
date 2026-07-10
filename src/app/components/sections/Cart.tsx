@@ -156,7 +156,18 @@ const Cart = () => {
                 key={item.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-100 p-4"
               >
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center mb-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={() =>
+                      setSelectedItems((prev) =>
+                        prev.includes(item.id)
+                          ? prev.filter((id) => id !== item.id)
+                          : [...prev, item.id],
+                      )
+                    }
+                  />
                   <div className="flex items-center space-x-3">
                     <div className="relative w-16 h-16 flex-shrink-0">
                       <Link href={`/add-to-cart/${slug}`}>

@@ -20,6 +20,7 @@ type CartContextType = {
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
+  removeSelectedItems: (ids: string[]) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -114,6 +115,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const removeFromCart = (id: string) => {
     setCartItems((prev) => prev.filter((i) => i.id !== id));
   };
+  const removeSelectedItems = (ids: string[]) => {
+    setCartItems((prev) => prev.filter((item) => !ids.includes(item.id)));
+  };
 
   const updateQuantity = (id: string, quantity: number) => {
     setCartItems((prev) =>
@@ -136,6 +140,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     <CartContext.Provider
       value={{
         cartItems,
+        removeSelectedItems,
         selectedItems,
         setSelectedItems,
         addToCart,
