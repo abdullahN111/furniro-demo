@@ -18,7 +18,7 @@ const Page = () => {
   const [selectedOption, setSelectedOption] = useState("Cash On Delivery");
   const [clientSecret, setClientSecret] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { cartItems, selectedItems, clearCart } = useCart();
+  const { cartItems, selectedItems, removeSelectedItems } = useCart();
   const router = useRouter();
 
   const selectedCartItems = cartItems.filter((item) =>
@@ -80,7 +80,7 @@ const Page = () => {
       if (response.ok) {
         localStorage.setItem("lastOrderId", orderId);
 
-        clearCart();
+        removeSelectedItems(selectedItems);
         router.push("/track-order");
       } else {
         console.error("Order submission failed:", result.message);
