@@ -36,6 +36,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const getKey = () => (userEmail ? `cart-${userEmail}` : "cart-guest");
+  const getSelectedKey = () =>
+    userEmail ? `selected-${userEmail}` : "selected-guest";
 
   const loadCart = () => {
     if (typeof window === "undefined") return;
@@ -54,6 +56,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       setCartItems(guestItems);
     }
+    const storedSelected = localStorage.getItem(getSelectedKey());
+    setSelectedItems(storedSelected ? JSON.parse(storedSelected) : []);
   };
 
   const saveCart = (items: CartItem[]) => {
@@ -94,6 +98,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       prev.filter((id) => cartItems.some((item) => item.id === id)),
     );
   }, [cartItems]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    localStorage.setItem(getSelectedKey(), JSON.stringify(selectedItems));
+  }, [selectedItems, isMounted, userEmail]);
 
   const addToCart = (item: CartItem) => {
     const exists = cartItems.some((i) => i.id === item.id);
