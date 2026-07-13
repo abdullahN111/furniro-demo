@@ -90,28 +90,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [cartItems]);
 
   useEffect(() => {
-    setSelectedItems((prev) => {
-      const validIds = cartItems.map((item) => item.id);
-
-      const updated = prev.filter((id) => validIds.includes(id));
-
-      const newItems = validIds.filter((id) => !updated.includes(id));
-
-      return [...updated, ...newItems];
-    });
+    setSelectedItems((prev) =>
+      prev.filter((id) => cartItems.some((item) => item.id === id)),
+    );
   }, [cartItems]);
-  const addToCart = (item: CartItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i,
-        );
-      }
-      return [...prev, item];
-    });
-  };
 
+  const addToCart = (item: CartItem) => {
+    const exists = cartItems.some((i) => i.id === item.id);
+
+    setCartItems((prev) =>
+      exists
+        ? prev.map((i) =>
+            i.id === item.id
+              ? { ...i, quantity: i.quantity + item.quantity }
+              : i,
+          )
+        : [...prev, item],
+    );
+
+    if (!exists) {
+      setSelectedItems((prev) => [...prev, item.id]);
+    }
+  };
   const removeFromCart = (id: string) => {
     setCartItems((prev) => prev.filter((i) => i.id !== id));
   };
