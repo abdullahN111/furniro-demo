@@ -43,7 +43,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
           cartItems.map((item) => (
             <div
               key={item.id}
-              className="mx-0 text-center sm:text-start sm:mr-3 w-[150px] sm:w-[120px] min-w-0"
+              className="flex gap-2 sm:gap-0 flex-col sm:flex-row items-center justify-between"
             >
               <div>
                 <Image
@@ -69,7 +69,7 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
                 </div>
               </div>
               <button
-                className="text-[#9F9F9F] cursor-pointer mr-0 sm:mr-2 shrink-0"
+                className="text-[#9F9F9F] cursor-pointer mr-0 sm:mr-2"
                 onClick={() => removeFromCart(item.id)}
               >
                 <MdCancel />
