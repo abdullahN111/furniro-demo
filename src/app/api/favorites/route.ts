@@ -115,6 +115,7 @@ export async function GET() {
   );
 
   const formatted =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     favorites?.map((product: any) => ({
       ...product,
       dicountPercentage: product.dicountPercentage
@@ -132,6 +133,4 @@ export async function GET() {
     })) || [];
 
   return NextResponse.json(formatted);
-
-  return NextResponse.json(favorites || []);
 }
