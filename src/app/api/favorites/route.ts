@@ -97,22 +97,41 @@ export async function GET() {
 
   const favorites = await serverClient.fetch(
     `*[_type=="user" && email==$email][0]{
-      favorites[]->{
-        _id,
-        title,
-        price,
-        slug,
-        featured,
-        dicountPercentage,
-        isNew,
-        inventoryInStock,
-        "image": productImage.asset->url
-      }
-    }.favorites`,
+    favorites[]->{
+      _id,
+      title,
+      price,
+      slug,
+      featured,
+      dicountPercentage,
+      isNew,
+      inventoryInStock,
+      "image": productImage.asset->url
+    }
+  }.favorites`,
     {
       email: session.user.email,
     },
   );
+
+  const formatted =
+    favorites?.map((product: any) => ({
+      ...product,
+      dicountPercentage: product.dicountPercentage
+        ? {
+            text: `-${product.dicountPercentage}%`,
+            color: "#E97171",
+          }
+        : undefined,
+      oldPrice: product.dicountPercentage
+        ? (
+            parseFloat(product.price) *
+            (1 + parseFloat(product.dicountPercentage) / 100)
+          ).toFixed(2)
+        : undefined,
+    })) || [];
+
+  return NextResponse.json(formatted);
 
   return NextResponse.json(favorites || []);
 }

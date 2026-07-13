@@ -41,7 +41,10 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
       <div className="flex flex-col gap-8 sm:gap-6 my-6 h-[280px] overflow-y-auto">
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
-            <div key={item.id} className="flex gap-3 items-center">
+            <div
+              key={item.id}
+              className="mx-0 text-center sm:text-start sm:mr-3 w-[150px] sm:w-[120px] min-w-0"
+            >
               <div>
                 <Image
                   src={item.image}
@@ -51,21 +54,22 @@ const CartItems = ({ closeCart }: { closeCart: () => void }) => {
                   className="rounded-md object-cover w-[75px] h-[75px]"
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-semibold line-clamp-2 break-words">
+              <div className="mx-0 text-center sm:text-start sm:mr-3 w-[150px] sm:w-[120px] sm:break-words line-clamp-2">
+                <p className="text-[15px] font-semibold break-words line-clamp-2">
                   {item.name}
                 </p>
-
-                <p className="flex items-center gap-2 mt-1">
-                  <span className="text-[15px]">{item.quantity}</span>
-                  <span>&times;</span>
-                  <span className="text-xs text-[#B88E2F] font-semibold">
-                    $ {item.price}.00
-                  </span>
-                </p>
+                <div>
+                  <p className="flex items-center justify-center sm:justify-start gap-2">
+                    <span className="text-[15px]">{item.quantity}</span>
+                    <span className="text-base">&times;</span>
+                    <span className="text-xs text-[#B88E2F] font-semibold">
+                      $ {item.price}.00
+                    </span>
+                  </p>
+                </div>
               </div>
               <button
-                className="text-[#9F9F9F] cursor-pointer shrink-0 ml-2"
+                className="text-[#9F9F9F] cursor-pointer mr-0 sm:mr-2 shrink-0"
                 onClick={() => removeFromCart(item.id)}
               >
                 <MdCancel />
