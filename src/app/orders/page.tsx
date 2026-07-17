@@ -24,7 +24,6 @@ const OrderCard = ({
 }) => {
   const [products, setProducts] = useState<ProductCardData[]>([]);
 
-
   useEffect(() => {
     async function loadProducts() {
       const fetchedProducts = await fetchProducts();
@@ -42,12 +41,13 @@ const OrderCard = ({
         <div>
           <h3 className="font-semibold text-gray-800">Furniro</h3>
           <p
-            className={`text-sm ${order.status === "Delivered"
-              ? "text-green-600"
-              : order.status === "Pending"
-                ? "text-yellow-600"
-                : "text-blue-600"
-              }`}
+            className={`text-sm ${
+              order.status === "Delivered"
+                ? "text-green-600"
+                : order.status === "Pending"
+                  ? "text-yellow-600"
+                  : "text-blue-600"
+            }`}
           >
             {order.status}
           </p>
@@ -55,10 +55,11 @@ const OrderCard = ({
             {steps.map((step, index) => (
               <div key={step} className="flex items-center">
                 <span
-                  className={`px-2 py-1 rounded-full ${index <= currentIndex
-                    ? "bg-[#B88E2F] text-white"
-                    : "bg-gray-200 text-gray-500"
-                    }`}
+                  className={`px-2 py-1 rounded-full ${
+                    index <= currentIndex
+                      ? "bg-[#B88E2F] text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
                 >
                   {step}
                 </span>
@@ -126,29 +127,22 @@ const OrderCard = ({
                   Qty: {order.itemQuantities[index]}
                 </p>
               </div>
-
             </div>
           </div>
         );
       })}
 
       <div className="flex justify-between items-center pt-4">
-
         <div className="text-sm text-gray-500">
           Ordered on {new Date(order.createdAt).toLocaleDateString()}
         </div>
         <div className="flex flex-col items-center gap-[6px]">
-
           <Link
             href={`/track-order?orderId=${order.orderId}`}
             className="text-sm text-blue-600 hover:text-blue-800 lg:block hidden"
           >
             View Details
           </Link>
-
-          <button className="px-3 py-2 text-sm bg-[#B88E2F] text-white rounded-md hover:bg-[#a57d28]">
-            Contact Seller
-          </button>
         </div>
       </div>
       {type === "review" && (
@@ -244,17 +238,13 @@ const Order = () => {
 
   const handleGalleryMode = async () => {
     if (!selectionMode) {
-      const res = await fetch(
-        `/api/gallery?email=${session?.user?.email}`
-      );
+      const res = await fetch(`/api/gallery?email=${session?.user?.email}`);
 
       const data = await res.json();
 
       if (data.gallery?.products) {
         setSelectedProducts(
-          data.gallery.products.map(
-            (product: { _id: string }) => product._id
-          )
+          data.gallery.products.map((product: { _id: string }) => product._id),
         );
       }
     }
@@ -318,10 +308,11 @@ const Order = () => {
               onClick={() =>
                 setActiveTab(tab.key as "receive" | "delivered" | "review")
               }
-              className={`pb-2 text-sm font-medium ${activeTab === tab.key
-                ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
-                : "text-gray-500"
-                }`}
+              className={`pb-2 text-sm font-medium ${
+                activeTab === tab.key
+                  ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
+                  : "text-gray-500"
+              }`}
             >
               {tab.label}
             </button>

@@ -81,7 +81,7 @@ const Page = () => {
         localStorage.setItem("lastOrderId", orderId);
 
         removeSelectedItems(selectedItems);
-        router.push("/track-order");
+        router.push(`/track-order?orderId=${orderId}`);
       } else {
         console.error("Order submission failed:", result.message);
         setIsProcessing(false);
