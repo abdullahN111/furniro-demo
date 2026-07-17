@@ -65,25 +65,24 @@ const OrderTracking = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
+    const checkUser = async () => {
       const res = await fetch("/api/account-info");
       const data = await res.json();
 
       if (!data.user) {
         router.push("/login");
-        return;
-      }
-
-      const orderId = searchParams.get("orderId");
-
-      if (orderId) {
-        setOrderIdInput(orderId);
-        fetchOrderDetails(orderId);
       }
     };
 
-    init();
-  }, [router, searchParams]);
+    const orderId = searchParams.get("orderId");
+
+    if (orderId) {
+      setOrderIdInput(orderId);
+      fetchOrderDetails(orderId);
+    }
+
+    checkUser();
+  }, [searchParams]);
 
   return (
     <div className="w-full max-w-[600px] mx-auto pt-10 pb-16 px-6 sm:px-8 lg:px-16 my-12 mb-16">
