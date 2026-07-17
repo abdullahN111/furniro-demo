@@ -252,17 +252,6 @@ const Order = () => {
     setSelectionMode((prev) => !prev);
   };
 
-  if (status === "loading" || loading) {
-    return (
-      <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
-        <SecondaryHeader routeName="Orders" />
-        <div className="py-6 flex justify-center">
-          <div className="animate-pulse text-gray-500">Loading orders...</div>
-        </div>
-      </section>
-    );
-  }
-
   if (!session) {
     return (
       <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
@@ -281,15 +270,20 @@ const Order = () => {
     );
   }
 
-  const toReceiveOrders = orders.filter((order) =>
-    ["Pending", "Processing", "Dispatched", "Shipped"].includes(order.status),
-  );
+  const toReceiveOrders = loading
+    ? []
+    : orders.filter((order) =>
+        ["Pending", "Processing", "Dispatched", "Shipped"].includes(
+          order.status,
+        ),
+      );
 
-  const deliveredOrders = orders.filter(
-    (order) => order.status === "Delivered",
-  );
+  const deliveredOrders = loading
+    ? []
+    : orders.filter((order) => order.status === "Delivered");
 
   const reviewOrders = deliveredOrders;
+
   return (
     <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
       <SecondaryHeader routeName="Orders" />
@@ -318,7 +312,16 @@ const Order = () => {
             </button>
           ))}
         </div>
-        {orders.length === 0 ? (
+        {loading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-52 rounded-lg bg-gray-200 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-8">
             <h3 className="text-lg font-medium text-gray-700">
               No orders found

@@ -74,17 +74,14 @@ const OrderTracking = () => {
       }
     };
 
-    checkUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     const orderId = searchParams.get("orderId");
 
     if (orderId) {
       setOrderIdInput(orderId);
       fetchOrderDetails(orderId);
     }
+
+    checkUser();
   }, [searchParams]);
 
   return (
@@ -150,9 +147,7 @@ const OrderTracking = () => {
                     <span className="w-1/4 text-center">
                       Qty: {item.quantity}
                     </span>
-                    <span className="w-1/4 text-right">
-                      ${item.price}
-                    </span>
+                    <span className="w-1/4 text-right">${item.price}</span>
                   </div>
                 ))}
               </div>
