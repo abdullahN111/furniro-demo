@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
     });
     // eslint-disable-next-line
   } catch (error: any) {

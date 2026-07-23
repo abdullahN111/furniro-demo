@@ -42,7 +42,10 @@ const Page = () => {
         body: JSON.stringify({ amount: cartTotal }),
       })
         .then((res) => res.json())
-        .then((data) => setClientSecret(data.clientSecret));
+        .then((data) => {
+          console.log(data);
+          setClientSecret(data.clientSecret);
+        });
     } else {
       setClientSecret("");
     }
@@ -98,38 +101,32 @@ const Page = () => {
     <section className="max-w-[1440px] mx-auto">
       <SecondaryHeader routeName="Checkout" />
       <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
-        {selectedOption === "Stripe" && clientSecret ? (
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <PaymentMethod
-              selectedOption={selectedOption}
-              onStripePayment={handleStripePayment}
-            />
+        <Elements
+          stripe={stripePromise}
+          options={
+            clientSecret
+              ? { clientSecret }
+              : {
+                  mode: "payment",
+                  amount: Math.round(cartTotal * 100),
+                  currency: "usd",
+                }
+          }
+        >
+          <PaymentMethod
+            selectedOption={selectedOption}
+            onStripePayment={handleStripePayment}
+          />
 
-            <PaymentDetails
-              selectedOption={selectedOption}
-              setSelectedOption={setSelectedOption}
-              amount={cartTotal}
-              clientSecret={clientSecret}
-              isProcessing={isProcessing}
-              items={selectedCartItems}
-            />
-          </Elements>
-        ) : (
-          <>
-            <PaymentMethod
-              selectedOption={selectedOption}
-              onStripePayment={handleStripePayment}
-            />
-
-            <PaymentDetails
-              selectedOption={selectedOption}
-              setSelectedOption={setSelectedOption}
-              amount={cartTotal}
-              isProcessing={isProcessing}
-              items={selectedCartItems}
-            />
-          </>
-        )}
+          <PaymentDetails
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            amount={cartTotal}
+            clientSecret={clientSecret}
+            isProcessing={isProcessing}
+            items={selectedCartItems}
+          />
+        </Elements>
       </div>
       <ServiceBar />
     </section>
