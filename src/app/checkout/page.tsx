@@ -42,10 +42,7 @@ const Page = () => {
         body: JSON.stringify({ amount: cartTotal }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setClientSecret(data.clientSecret);
-        });
+        .then((data) => setClientSecret(data.clientSecret));
     } else {
       setClientSecret("");
     }
@@ -95,38 +92,35 @@ const Page = () => {
     }
   };
 
-  console.log("selectedOption", selectedOption);
-  console.log("clientSecret", clientSecret);
   return (
     <section className="max-w-[1440px] mx-auto">
       <SecondaryHeader routeName="Checkout" />
       <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
-        <Elements
-          stripe={stripePromise}
-          options={
-            clientSecret
-              ? { clientSecret }
-              : {
-                  mode: "payment",
-                  amount: Math.round(cartTotal * 100),
-                  currency: "usd",
-                }
-          }
-        >
-          <PaymentMethod
-            selectedOption={selectedOption}
-            onStripePayment={handleStripePayment}
-          />
+        <PaymentMethod
+          selectedOption={selectedOption}
+          onStripePayment={handleStripePayment}
+        />
 
+        {selectedOption === "Stripe" && clientSecret ? (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <PaymentDetails
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              amount={cartTotal}
+              clientSecret={clientSecret}
+              isProcessing={isProcessing}
+              items={selectedCartItems}
+            />
+          </Elements>
+        ) : (
           <PaymentDetails
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
             amount={cartTotal}
-            clientSecret={clientSecret}
             isProcessing={isProcessing}
             items={selectedCartItems}
           />
-        </Elements>
+        )}
       </div>
       <ServiceBar />
     </section>

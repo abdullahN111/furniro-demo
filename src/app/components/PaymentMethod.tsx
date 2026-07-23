@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useStripeCheckout } from "./useStripeCheckout";
 
 interface FormData {
   firstname: string;
@@ -53,7 +52,6 @@ const PaymentMethod = ({
   const { cartItems, selectedItems, removeSelectedItems } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
-  const { confirmPayment } = useStripeCheckout();
 
   const selectedCartItems = cartItems.filter((item) =>
     selectedItems.includes(item.id),
@@ -67,12 +65,7 @@ const PaymentMethod = ({
 
   const submitHandler = async (data: FormData) => {
     if (selectedOption === "Stripe") {
-      const success = await confirmPayment();
-
-      if (!success) return;
-
       await onStripePayment(data);
-      return;
     } else {
       const orderId = uuidv4().slice(0, 8);
       const orderDetails = {
@@ -113,7 +106,6 @@ const PaymentMethod = ({
       }
     }
   };
-  console.log("PaymentMethod rendered");
 
   return (
     <div className="w-full sm:w-[600px] py-16 px-4 sm:px-8 lg:px-16">
