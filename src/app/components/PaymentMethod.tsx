@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { useStripe, useElements } from "@stripe/react-stripe-js";
 
 interface FormData {
   firstname: string;
@@ -52,6 +53,8 @@ const PaymentMethod = ({
   const { cartItems, selectedItems, removeSelectedItems } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
+  const stripe = useStripe();
+  const elements = useElements();
 
   const selectedCartItems = cartItems.filter((item) =>
     selectedItems.includes(item.id),
@@ -65,7 +68,29 @@ const PaymentMethod = ({
 
   const submitHandler = async (data: FormData) => {
     if (selectedOption === "Stripe") {
+      if (!stripe || !elements) {
+        console.error("Stripe has not loaded yet.");
+        return;
+      }
+
+      const result = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
+
+      if (result.error) {
+        console.error(result.error.message);
+        return;
+      }
+
+      if (result.paymentIntent?.status !== "succeeded") {
+        console.error("Payment not successful.");
+        return;
+      }
+
       await onStripePayment(data);
+
+      return;
     } else {
       const orderId = uuidv4().slice(0, 8);
       const orderDetails = {

@@ -96,13 +96,13 @@ const Page = () => {
     <section className="max-w-[1440px] mx-auto">
       <SecondaryHeader routeName="Checkout" />
       <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
-        <PaymentMethod
-          selectedOption={selectedOption}
-          onStripePayment={handleStripePayment}
-        />
-
         {selectedOption === "Stripe" && clientSecret ? (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <PaymentMethod
+              selectedOption={selectedOption}
+              onStripePayment={handleStripePayment}
+            />
+
             <PaymentDetails
               selectedOption={selectedOption}
               setSelectedOption={setSelectedOption}
@@ -113,13 +113,20 @@ const Page = () => {
             />
           </Elements>
         ) : (
-          <PaymentDetails
-            selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
-            amount={cartTotal}
-            isProcessing={isProcessing}
-            items={selectedCartItems}
-          />
+          <>
+            <PaymentMethod
+              selectedOption={selectedOption}
+              onStripePayment={handleStripePayment}
+            />
+
+            <PaymentDetails
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              amount={cartTotal}
+              isProcessing={isProcessing}
+              items={selectedCartItems}
+            />
+          </>
         )}
       </div>
       <ServiceBar />
