@@ -83,7 +83,7 @@ const PaymentMethod = ({
         paymentMethod: selectedOption,
       };
 
-      console.log("Submitting order with details:", orderDetails);
+      // console.log("Submitting order with details:", orderDetails);
 
       try {
         const response = await fetch("/api/order", {
