@@ -92,6 +92,8 @@ const Page = () => {
     }
   };
 
+  console.log("selectedOption", selectedOption);
+  console.log("clientSecret", clientSecret);
   return (
     <section className="max-w-[1440px] mx-auto">
       <SecondaryHeader routeName="Checkout" />

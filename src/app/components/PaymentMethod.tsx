@@ -113,6 +113,7 @@ const PaymentMethod = ({
       }
     }
   };
+  console.log("PaymentMethod rendered");
 
   return (
     <div className="w-full sm:w-[600px] py-16 px-4 sm:px-8 lg:px-16">
