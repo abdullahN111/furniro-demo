@@ -47,40 +47,49 @@ const Page = () => {
     }
   }, [selectedOption, cartTotal]);
 
-const handleOrderCreated = (orderId: string) => {
-  localStorage.setItem("lastOrderId", orderId);
-  removeSelectedItems(selectedItems);
-  router.push(`/track-order?orderId=${orderId}`);
-};
+  const handleOrderCreated = (orderId: string) => {
+    localStorage.setItem("lastOrderId", orderId);
+    removeSelectedItems(selectedItems);
+    router.push(`/track-order?orderId=${orderId}`);
+  };
 
-return (
-  <section className="max-w-[1440px] mx-auto">
-    <SecondaryHeader routeName="Checkout" />
-    <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
-      <Elements
-        stripe={stripePromise}
-        options={clientSecret ? { clientSecret } : undefined}
-      >
-        <PaymentMethod
-          selectedOption={selectedOption}
-          onOrderCreated={handleOrderCreated}
-          setIsProcessing={setIsProcessing}
-          cartItems={selectedCartItems}
-          cartTotal={cartTotal}
-        />
-        <PaymentDetails
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
-          amount={cartTotal}
-          clientSecret={clientSecret}
-          isProcessing={isProcessing}
-          items={selectedCartItems}
-        />
-      </Elements>
-    </div>
-    <ServiceBar />
-  </section>
-);
+  return (
+    <section className="max-w-[1440px] mx-auto">
+      <SecondaryHeader routeName="Checkout" />
+      <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
+        <Elements
+          key={clientSecret || "no-secret"}
+          stripe={stripePromise}
+          options={
+            clientSecret
+              ? { clientSecret }
+              : {
+                  mode: "payment",
+                  amount: Math.max(Math.round(cartTotal * 100), 50),
+                  currency: "usd",
+                }
+          }
+        >
+          <PaymentMethod
+            selectedOption={selectedOption}
+            onOrderCreated={handleOrderCreated}
+            setIsProcessing={setIsProcessing}
+            cartItems={selectedCartItems}
+            cartTotal={cartTotal}
+          />
+          <PaymentDetails
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            amount={cartTotal}
+            clientSecret={clientSecret}
+            isProcessing={isProcessing}
+            items={selectedCartItems}
+          />
+        </Elements>
+      </div>
+      <ServiceBar />
+    </section>
+  );
 };
 
 export default Page;
