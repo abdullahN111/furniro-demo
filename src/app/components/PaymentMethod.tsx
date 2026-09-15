@@ -2,11 +2,10 @@
 
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
-import { useCart } from "@/app/context/CartContext";
-import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { useStripe, useElements } from "@stripe/react-stripe-js";
 
 interface FormData {
   firstname: string;
@@ -33,14 +32,26 @@ interface SelectFieldProps extends Omit<InputFieldProps, "pattern"> {
   children: React.ReactNode;
 }
 
+interface CartItem {
+  id: string;
+  price: number | string;
+  quantity: number;
+}
+
 interface PaymentMethodProps {
   selectedOption: string;
-  onStripePayment: (formData: FormData) => Promise<void>;
+  onOrderCreated: (orderId: string) => void;
+  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  cartItems: CartItem[];
+  cartTotal: number;
 }
 
 const PaymentMethod = ({
   selectedOption,
-  onStripePayment,
+  onOrderCreated,
+  setIsProcessing,
+  cartItems, // ✅ used directly now, no rename
+  cartTotal,
 }: PaymentMethodProps) => {
   const {
     register,
@@ -49,13 +60,9 @@ const PaymentMethod = ({
     formState: { errors },
   } = useForm<FormData>();
 
-  const { cartItems, selectedItems, removeSelectedItems } = useCart();
-  const router = useRouter();
+  const stripe = useStripe();
+  const elements = useElements();
   const { data: session } = useSession();
-
-  const selectedCartItems = cartItems.filter((item) =>
-    selectedItems.includes(item.id),
-  );
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -64,46 +71,92 @@ const PaymentMethod = ({
   }, [session, setValue]);
 
   const submitHandler = async (data: FormData) => {
-    if (selectedOption === "Stripe") {
-      await onStripePayment(data);
-    } else {
-      const orderId = uuidv4().slice(0, 8);
-      const orderDetails = {
-        orderId,
-        user: { ...data },
-        items: selectedCartItems.map((item) => ({
-          productId: item.id,
-          price: Number(item.price),
-          quantity: item.quantity,
-        })),
-        total: selectedCartItems.reduce(
-          (acc, item) => acc + parseFloat(String(item.price)) * item.quantity,
-          0,
-        ),
-        paymentMethod: selectedOption,
-      };
+    setIsProcessing(true);
+    const orderId = uuidv4().slice(0, 8);
 
-      // console.log("Submitting order with details:", orderDetails);
+    const baseOrderDetails = {
+      orderId,
+      user: { ...data },
+      items: cartItems.map((item) => ({
+        productId: item.id,
+        price: Number(item.price),
+        quantity: item.quantity,
+      })),
+      total: cartTotal,
+    };
 
-      try {
+    try {
+      if (selectedOption === "Stripe") {
+        if (!stripe || !elements) {
+          console.error("Stripe.js hasn't loaded yet.");
+          setIsProcessing(false);
+          return;
+        }
+
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          console.error(submitError.message);
+          setIsProcessing(false);
+          return;
+        }
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          redirect: "if_required",
+        });
+
+        if (error) {
+          console.error("Payment failed:", error.message);
+          setIsProcessing(false);
+          return;
+        }
+
+        if (paymentIntent?.status !== "succeeded") {
+          console.error("Unexpected payment status:", paymentIntent?.status);
+          setIsProcessing(false);
+          return;
+        }
+
         const response = await fetch("/api/order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderDetails),
+          body: JSON.stringify({
+            ...baseOrderDetails,
+            paymentMethod: "Stripe",
+            paid: true,
+            stripePaymentIntentId: paymentIntent.id,
+          }),
         });
 
         const result = await response.json();
-
         if (response.ok) {
-          localStorage.setItem("lastOrderId", orderId);
-          removeSelectedItems(selectedItems);
-          router.push(`/track-order?orderId=${orderId}`);
+          onOrderCreated(orderId);
         } else {
           console.error("Order submission failed:", result.message);
+          setIsProcessing(false);
         }
-      } catch (error) {
-        console.error("Order submission failed", error);
+      } else {
+        const response = await fetch("/api/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...baseOrderDetails,
+            paymentMethod: "Cash On Delivery",
+            paid: false,
+          }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          onOrderCreated(orderId);
+        } else {
+          console.error("Order submission failed:", result.message);
+          setIsProcessing(false);
+        }
       }
+    } catch (err) {
+      console.error("Order submission failed", err);
+      setIsProcessing(false);
     }
   };
 
@@ -142,16 +195,15 @@ const PaymentMethod = ({
           required
           pattern={/^[0-9]+$/}
         />
+
         <div className="flex flex-col gap-[17px] w-full">
           <label className="text-base font-semibold">Email</label>
-
           <input
             type="email"
             value={session?.user?.email || ""}
             readOnly
             className="border border-[#9F9F9F] rounded-lg h-[70px] w-full text-base px-[14px] bg-gray-100 cursor-not-allowed"
           />
-
           <input
             type="hidden"
             {...register("email")}
@@ -199,7 +251,6 @@ const PaymentMethod = ({
           errors={errors}
           required
         />
-
         <InputField
           label="Zip Code"
           id="zipcode"
@@ -263,7 +314,6 @@ const SelectField = ({
         <option value="" disabled>
           Select {label}
         </option>
-
         {children}
       </select>
       <span className="text-xl absolute right-6 top-1/2 transform -translate-y-1/2 cursor-pointer">

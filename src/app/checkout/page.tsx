@@ -10,7 +10,6 @@ import PaymentDetails from "@/app/components/PaymentDetails";
 import PaymentMethod from "@/app/components/PaymentMethod";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
@@ -48,83 +47,40 @@ const Page = () => {
     }
   }, [selectedOption, cartTotal]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleStripePayment = async (formData: any) => {
-    setIsProcessing(true);
+const handleOrderCreated = (orderId: string) => {
+  localStorage.setItem("lastOrderId", orderId);
+  removeSelectedItems(selectedItems);
+  router.push(`/track-order?orderId=${orderId}`);
+};
 
-    const orderId = uuidv4().slice(0, 8);
-    const orderDetails = {
-      orderId,
-      user: { ...formData },
-      items: selectedCartItems.map((item) => ({
-        productId: item.id,
-        price: Number(item.price),
-        quantity: item.quantity,
-      })),
-      total: selectedCartItems.reduce(
-        (acc, item) => acc + parseFloat(String(item.price)) * item.quantity,
-        0,
-      ),
-      paymentMethod: selectedOption,
-    };
-
-    try {
-      const response = await fetch("/api/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderDetails),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("lastOrderId", orderId);
-
-        removeSelectedItems(selectedItems);
-        router.push(`/track-order?orderId=${orderId}`);
-      } else {
-        console.error("Order submission failed:", result.message);
-        setIsProcessing(false);
-      }
-    } catch (error) {
-      console.error("Order submission failed", error);
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <section className="max-w-[1440px] mx-auto">
-      <SecondaryHeader routeName="Checkout" />
-      <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
+return (
+  <section className="max-w-[1440px] mx-auto">
+    <SecondaryHeader routeName="Checkout" />
+    <div className="py-10 px-2 lg:px-24 flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-6">
+      <Elements
+        stripe={stripePromise}
+        options={clientSecret ? { clientSecret } : undefined}
+      >
         <PaymentMethod
           selectedOption={selectedOption}
-          onStripePayment={handleStripePayment}
+          onOrderCreated={handleOrderCreated}
+          setIsProcessing={setIsProcessing}
+          cartItems={selectedCartItems}
+          cartTotal={cartTotal}
         />
-
-        {selectedOption === "Stripe" && clientSecret ? (
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <PaymentDetails
-              selectedOption={selectedOption}
-              setSelectedOption={setSelectedOption}
-              amount={cartTotal}
-              clientSecret={clientSecret}
-              isProcessing={isProcessing}
-              items={selectedCartItems}
-            />
-          </Elements>
-        ) : (
-          <PaymentDetails
-            selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
-            amount={cartTotal}
-            isProcessing={isProcessing}
-            items={selectedCartItems}
-          />
-        )}
-      </div>
-      <ServiceBar />
-    </section>
-  );
+        <PaymentDetails
+          selectedOption={selectedOption}
+          setSelectedOption={setSelectedOption}
+          amount={cartTotal}
+          clientSecret={clientSecret}
+          isProcessing={isProcessing}
+          items={selectedCartItems}
+        />
+      </Elements>
+    </div>
+    <ServiceBar />
+  </section>
+);
 };
 
 export default Page;
