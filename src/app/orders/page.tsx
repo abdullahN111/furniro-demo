@@ -41,13 +41,12 @@ const OrderCard = ({
         <div>
           <h3 className="font-semibold text-gray-800">Furniro</h3>
           <p
-            className={`text-sm ${
-              order.status === "Delivered"
+            className={`text-sm ${order.status === "Delivered"
                 ? "text-green-600"
                 : order.status === "Pending"
                   ? "text-yellow-600"
                   : "text-blue-600"
-            }`}
+              }`}
           >
             {order.status}
           </p>
@@ -55,11 +54,10 @@ const OrderCard = ({
             {steps.map((step, index) => (
               <div key={step} className="flex items-center">
                 <span
-                  className={`px-2 py-1 rounded-full ${
-                    index <= currentIndex
+                  className={`px-2 py-1 rounded-full ${index <= currentIndex
                       ? "bg-[#B88E2F] text-white"
                       : "bg-gray-200 text-gray-500"
-                  }`}
+                    }`}
                 >
                   {step}
                 </span>
@@ -184,6 +182,8 @@ const Order = () => {
 
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
+  const [isSavingGallery, setIsSavingGallery] = useState(false);
+  const [hasGallery, setHasGallery] = useState(false);
 
   const toggleProduct = (productId: string) => {
     setSelectedProducts((prev) =>
@@ -217,29 +217,67 @@ const Order = () => {
     loadOrders();
   }, [session, status]);
 
-  const createGallery = async () => {
+  useEffect(() => {
+    const checkExistingGallery = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        const res = await fetch(`/api/gallery?email=${session.user.email}`);
+        const data = await res.json();
+        setHasGallery((data.gallery?.products?.length ?? 0) > 0);
+      } catch (error) {
+        console.error("Failed to check gallery:", error);
+      }
+    };
+
+    checkExistingGallery();
+  }, [session]);
+
+  const createGallery = async (): Promise<boolean> => {
     if (selectedProducts.length < 4) {
       alert("Please select at least 4 products to create a gallery");
-      return;
+      return false;
     }
 
-    await fetch("/api/gallery", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userEmail: session?.user?.email,
-        products: selectedProducts,
-      }),
-    });
+    try {
+      const res = await fetch("/api/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: session?.user?.email,
+          products: selectedProducts,
+        }),
+      });
 
-    setSelectionMode(false);
-    setSelectedProducts([]);
+      if (!res.ok) {
+        alert("Failed to save gallery. Please try again.");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Failed to save gallery:", error);
+      alert("Failed to save gallery. Please try again.");
+      return false;
+    }
+  };
+
+  const handleSaveGallery = async () => {
+    setIsSavingGallery(true);
+    const success = await createGallery();
+    setIsSavingGallery(false);
+
+    if (success) {
+      setHasGallery(true);
+      setSelectionMode(false);
+      setSelectedProducts([]);
+    }
+
   };
 
   const handleGalleryMode = async () => {
     if (!selectionMode) {
       const res = await fetch(`/api/gallery?email=${session?.user?.email}`);
-
       const data = await res.json();
 
       if (data.gallery?.products) {
@@ -273,10 +311,10 @@ const Order = () => {
   const toReceiveOrders = loading
     ? []
     : orders.filter((order) =>
-        ["Pending", "Processing", "Dispatched", "Shipped"].includes(
-          order.status,
-        ),
-      );
+      ["Pending", "Processing", "Dispatched", "Shipped"].includes(
+        order.status,
+      ),
+    );
 
   const deliveredOrders = loading
     ? []
@@ -302,11 +340,10 @@ const Order = () => {
               onClick={() =>
                 setActiveTab(tab.key as "receive" | "delivered" | "review")
               }
-              className={`pb-2 text-sm font-medium ${
-                activeTab === tab.key
+              className={`pb-2 text-sm font-medium ${activeTab === tab.key
                   ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -349,15 +386,18 @@ const Order = () => {
                   onClick={handleGalleryMode}
                   className="bg-gray-800 text-white px-4 py-2 rounded"
                 >
-                  {selectionMode ? "Cancel" : "Create Gallery"}
+                  {selectionMode ? "Cancel" : hasGallery ? "Edit Gallery" : "Create Gallery"}
                 </button>
 
                 {selectionMode && (
                   <button
-                    onClick={createGallery}
-                    className="bg-[#B88E2F] text-white px-4 py-2 rounded"
+                    onClick={handleSaveGallery}
+                    disabled={isSavingGallery}
+                    className="bg-[#B88E2F] text-white px-4 py-2 rounded disabled:opacity-60"
                   >
-                    Save Gallery ({selectedProducts.length}/8)
+                    {isSavingGallery
+                      ? "Saving..."
+                      : `Save Gallery (${selectedProducts.length}/8)`}
                   </button>
                 )}
               </div>
