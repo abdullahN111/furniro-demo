@@ -9,6 +9,29 @@ import { useSession } from "next-auth/react";
 import { fetchProducts, ProductCardData } from "../Data";
 import Link from "next/link";
 
+const StarRating = ({
+  rating,
+  onChange,
+  readOnly = false,
+}: {
+  rating: number;
+  onChange?: (n: number) => void;
+  readOnly?: boolean;
+}) => (
+  <div className="flex gap-1">
+    {[1, 2, 3, 4, 5].map((n) => (
+      <span
+        key={n}
+        onClick={() => !readOnly && onChange?.(n)}
+        className={`text-lg ${readOnly ? "" : "cursor-pointer"} ${n <= rating ? "text-yellow-500" : "text-gray-300"
+          }`}
+      >
+        ★
+      </span>
+    ))}
+  </div>
+);
+
 const OrderCard = ({
   order,
   type,
@@ -24,17 +47,96 @@ const OrderCard = ({
 }) => {
   const [products, setProducts] = useState<ProductCardData[]>([]);
 
+  const [existingReviews, setExistingReviews] = useState<
+    Record<string, { rating: number; comment: string }>
+  >({});
+  const [draftRating, setDraftRating] = useState<Record<string, number>>({});
+  const [draftComment, setDraftComment] = useState<Record<string, string>>(
+    {},
+  );
+  const [submittingProductId, setSubmittingProductId] = useState<
+    string | null
+  >(null);
+
   useEffect(() => {
     async function loadProducts() {
       const fetchedProducts = await fetchProducts();
       setProducts(fetchedProducts);
     }
-
     loadProducts();
   }, []);
 
-  const steps = ["Pending", "Processing", "Dispatched", "Shipped", "Delivered"];
+  useEffect(() => {
+    if (type !== "review") return;
+
+    const loadReviews = async () => {
+      try {
+        const res = await fetch(`/api/reviews?orderId=${order.orderId}`);
+        const data = await res.json();
+        const map: Record<string, { rating: number; comment: string }> = {};
+        (data.reviews ?? []).forEach(
+          (r: { productId: string; rating: number; comment: string }) => {
+            map[r.productId] = { rating: r.rating, comment: r.comment };
+          },
+        );
+        setExistingReviews(map);
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+      }
+    };
+
+    loadReviews();
+  }, [type, order.orderId]);
+
+  const handleSubmitReview = async (productId: string) => {
+    const rating = draftRating[productId] ?? 0;
+    if (rating === 0) {
+      alert("Please select a rating before submitting.");
+      return;
+    }
+
+    setSubmittingProductId(productId);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.orderId,
+          productId,
+          userName: `${order.user.firstname} ${order.user.lastname}`,
+          rating,
+          comment: draftComment[productId] ?? "",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to submit review. Please try again.");
+        return;
+      }
+
+      setExistingReviews((prev) => ({
+        ...prev,
+        [productId]: { rating, comment: draftComment[productId] ?? "" },
+      }));
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setSubmittingProductId(null);
+    }
+  };
+
+  const steps = [
+    "Pending",
+    "Processing",
+    "Dispatched",
+    "Shipped",
+    "Delivered",
+  ];
   const currentIndex = steps.indexOf(order.status);
+
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
       <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
@@ -61,7 +163,6 @@ const OrderCard = ({
                 >
                   {step}
                 </span>
-
                 {index < steps.length - 1 && (
                   <div className="w-4 h-[2px] bg-gray-300 mx-1" />
                 )}
@@ -75,57 +176,111 @@ const OrderCard = ({
       {order.items.map((item, index) => {
         const product = products.find((p) => p._id === item._id);
         const slug = product?.slug.current;
+        const existingReview = existingReviews[item._id];
 
         return (
           <div
             key={item._id}
-            className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-4 border-b border-gray-100 last:border-b-0"
+            className="py-4 border-b border-gray-100 last:border-b-0"
           >
-            <div className="flex items-start space-x-4 w-full lg:w-auto">
-              {selectionMode &&
-                type === "delivered" &&
-                selectedProducts &&
-                toggleProduct && (
-                  <input
-                    type="checkbox"
-                    checked={selectedProducts.includes(item._id)}
-                    onChange={() => toggleProduct(item._id)}
-                    className="mr-2"
-                  />
-                )}
-              <Link href={`/add-to-cart/${slug}`}>
-                <div className="relative w-20 h-20 flex-shrink-0">
-                  <Image
-                    src={item.productImage || "/placeholder-image.jpg"}
-                    alt={item.title}
-                    fill
-                    className="object-cover rounded-md"
-                  />
-                </div>
-              </Link>
-              <div className="flex-1 min-w-0">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="flex items-start space-x-4 w-full lg:w-auto">
+                {selectionMode &&
+                  type === "delivered" &&
+                  selectedProducts &&
+                  toggleProduct && (
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.includes(item._id)}
+                      onChange={() => toggleProduct(item._id)}
+                      className="mr-2"
+                    />
+                  )}
                 <Link href={`/add-to-cart/${slug}`}>
-                  <h4 className="font-medium text-gray-900 text-[13px] sm:text-sm line-clamp-2">
-                    {item.title}
-                  </h4>
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    <Image
+                      src={item.productImage || "/placeholder-image.jpg"}
+                      alt={item.title}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
                 </Link>
-                <p className="text-xs text-gray-500 mt-1">
-                  Color Family: White Black
-                </p>
-                <p className="text-xs text-gray-500">Size: Int: LM</p>
+                <div className="flex-1 min-w-0">
+                  <Link href={`/add-to-cart/${slug}`}>
+                    <h4 className="font-medium text-gray-900 text-[13px] sm:text-sm line-clamp-2">
+                      {item.title}
+                    </h4>
+                  </Link>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Color Family: White Black
+                  </p>
+                  <p className="text-xs text-gray-500">Size: Int: LM</p>
+                </div>
+              </div>
+
+              <div className="flex justify-between w-full lg:w-auto mt-4 lg:mt-0 lg:flex-col lg:items-end">
+                <div className="text-right">
+                  <p className="font-semibold text-gray-900">
+                    Rs. {order.itemPrices[index] * order.itemQuantities[index]}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Qty: {order.itemQuantities[index]}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-between w-full lg:w-auto mt-4 lg:mt-0 lg:flex-col lg:items-end">
-              <div className="text-right">
-                <p className="font-semibold text-gray-900">
-                  Rs. {order.itemPrices[index] * order.itemQuantities[index]}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Qty: {order.itemQuantities[index]}
-                </p>
+            {/* ✅ per-item review UI, only in the review tab */}
+            {type === "review" && (
+              <div className="mt-3 ml-0 lg:ml-24 border-t pt-3">
+                {existingReview ? (
+                  <div>
+                    <p className="text-sm font-medium text-green-700 mb-1">
+                      ✓ You reviewed this item
+                    </p>
+                    <StarRating rating={existingReview.rating} readOnly />
+                    {existingReview.comment && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {existingReview.comment}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm font-medium mb-2">
+                      Leave a Review
+                    </p>
+                    <StarRating
+                      rating={draftRating[item._id] ?? 0}
+                      onChange={(n) =>
+                        setDraftRating((prev) => ({ ...prev, [item._id]: n }))
+                      }
+                    />
+                    <textarea
+                      placeholder="Write your review..."
+                      value={draftComment[item._id] ?? ""}
+                      onChange={(e) =>
+                        setDraftComment((prev) => ({
+                          ...prev,
+                          [item._id]: e.target.value,
+                        }))
+                      }
+                      className="w-full border p-2 rounded text-sm mt-2"
+                    />
+                    <button
+                      onClick={() => handleSubmitReview(item._id)}
+                      disabled={submittingProductId === item._id}
+                      className="mt-2 bg-[#B88E2F] text-white px-4 py-2 rounded text-sm disabled:opacity-60"
+                    >
+                      {submittingProductId === item._id
+                        ? "Submitting..."
+                        : "Submit Review"}
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         );
       })}
@@ -143,31 +298,6 @@ const OrderCard = ({
           </Link>
         </div>
       </div>
-      {type === "review" && (
-        <div className="mt-3 border-t pt-4">
-          <p className="text-sm font-medium mb-2">Leave a Review</p>
-
-          <div className="flex gap-1 mb-2">
-            {"★★★★★".split("").map((_, i) => (
-              <span
-                key={i}
-                className="cursor-pointer text-gray-400 hover:text-yellow-500"
-              >
-                ★
-              </span>
-            ))}
-          </div>
-
-          <textarea
-            placeholder="Write your review..."
-            className="w-full border p-2 rounded text-sm"
-          />
-
-          <button className="mt-2 bg-[#B88E2F] text-white px-4 py-2 rounded text-sm">
-            Submit Review
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -341,8 +471,8 @@ const Order = () => {
                 setActiveTab(tab.key as "receive" | "delivered" | "review")
               }
               className={`pb-2 text-sm font-medium ${activeTab === tab.key
-                  ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
-                  : "text-gray-500"
+                ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
+                : "text-gray-500"
                 }`}
             >
               {tab.label}
