@@ -177,18 +177,18 @@ const ProductDetail = () => {
             $ {product.price}.00
           </p>
 
-          {/* ✅ now reflects real review data instead of static product fields */}
-          <div className="flex items-center gap-5 my-1">
-            <StarDisplay rating={averageRating} />
-            <div className="h-[30px] w-px bg-[#9F9F9F]"></div>
-            <p className="text-[13px] text-[#9F9F9F]">
-              {loadingReviews
-                ? "Loading reviews..."
-                : reviewCount > 0
+
+          {!loadingReviews && (
+            <div className="flex items-center gap-5 my-1">
+              <StarDisplay rating={averageRating} />
+              <div className="h-[30px] w-px bg-[#9F9F9F]"></div>
+              <p className="text-[13px] text-[#9F9F9F]">
+                {reviewCount > 0
                   ? `${averageRating.toFixed(1)} (${reviewCount} review${reviewCount === 1 ? "" : "s"})`
                   : "No reviews yet"}
-            </p>
-          </div>
+              </p>
+            </div>
+          )}
 
           <p className="text-[14px] sm:text-[15px] leading-relaxed">
             {product.description.substring(0, 573)}
@@ -279,7 +279,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      
+
       <div className="mt-16 pt-10 border-t border-[#E5E5E5]">
         <h2 className="text-2xl font-semibold mb-6">Customer Reviews</h2>
 
