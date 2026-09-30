@@ -141,11 +141,11 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="w-full mx-auto py-10 mb-12 px-8 lg:px-16">
-      {/* ===== Existing top section — unchanged layout ===== */}
+    <div className="w-full mx-auto py-10 mb-12 px-8 lg:px-16 overflow-x-hidden">
+
       <div className="flex flex-col lg:flex-row gap-10">
-        <div className="basis-[50%] flex flex-col lg:flex-row gap-6 lg:gap-4">
-          <div className="flex lg:flex-col gap-3 sm:gap-5">
+        <div className="basis-[50%] flex flex-col lg:flex-row gap-6 lg:gap-4 min-w-0">
+          <div className="flex lg:flex-col gap-3 sm:gap-5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
             {product.sideImages?.map((img, idx) => (
               <Image
                 key={idx}
@@ -153,7 +153,7 @@ const ProductDetail = () => {
                 alt={`Product side image ${idx + 1}`}
                 width={80}
                 height={80}
-                className="bg-[#F9F1E7] rounded-md object-cover w-[80px] h-[80px]"
+                className="bg-[#F9F1E7] rounded-md object-cover w-[80px] h-[80px] flex-shrink-0"
               />
             ))}
           </div>
