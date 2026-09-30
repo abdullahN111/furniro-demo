@@ -231,7 +231,7 @@ const OrderCard = ({
               </div>
             </div>
 
-            {/* ✅ per-item review UI, only in the review tab */}
+           
             {type === "review" && (
               <div className="mt-3 ml-0 lg:ml-24 border-t pt-3">
                 {existingReview ? (

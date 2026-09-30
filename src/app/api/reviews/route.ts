@@ -104,19 +104,49 @@ export async function POST(req: Request) {
   }
 }
 
+
 export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const orderId = searchParams.get("orderId");
+    const productId = searchParams.get("productId");
+
+    
+    if (productId) {
+      const reviews = await client.fetch(
+        `*[_type == "review" && product._ref == $productId] | order(createdAt desc){
+          _id,
+          userName,
+          rating,
+          comment,
+          createdAt
+        }`,
+        { productId },
+        { cache: "no-store" },
+      );
+
+      const count = reviews.length;
+      const average =
+        count > 0
+          ? reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / count
+          : 0;
+
+      return NextResponse.json({
+        reviews,
+        average: Math.round(average * 10) / 10,
+        count,
+      });
+    }
+
+   
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const orderId = searchParams.get("orderId");
-
     if (!orderId) {
       return NextResponse.json(
-        { error: "orderId is required" },
+        { error: "orderId or productId is required" },
         { status: 400 },
       );
     }
