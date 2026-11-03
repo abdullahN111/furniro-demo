@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { FiShare2 } from "react-icons/fi";
+import { FiShare2, FiDownload } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import jsPDF from "jspdf";
 import { placeholderImages } from "@/app/Data/gallery";
+import { useToast } from "@/app/context/ToastContext";
 
 const CollectionSetup = () => {
   const { data: session } = useSession();
+  const { showToast } = useToast();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [images, setImages] = useState<any[]>([]);
   const [hasGallery, setHasGallery] = useState(false);
@@ -18,12 +20,17 @@ const CollectionSetup = () => {
     async function fetchGallery() {
       if (!session?.user?.email) return;
 
-      const res = await fetch(`/api/gallery?email=${session.user.email}`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`/api/gallery?email=${session.user.email}`);
+        if (!res.ok) return;
+        const data = await res.json();
 
-      if (data.gallery?.products?.length >= 4) {
-        setImages(data.gallery.products);
-        setHasGallery(true);
+        if (data.gallery?.products?.length >= 4) {
+          setImages(data.gallery.products);
+          setHasGallery(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch gallery:", err);
       }
     }
 
@@ -41,7 +48,6 @@ const CollectionSetup = () => {
 
     try {
       const pdf = new jsPDF();
-
       let y = 10;
 
       pdf.setFont("helvetica", "bold");
@@ -54,9 +60,11 @@ const CollectionSetup = () => {
 
       for (let i = 0; i < displayImages.length; i++) {
         const img = displayImages[i].image;
+        const imgSrc = typeof img === "string" ? img : img?.src;
+        if (!imgSrc) continue;
 
         try {
-          const res = await fetch(img);
+          const res = await fetch(imgSrc);
           const blob = await res.blob();
 
           const reader = new FileReader();
@@ -96,37 +104,51 @@ const CollectionSetup = () => {
       }
 
       pdf.save("furniro_gallery.pdf");
+      showToast({
+        message: "Gallery PDF downloaded successfully!",
+        type: "success",
+      });
+    } catch {
+      showToast({
+        message: "Failed to generate Gallery PDF",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="max-w-[1440px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-8">
-        <h5 className="text-lg font-medium text-gray-600 mb-2">
+    <section className="max-w-[1440px] mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-10">
+        <p className="text-sm sm:text-base font-semibold uppercase tracking-widest text-gray-500 mb-2">
           Share your setup with
-        </h5>
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center justify-center gap-2">
+        </p>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center justify-center gap-2.5">
           <FiShare2 className="text-[#B88E2F]" />
-          #FuniroFurniture
+          <span>#FuniroFurniture</span>
         </h2>
 
         {!hasGallery && (
-          <p className="text-gray-500 mt-2">
-            Order your first furniture and create your gallery
+          <p className="text-sm text-gray-500 mt-2">
+            Order your favorite pieces to unlock your personalized lookbook
+            gallery
           </p>
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6 mb-12">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
         {displayImages.slice(0, 8).map((item, index) => (
-          <div key={index} className="relative w-full aspect-square">
+          <div
+            key={index}
+            className="group relative w-full aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-xs hover:shadow-md transition-all duration-300"
+          >
             <Image
               src={item.image}
-              alt={`Setup ${index}`}
+              alt={`Furniro setup inspiration ${index + 1}`}
               fill
-              className="object-cover rounded-md"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           </div>
         ))}
@@ -134,9 +156,10 @@ const CollectionSetup = () => {
 
       <div className="text-center flex justify-center">
         <button
+          type="button"
           onClick={downloadPDF}
           disabled={loading}
-          className="bg-[#B88E2F] text-white px-6 py-3 rounded flex items-center justify-center gap-2 disabled:opacity-70"
+          className="bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold px-7 py-3 rounded-md flex items-center justify-center gap-2 shadow-sm transition-colors disabled:opacity-70"
         >
           {loading ? (
             <>
@@ -159,10 +182,13 @@ const CollectionSetup = () => {
                   d="M4 12a8 8 0 018-8v8H4z"
                 />
               </svg>
-              Downloading...
+              <span>Generating PDF...</span>
             </>
           ) : (
-            "Download Gallery"
+            <>
+              <FiDownload className="text-lg" />
+              <span>Download Gallery PDF</span>
+            </>
           )}
         </button>
       </div>

@@ -5,21 +5,21 @@ import Image from "next/image";
 import Logo from "@/app/public/assets/images/main/Logo.png";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setMessage("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setMessageType("error");
       setMessage("Please enter your email and password.");
       return;
@@ -28,7 +28,7 @@ const LoginPage = () => {
     setLoading(true);
 
     const result = await signIn("credentials", {
-      email,
+      email: email.trim(),
       password,
       redirect: false,
     });
@@ -46,83 +46,109 @@ const LoginPage = () => {
 
     setTimeout(() => {
       window.location.href = "/";
-    }, 1500);
+    }, 1000);
   };
 
   return (
-    <div className="flex flex-col lg:flex-row py-12">
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4 sm:px-8 text-center bg-white lg:shadow-none border-b lg:border-none border-gray-200 py-6 lg:py-0">
-        <Image
-          src={Logo}
-          alt="Furniro Logo"
-          width={90}
-          height={90}
-          className="mb-4"
-        />
-        <h2 className="text-3xl md:text-4xl font-extrabold text-[#B88E2F] mb-4">
-          Furniro
-        </h2>
-        <p className="text-base lg:text-lg max-w-md leading-relaxed text-gray-700">
-          Elevate your living space with timeless, high-quality furniture.
-          Explore our collection today and experience the perfect blend of style
-          and comfort.
-        </p>
-      </div>
-
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4 sm:px-8 bg-white lg:rounded-lg py-6 lg:py-0 min-h-[80vh]">
-        <div className="text-center w-full max-w-sm">
-          <h2 className="text-[26px] lg:text-3xl font-bold text-[#B88E2F] my-4">
-            Unlock Your Home’s Elegance
-          </h2>
-          <p className="text-[#666] text-sm lg:text-base mb-6">
-            Sign in now and start creating your dream space with our premium furniture.
+    <section className="max-w-[1440px] mx-auto px-4 sm:px-8 py-12 lg:py-16">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 rounded-2xl overflow-hidden border border-[#f0e4d3] shadow-lg bg-white">
+        {/* Left Brand Panel */}
+        <div className="lg:col-span-5 bg-[#FCF8F3] p-8 sm:p-10 flex flex-col justify-center items-center text-center border-b lg:border-b-0 lg:border-r border-[#f0e4d3]">
+          <Image
+            src={Logo}
+            alt="Furniro Logo"
+            width={72}
+            height={72}
+            className="mb-4"
+          />
+          <h1 className="text-3xl font-bold text-[#B88E2F] mb-3">Furniro</h1>
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+            Elevate your living space with timeless, handcrafted furniture. Sign
+            in to manage your wishlist, track deliveries, and enjoy seamless
+            checkout.
           </p>
         </div>
 
-
-        <div className="w-full max-w-sm flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-lg font-semibold">Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading || messageType === "success"}
-              placeholder="Enter your email"
-              className="text-base text-[#333] border border-[#B88E2F] py-[10px] px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
-            />
+        {/* Right Form Panel */}
+        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Welcome Back
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Sign in to your Furniro account to continue.
+            </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-lg font-semibold">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading || messageType === "success"}
-              placeholder="Enter your password"
-              className="text-base text-[#333] border border-[#B88E2F] py-[10px] px-4 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
-            />
-          </div>
-          {message && (
-            <div
-              className={`rounded-md px-4 py-[10px] text-sm font-medium ${messageType === "success"
-                ? "bg-green-100 text-green-700 border border-green-300"
-                : "bg-red-100 text-red-700 border border-red-300"
-                }`}
-            >
-              {message}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="login-email"
+                className="text-sm font-semibold text-gray-800"
+              >
+                Email Address
+              </label>
+              <input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading || messageType === "success"}
+                placeholder="you@example.com"
+                className="text-sm sm:text-base text-gray-900 border border-gray-300 focus:border-[#B88E2F] py-3 px-4 rounded-xl w-full focus:outline-none transition-colors"
+              />
             </div>
-          )}
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="text-white text-lg bg-[#B88E2F] hover:bg-[#b88f2ff8] rounded-md py-[10px] px-6 font-semibold shadow-md transition duration-300"
-          >
-            {loading ? "Signing In..." : "Sign In"}
-          </button>
 
-          <p className="text-center text-gray-600">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="login-password"
+                className="text-sm font-semibold text-gray-800"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading || messageType === "success"}
+                  placeholder="Enter your password"
+                  className="text-sm sm:text-base text-gray-900 border border-gray-300 focus:border-[#B88E2F] py-3 pl-4 pr-11 rounded-xl w-full focus:outline-none transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+            </div>
+
+            {message && (
+              <div
+                className={`rounded-xl px-4 py-3 text-sm font-medium ${
+                  messageType === "success"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full text-white text-sm sm:text-base bg-[#B88E2F] hover:bg-[#9f7924] rounded-xl py-3.5 px-6 font-semibold shadow-sm transition-colors disabled:opacity-60"
+            >
+              {loading ? "Signing In..." : "Sign In"}
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-gray-600 mt-5">
             Don&apos;t have an account?{" "}
             <Link
               href="/create-account"
@@ -132,19 +158,18 @@ const LoginPage = () => {
             </Link>
           </p>
 
-          <div className="w-full max-w-md mx-auto">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-px bg-gray-700" />
-              <div className="text-gray-700 text-2xl font-semibold whitespace-nowrap">
-                OR
-              </div>
-              <div className="flex-1 h-px bg-gray-700" />
-            </div>
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              OR
+            </span>
+            <div className="flex-1 h-px bg-gray-200" />
           </div>
 
           <button
+            type="button"
             onClick={() => signIn("google")}
-            className="flex items-center justify-center gap-3 text-gray-700 bg-white border border-gray-700 hover:bg-[#ffffffa8] rounded-md py-[10px] px-6 font-semibold shadow-sm transition duration-300 w-full"
+            className="flex items-center justify-center gap-3 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl py-3 px-6 text-sm sm:text-base font-semibold transition-colors w-full"
           >
             <svg
               className="w-5 h-5"
@@ -172,9 +197,8 @@ const LoginPage = () => {
             Continue with Google
           </button>
         </div>
-
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -1,75 +1,157 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useToast } from "@/app/context/ToastContext";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  return (
-    <footer className="bg-[#FFFFFF]  border-t border-gray-300 mx-auto max-w-[1440px] px-9 lg:px-[80px] py-4 pt-8">
-      <div>
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[300px_352px_286px] gap-12 lg:gap-6">
-          <div className="flex flex-col gap-8 mr-[100px] lg:mr-[120px]">
-            <h1 className="font-bold text-2xl">Furniro.</h1>
+  const [email, setEmail] = useState("");
+  const { showToast } = useToast();
 
-            <p className="max-w-[290px] text-base text-[#9F9F9F]">
-              400 University Drive Suite 200 Coral Gables, FL 33134 USA
-            </p>
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmed || !emailRegex.test(trimmed)) {
+      showToast({
+        message: "Please enter a valid email address",
+        type: "error",
+      });
+      return;
+    }
+
+    setEmail("");
+    showToast({
+      message: "Thank you for subscribing to the Furniro newsletter!",
+      type: "success",
+    });
+  };
+
+  return (
+    <footer className="bg-white border-t border-gray-200 mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-[80px] pt-12 pb-6">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1.2fr] gap-10 lg:gap-12">
+        {/* Brand Info */}
+        <div className="flex flex-col gap-5">
+          <Link href="/" className="font-bold text-2xl text-gray-900 w-fit">
+            Furniro.
+          </Link>
+          <p className="max-w-[290px] text-sm sm:text-base text-[#9F9F9F] leading-relaxed">
+            400 University Drive Suite 200 Coral Gables,
+            <br />
+            FL 33134 USA
+          </p>
+        </div>
+
+        {/* Navigation & Help Links */}
+        <div className="grid grid-cols-2 gap-8">
+          <div className="flex flex-col gap-5 items-start">
+            <h6 className="text-[#9F9F9F] text-sm font-semibold uppercase tracking-wider">
+              Links
+            </h6>
+            <ul className="flex flex-col gap-4">
+              <li>
+                <Link
+                  href="/"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shop"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
           </div>
-          <div className="flex gap-20">
-            <div className="flex flex-col gap-8 items-start">
-              <h6 className="text-[#9F9F9F] text-base">Links</h6>
-              <ul className="flex flex-col gap-6">
-                <Link href="/" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Home</li>
+
+          <div className="flex flex-col gap-5 items-start">
+            <h6 className="text-[#9F9F9F] text-sm font-semibold uppercase tracking-wider">
+              Help
+            </h6>
+            <ul className="flex flex-col gap-4">
+              <li>
+                <Link
+                  href="/payment-options"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Payment Options
                 </Link>
-                <Link href="/shop" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Shop</li>
+              </li>
+              <li>
+                <Link
+                  href="/return-policy"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Return Policy
                 </Link>
-                <Link href="/about" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">About</li>
+              </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="text-sm sm:text-base font-medium text-gray-800 hover:text-[#B88E2F] transition-colors"
+                >
+                  Privacy Policy
                 </Link>
-                <Link href="/contact" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Contact</li>
-                </Link>
-              </ul>
-            </div>
-            <div className="flex flex-col gap-8 items-start">
-              <h6 className="text-[#9F9F9F] text-base">Help</h6>
-              <ul className="flex flex-col gap-6">
-                <Link href="/payment-options" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Payment Options</li>
-                </Link>
-                <Link href="/return-policy" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Return Policy</li>
-                </Link>
-                <Link href="/privacy-policy" className="cursor-pointer">
-                  <li className="text-base cursor-pointer">Privacy Policy</li>
-                </Link>
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col gap-8 mr-4">
-            <h6 className="text-[#9F9F9F] text-base">Newsletter</h6>
-            <div className="flex flex-wrap gap-[10px]">
-              <input
-                type="text"
-                placeholder="Enter Your Email Address"
-                className="outline-none border-b-[2px] border-black
-"
-              />
-              <Link href={"/"}>
-                <p className="text-sm border-b-[2px] border-black uppercase cursor-pointer">
-                  Subscribe
-                </p>
-              </Link>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="mb-3 mt-10">
-          <div className="w-full h-px bg-gray-300"></div>
+        {/* Newsletter Form */}
+        <div className="flex flex-col gap-5">
+          <h6 className="text-[#9F9F9F] text-sm font-semibold uppercase tracking-wider">
+            Newsletter
+          </h6>
+          <p className="text-sm text-gray-500">
+            Receive exclusive offers, interior styling tips, and early access to
+            new arrivals.
+          </p>
+          <form
+            onSubmit={handleSubscribe}
+            className="flex flex-wrap items-center gap-3"
+          >
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter Your Email Address"
+              aria-label="Email address for newsletter"
+              className="outline-none border-b-2 border-gray-800 focus:border-[#B88E2F] text-sm py-1.5 min-w-[210px] flex-1 bg-transparent transition-colors"
+            />
+            <button
+              type="submit"
+              className="text-sm font-bold border-b-2 border-gray-800 hover:border-[#B88E2F] hover:text-[#B88E2F] py-1.5 uppercase tracking-wider cursor-pointer transition-colors"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
-      <div className="h-14 content-center">
-        <p className="text-base">{currentYear} Furniro. All rights reserved.</p>
+
+      <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-600">
+        <p>&copy; {currentYear} Furniro. All rights reserved.</p>
       </div>
     </footer>
   );

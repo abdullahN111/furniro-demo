@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useStripe, useElements } from "@stripe/react-stripe-js";
+import { useToast } from "@/app/context/ToastContext";
 
 interface FormData {
   firstname: string;
@@ -25,7 +26,8 @@ interface InputFieldProps {
   register: UseFormRegister<FormData>;
   errors: FieldErrors<FormData>;
   required?: boolean;
-  pattern?: RegExp;
+  placeholder?: string;
+  pattern?: { value: RegExp; message: string };
 }
 
 interface SelectFieldProps extends Omit<InputFieldProps, "pattern"> {
@@ -46,31 +48,71 @@ interface PaymentMethodProps {
   cartTotal: number;
 }
 
+const COUNTRY_REGIONS: Record<string, string[]> = {
+  "United States": [
+    "California",
+    "Florida",
+    "New York",
+    "Texas",
+    "Illinois",
+    "Washington",
+    "Other",
+  ],
+  Pakistan: ["Sindh", "Punjab", "KPK", "Balochistan", "Islamabad Capital"],
+  "United Kingdom": ["England", "Scotland", "Wales", "Northern Ireland"],
+  Canada: ["Ontario", "British Columbia", "Quebec", "Alberta", "Other"],
+  "United Arab Emirates": ["Dubai", "Abu Dhabi", "Sharjah", "Other"],
+  India: ["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "Other"],
+};
+
 const PaymentMethod = ({
   selectedOption,
   onOrderCreated,
   setIsProcessing,
-  cartItems, // ✅ used directly now, no rename
+  cartItems,
   cartTotal,
 }: PaymentMethodProps) => {
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      country: "Pakistan",
+      province: "Sindh",
+    },
+  });
 
   const stripe = useStripe();
   const elements = useElements();
   const { data: session } = useSession();
+  const { showToast } = useToast();
+
+  const selectedCountry = watch("country") || "Pakistan";
+  const provinces = COUNTRY_REGIONS[selectedCountry] || ["Other"];
 
   useEffect(() => {
     if (session?.user?.email) {
       setValue("email", session.user.email);
     }
+    if (session?.user?.name) {
+      const parts = session.user.name.trim().split(" ");
+      if (parts[0]) setValue("firstname", parts[0]);
+      if (parts.length > 1) setValue("lastname", parts.slice(1).join(" "));
+    }
   }, [session, setValue]);
 
   const submitHandler = async (data: FormData) => {
+    if (cartItems.length === 0) {
+      showToast({
+        message: "Your checkout list is empty",
+        type: "error",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     const orderId = uuidv4().slice(0, 8);
 
@@ -79,7 +121,10 @@ const PaymentMethod = ({
       user: { ...data },
       items: cartItems.map((item) => ({
         productId: item.id,
-        price: Number(item.price),
+        price:
+          typeof item.price === "string"
+            ? parseFloat(item.price.replace(/[^0-9.]+/g, "")) || 0
+            : Number(item.price),
         quantity: item.quantity,
       })),
       total: cartTotal,
@@ -88,14 +133,20 @@ const PaymentMethod = ({
     try {
       if (selectedOption === "Stripe") {
         if (!stripe || !elements) {
-          console.error("Stripe.js hasn't loaded yet.");
+          showToast({
+            message: "Stripe payment form is still loading. Please wait.",
+            type: "error",
+          });
           setIsProcessing(false);
           return;
         }
 
         const { error: submitError } = await elements.submit();
         if (submitError) {
-          console.error(submitError.message);
+          showToast({
+            message: submitError.message || "Please check your card details",
+            type: "error",
+          });
           setIsProcessing(false);
           return;
         }
@@ -106,13 +157,19 @@ const PaymentMethod = ({
         });
 
         if (error) {
-          console.error("Payment failed:", error.message);
+          showToast({
+            message: error.message || "Payment declined. Please try again.",
+            type: "error",
+          });
           setIsProcessing(false);
           return;
         }
 
         if (paymentIntent?.status !== "succeeded") {
-          console.error("Unexpected payment status:", paymentIntent?.status);
+          showToast({
+            message: `Payment status: ${paymentIntent?.status || "incomplete"}`,
+            type: "error",
+          });
           setIsProcessing(false);
           return;
         }
@@ -132,7 +189,10 @@ const PaymentMethod = ({
         if (response.ok) {
           onOrderCreated(orderId);
         } else {
-          console.error("Order submission failed:", result.message);
+          showToast({
+            message: result.message || "Failed to save order",
+            type: "error",
+          });
           setIsProcessing(false);
         }
       } else {
@@ -150,30 +210,46 @@ const PaymentMethod = ({
         if (response.ok) {
           onOrderCreated(orderId);
         } else {
-          console.error("Order submission failed:", result.message);
+          showToast({
+            message: result.message || "Order submission failed",
+            type: "error",
+          });
           setIsProcessing(false);
         }
       }
     } catch (err) {
       console.error("Order submission failed", err);
+      showToast({
+        message: "Network error while placing your order. Please try again.",
+        type: "error",
+      });
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="w-full sm:w-[600px] py-16 px-4 sm:px-8 lg:px-16">
-      <h2 className="text-[32px] sm:text-[34px] font-semibold mb-8">
-        Billing Details
-      </h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-10 shadow-xs">
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Billing & Shipping Details
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Enter the delivery address where you would like your furniture
+          delivered.
+        </p>
+      </div>
+
       <form
         onSubmit={handleSubmit(submitHandler)}
         id="checkout-form"
-        className="flex flex-col gap-8"
+        className="space-y-6"
+        noValidate
       >
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <InputField
             label="First Name"
             id="firstname"
+            placeholder="e.g. Abdullah"
             register={register}
             errors={errors}
             required
@@ -181,83 +257,105 @@ const PaymentMethod = ({
           <InputField
             label="Last Name"
             id="lastname"
+            placeholder="e.g. Nadeem"
             register={register}
             errors={errors}
             required
           />
         </div>
 
-        <InputField
-          label="Phone"
-          id="phone"
-          register={register}
-          errors={errors}
-          required
-          pattern={/^[0-9]+$/}
-        />
-
-        <div className="flex flex-col gap-[17px] w-full">
-          <label className="text-base font-semibold">Email</label>
-          <input
-            type="email"
-            value={session?.user?.email || ""}
-            readOnly
-            className="border border-[#9F9F9F] rounded-lg h-[70px] w-full text-base px-[14px] bg-gray-100 cursor-not-allowed"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <InputField
+            label="Phone Number"
+            id="phone"
+            placeholder="e.g. 03001234567"
+            register={register}
+            errors={errors}
+            required
+            pattern={{
+              value: /^[0-9+\-\s()]{7,18}$/,
+              message: "Enter a valid phone number (7–18 digits)",
+            }}
           />
-          <input
-            type="hidden"
-            {...register("email")}
-            value={session?.user?.email || ""}
+
+          <div className="flex flex-col gap-2 w-full">
+            <label className="text-sm font-semibold text-gray-800">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={session?.user?.email || ""}
+              readOnly
+              className="border border-gray-200 rounded-xl h-12 w-full text-sm px-4 bg-gray-100 text-gray-600 cursor-not-allowed"
+            />
+            <input
+              type="hidden"
+              {...register("email")}
+              value={session?.user?.email || ""}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <SelectField
+            label="Country / Region"
+            id="country"
+            register={register}
+            errors={errors}
+            required
+          >
+            {Object.keys(COUNTRY_REGIONS).map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </SelectField>
+
+          <SelectField
+            label="State / Province"
+            id="province"
+            register={register}
+            errors={errors}
+            required
+          >
+            {provinces.map((prov) => (
+              <option key={prov} value={prov}>
+                {prov}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <InputField
+            label="Town / City"
+            id="city"
+            placeholder="e.g. Karachi"
+            register={register}
+            errors={errors}
+            required
+          />
+          <InputField
+            label="Postal / Zip Code"
+            id="zipcode"
+            placeholder="e.g. 75500"
+            register={register}
+            errors={errors}
+            required
+            pattern={{
+              value: /^[0-9A-Za-z\-\s]{4,10}$/,
+              message: "Enter a valid 4–10 character postal/zip code",
+            }}
           />
         </div>
 
-        <SelectField
-          label="Country / Region"
-          id="country"
-          register={register}
-          errors={errors}
-          required
-        >
-          <option value="Pakistan">Pakistan</option>
-          <option value="India">India</option>
-          <option value="Bangladesh">Bangladesh</option>
-          <option value="Sri Lanka">Sri Lanka</option>
-        </SelectField>
-
-        <SelectField
-          label="Province"
-          id="province"
-          register={register}
-          errors={errors}
-          required
-        >
-          <option value="Sindh">Sindh</option>
-          <option value="Punjab">Punjab</option>
-          <option value="KPK">KPK</option>
-          <option value="Balochistan">Balochistan</option>
-        </SelectField>
-
-        <InputField
-          label="Town / City"
-          id="city"
-          register={register}
-          errors={errors}
-          required
-        />
         <InputField
           label="Street Address"
           id="streetaddress"
+          placeholder="House number, street name, apartment or suite"
           register={register}
           errors={errors}
           required
-        />
-        <InputField
-          label="Zip Code"
-          id="zipcode"
-          register={register}
-          errors={errors}
-          required
-          pattern={/^[0-9]{5}$/}
         />
       </form>
     </div>
@@ -270,15 +368,21 @@ const InputField = ({
   register,
   errors,
   required,
+  placeholder,
   pattern,
 }: InputFieldProps) => (
-  <div className="flex flex-col gap-[17px] w-full">
-    <label className="text-base font-semibold" htmlFor={id}>
-      {label}
+  <div className="flex flex-col gap-2 w-full">
+    <label className="text-sm font-semibold text-gray-800" htmlFor={id}>
+      {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
       type="text"
-      className="border border-[#9F9F9F] rounded-lg focus:outline-none h-[70px] w-full text-base px-[14px]"
+      placeholder={placeholder}
+      className={`border rounded-xl focus:outline-none h-12 w-full text-sm px-4 transition-colors ${
+        errors[id]
+          ? "border-red-400 focus:border-red-500"
+          : "border-gray-300 focus:border-[#B88E2F]"
+      }`}
       id={id}
       {...register(id, {
         required: required ? `${label} is required` : false,
@@ -286,7 +390,7 @@ const InputField = ({
       })}
     />
     {errors[id] && (
-      <p className="text-red-500 text-sm">{errors[id]?.message}</p>
+      <p className="text-red-500 text-xs font-medium">{errors[id]?.message}</p>
     )}
   </div>
 );
@@ -299,9 +403,9 @@ const SelectField = ({
   required,
   children,
 }: SelectFieldProps) => (
-  <div className="flex flex-col gap-[17px] relative w-full">
-    <label className="text-base font-semibold" htmlFor={id}>
-      {label}
+  <div className="flex flex-col gap-2 relative w-full">
+    <label className="text-sm font-semibold text-gray-800" htmlFor={id}>
+      {label} {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
       <select
@@ -309,19 +413,16 @@ const SelectField = ({
         {...register(id, {
           required: required ? `${label} is required` : false,
         })}
-        className="border border-[#9F9F9F] rounded-lg focus:outline-none h-[70px] w-full text-base px-5 appearance-none"
+        className="border border-gray-300 focus:border-[#B88E2F] rounded-xl focus:outline-none h-12 w-full text-sm px-4 appearance-none bg-white"
       >
-        <option value="" disabled>
-          Select {label}
-        </option>
         {children}
       </select>
-      <span className="text-xl absolute right-6 top-1/2 transform -translate-y-1/2 cursor-pointer">
+      <span className="text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
         <FaAngleDown />
       </span>
     </div>
     {errors[id] && (
-      <p className="text-red-500 text-sm">{errors[id]?.message}</p>
+      <p className="text-red-500 text-xs font-medium">{errors[id]?.message}</p>
     )}
   </div>
 );

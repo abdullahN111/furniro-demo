@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ImCancelCircle } from "react-icons/im";
+import { FiX } from "react-icons/fi";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,82 +16,72 @@ interface User {
 const ClientAccountInfo = ({
   close,
   favoriteCount,
+  user,
+  orderCount = 0,
 }: {
   close: () => void;
   favoriteCount: number;
+  user?: User | null;
+  orderCount?: number;
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [orderCount, setOrderCount] = useState(0);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/account-info");
-        const data = await res.json();
-        setUser(data.user);
-
-        const orderRes = await fetch("/api/order/count");
-        const orderData = await orderRes.json();
-        setOrderCount(orderData.count);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      }
-    };
-    fetchUser();
-  }, []);
-
   return (
     <div
-      className="relative px-4 py-5 sm:py-6 sm:px-5 w-[280px] xsx:w-[320px] bg-white shadow-lg z-[1001] rounded-md flex flex-col"
+      className="relative px-5 py-6 w-[290px] sm:w-[320px] h-fit bg-white shadow-2xl z-[1001] rounded-bl-xl border-l border-b border-gray-100 flex flex-col"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex justify-end absolute right-3 top-3">
+      <div className="flex justify-end absolute right-3.5 top-3.5">
         <button
-          className="text-[#9F9F9F] hover:text-gray-700 transition-colors"
+          type="button"
+          className="p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
           onClick={close}
           aria-label="Close account menu"
         >
-          <ImCancelCircle size={18} />
+          <FiX size={18} />
         </button>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-2 pt-6 pb-4">
-        {user &&
-          (user.image ? (
+      <div className="flex flex-col items-center justify-center gap-2 pt-4 pb-4">
+        {user ? (
+          user.image ? (
             <Image
               src={user.image}
               alt={user.name || "User"}
-              width={70}
-              height={70}
-              className="rounded-full object-cover border-2 border-gray-200"
+              width={68}
+              height={68}
+              className="rounded-full object-cover border-2 border-[#F9F1E7]"
             />
           ) : (
-            <div className="w-[70px] h-[70px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-3xl font-bold">
-              {user.name?.charAt(0).toUpperCase()}
+            <div className="w-[68px] h-[68px] rounded-full bg-[#B88E2F] text-white flex items-center justify-center text-2xl font-bold">
+              {user.name?.charAt(0).toUpperCase() || "U"}
             </div>
-          ))}
-        <p className="text-[17px] font-medium text-center text-gray-800">
+          )
+        ) : (
+          <div className="w-[64px] h-[64px] rounded-full bg-[#F9F1E7] text-[#B88E2F] flex items-center justify-center text-xl font-bold">
+            G
+          </div>
+        )}
+        <p className="text-base font-semibold text-center text-gray-800 mt-1">
           {user?.name || "Guest User"}
         </p>
-        <p className="text-[13px] text-gray-500 text-center max-w-full truncate">
-          {user?.email || "No email"}
+        <p className="text-xs text-gray-500 text-center max-w-full truncate">
+          {user?.email || "Sign in to manage orders & favorites"}
         </p>
       </div>
 
-      <div className="border-t border-gray-200 my-2" />
+      <div className="border-t border-gray-100 my-2" />
 
-      <div className="flex flex-col space-y-2 py-2">
+      <div className="flex flex-col space-y-1.5 py-2">
         <Link
           href="/orders"
-          className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition"
+          className="flex items-center justify-between px-3 py-2.5 text-gray-700 hover:bg-[#F9F1E7] rounded-lg transition-colors"
           onClick={close}
         >
           <div className="flex items-center">
             <FaShoppingBag className="mr-3 text-[#B88E2F]" />
-            <span className="text-sm">My Orders</span>
+            <span className="text-sm font-medium">My Orders</span>
           </div>
           {orderCount > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="bg-[#B88E2F] text-white text-xs font-semibold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
               {orderCount}
             </span>
           )}
@@ -101,47 +90,51 @@ const ClientAccountInfo = ({
         <Link
           href="/favorites"
           onClick={close}
-          className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition"
+          className="flex items-center justify-between px-3 py-2.5 text-gray-700 hover:bg-[#F9F1E7] rounded-lg transition-colors"
         >
           <div className="flex items-center">
             <FaRegHeart className="mr-3 text-[#B88E2F]" />
-            <span className="text-sm">Favorites</span>
+            <span className="text-sm font-medium">Favorites</span>
           </div>
 
           {favoriteCount > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="bg-red-500 text-white text-xs font-semibold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
               {favoriteCount}
             </span>
           )}
         </Link>
+
         {user && (
           <Link
             href="/track-order"
-            className="flex items-center px-3 py-2 text-gray-700 hover:bg-[#F9F1E7] rounded-md transition-colors"
+            className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-[#F9F1E7] rounded-lg transition-colors"
             onClick={close}
           >
             <CgTrack className="mr-3 text-[#B88E2F]" />
-            <span className="text-sm">Track Order</span>
+            <span className="text-sm font-medium">Track Order</span>
           </Link>
         )}
       </div>
 
-      <div className="border-t border-gray-200 my-2" />
+      <div className="border-t border-gray-100 my-2" />
 
-      <div className="pt-2 pb-3">
+      <div className="pt-2">
         {user ? (
           <button
+            type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex items-center justify-center w-full text-sm hover:bg-gray-100 py-2 px-4 rounded-md text-gray-700 transition-colors"
+            className="flex items-center justify-center w-full text-sm font-medium hover:bg-red-50 hover:text-red-600 py-2.5 px-4 rounded-lg text-gray-700 transition-colors"
           >
             <FaSignOutAlt className="mr-2" />
             Logout
           </button>
         ) : (
-          <Link href="/login" onClick={close}>
-            <button className="w-full text-sm hover:bg-[#F9F1E7] py-2 px-4 rounded-full border border-black transition-colors">
-              Login
-            </button>
+          <Link
+            href="/login"
+            onClick={close}
+            className="block w-full text-center text-sm font-semibold bg-[#B88E2F] text-white hover:bg-[#9f7924] py-2.5 px-4 rounded-full transition-colors"
+          >
+            Login / Register
           </Link>
         )}
       </div>

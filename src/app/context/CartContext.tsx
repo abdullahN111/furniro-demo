@@ -86,22 +86,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     loadCart();
     setIsMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail]);
 
   useEffect(() => {
     if (!isMounted) return;
     saveCart(cartItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems]);
 
   useEffect(() => {
     setSelectedItems((prev) =>
-      prev.filter((id) => cartItems.some((item) => item.id === id)),
+      prev.filter((id) => cartItems.some((item) => item.id === id))
     );
   }, [cartItems]);
 
   useEffect(() => {
     if (!isMounted) return;
     localStorage.setItem(getSelectedKey(), JSON.stringify(selectedItems));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItems, isMounted, userEmail]);
 
   const addToCart = (item: CartItem) => {
@@ -112,18 +115,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         ? prev.map((i) =>
             i.id === item.id
               ? { ...i, quantity: i.quantity + item.quantity }
-              : i,
+              : i
           )
-        : [...prev, item],
+        : [...prev, item]
     );
 
     if (!exists) {
       setSelectedItems((prev) => [...prev, item.id]);
     }
   };
+
   const removeFromCart = (id: string) => {
     setCartItems((prev) => prev.filter((i) => i.id !== id));
   };
+
   const removeSelectedItems = (ids: string[]) => {
     setCartItems((prev) => prev.filter((item) => !ids.includes(item.id)));
   };
@@ -131,8 +136,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateQuantity = (id: string, quantity: number) => {
     setCartItems((prev) =>
       prev.map((i) =>
-        i.id === id ? { ...i, quantity: Math.max(1, quantity) } : i,
-      ),
+        i.id === id ? { ...i, quantity: Math.max(1, quantity) } : i
+      )
     );
   };
 
@@ -142,8 +147,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.removeItem(getKey());
     }
   };
-
-  if (!isMounted) return null;
 
   return (
     <CartContext.Provider

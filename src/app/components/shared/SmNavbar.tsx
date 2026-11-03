@@ -1,41 +1,45 @@
+"use client";
+
 import Link from "next/link";
-import { ImCancelCircle } from "react-icons/im";
+import { usePathname } from "next/navigation";
+
+const navItems = [
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/shop" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
 
 const SmNavbar = ({ closeMenu }: { closeMenu: () => void }) => {
+  const pathname = usePathname();
+
   return (
-    <ul className="flex flex-col items-center  py-4 gap-4">
-      <li className="text-xl cursor-pointer" onClick={closeMenu}>
-        <ImCancelCircle />
-      </li>
-      <Link
-        href="/"
-        className="cursor-pointer hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] transition-shadow"
-        onClick={closeMenu}
-      >
-        <li className="text-base cursor-pointer">Home</li>
-      </Link>
-      <Link
-        href="/shop"
-        className="cursor-pointer hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] transition-shadow"
-        onClick={closeMenu}
-      >
-        <li className="text-base cursor-pointer">Shop</li>
-      </Link>
-      <Link
-        href="/about"
-        className="cursor-pointer hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] transition-shadow"
-        onClick={closeMenu}
-      >
-        <li className="text-base cursor-pointer">About</li>
-      </Link>
-      <Link
-        href="/contact"
-        className="cursor-pointer hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] transition-shadow"
-        onClick={closeMenu}
-      >
-        <li className="text-base cursor-pointer">Contact</li>
-      </Link>
-    </ul>
+    <nav aria-label="Mobile Navigation">
+      <ul className="flex flex-col items-center py-4 gap-3">
+        {navItems.map((item) => {
+          const isActive =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.href);
+
+          return (
+            <li key={item.href} className="w-full text-center">
+              <Link
+                href={item.href}
+                onClick={closeMenu}
+                className={`inline-block py-2 px-6 text-base font-medium rounded-md transition-colors ${
+                  isActive
+                    ? "text-[#B88E2F] font-semibold bg-[#F9F1E7]"
+                    : "text-gray-800 hover:text-[#B88E2F]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 };
 

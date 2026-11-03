@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { CartItem } from "../context/CartContext";
+import { FiLock, FiCreditCard, FiTruck } from "react-icons/fi";
 
 interface PaymentDetailsProps {
   selectedOption: string;
@@ -16,8 +18,6 @@ interface PaymentDetailsProps {
 const PaymentDetails = ({
   selectedOption,
   setSelectedOption,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  amount,
   clientSecret,
   isProcessing,
   items,
@@ -31,105 +31,165 @@ const PaymentDetails = ({
   }, 0);
 
   return (
-    <div className="w-full sm:w-[600px] pt-10 pb-16 lg:py-[102px] px-4 sm:px-8 lg:px-16">
-      <div className="flex flex-col gap-4 mb-7">
-        <div className="flex items-center justify-between">
-          <h5 className="text-[21px] lg:text-[22px] font-semibold">Product</h5>
-          <h5 className="text-[21px] lg:text-[22px] font-semibold">Subtotal</h5>
-        </div>
+    <div className="bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-6 sm:p-8 shadow-xs sticky top-28">
+      <h3 className="text-xl font-bold text-gray-900 mb-5">Your Order</h3>
 
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-[4px] sm:gap-[6px] lg:gap-2">
-              <span className="text-[15px] lg:text-base text-[#9F9F9F]">
-                {item.name}
+      {/* Itemized List */}
+      <div className="space-y-3.5 max-h-72 overflow-y-auto pr-1 mb-5">
+        {items.map((item) => {
+          const unitPrice =
+            typeof item.price === "string"
+              ? parseFloat(item.price.replace(/[^0-9.]+/g, "")) || 0
+              : Number(item.price);
+
+          return (
+            <div
+              key={item.id}
+              className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#f0e4d3]"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#F9F1E7] shrink-0">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Qty: {item.quantity} &times; ${unitPrice.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-gray-900 shrink-0">
+                ${(unitPrice * item.quantity).toFixed(2)}
               </span>
-              <span className="text-base lg:text-lg">&times;</span>
-              <span className="text-sm">{item.quantity}</span>
             </div>
-            <div>
-              <p className="text-[15px] lg:text-base">
-                $ {Number(item.price) * item.quantity}.00
-              </p>
-            </div>
-          </div>
-        ))}
-        <div className="flex items-center justify-between">
-          <p className="text-[15px] lg:text-base">Subtotal</p>
-          <p className="text-[15px] lg:text-base">$ {cartTotal}.00</p>
+          );
+        })}
+      </div>
+
+      {/* Totals */}
+      <div className="space-y-2.5 border-y border-[#e5d6c0] py-4 text-sm">
+        <div className="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span className="font-semibold text-gray-900">
+            ${cartTotal.toFixed(2)}
+          </span>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-[15px] lg:text-base">Total</p>
-          <h4 className="text-lg sm:text-[22px] lg:text-2xl text-[#B88E2F] font-bold">
-            $ {cartTotal}.00
-          </h4>
+        <div className="flex justify-between text-gray-600">
+          <span>Shipping</span>
+          <span className="font-semibold text-emerald-700">Free</span>
+        </div>
+        <div className="flex justify-between items-baseline pt-2 border-t border-[#e5d6c0]">
+          <span className="text-base font-bold text-gray-900">Total</span>
+          <span className="text-2xl font-bold text-[#B88E2F]">
+            ${cartTotal.toFixed(2)}
+          </span>
         </div>
       </div>
-      <div className="bg-[#D9D9D9] h-px w-full my-4"></div>
-      <div className="flex flex-col items-start gap-[22px]">
-        <div>
-          <h2 className="text-lg font-semibold">Payment</h2>
-          <p className="text-[#9F9F9F] text-base mt-2">
-            Make your payment directly into our bank account. Please use your
-            Order ID as the payment reference.
-          </p>
-        </div>
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="Stripe"
-              checked={selectedOption === "Stripe"}
-              onChange={() => setSelectedOption("Stripe")}
-              className="form-radio text-[#9F9F9F] focus:ring-0"
-            />
-            <span className="text-base text-[#9F9F9F]">
-              Credit / Debit Card
-            </span>
-          </label>
 
-          <label className="flex items-center space-x-2 mt-3">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="Cash On Delivery"
-              checked={selectedOption === "Cash On Delivery"}
-              onChange={() => setSelectedOption("Cash On Delivery")}
-              className="form-radio text-[#9F9F9F] focus:ring-0"
-            />
-            <span className="text-base text-[#9F9F9F]">Cash On Delivery</span>
-          </label>
-        </div>
-        <div>
-          <p className="text-base">
-            Your personal data will be used to support your experience
-            throughout this website, to manage access to your account, and for
-            other purposes described in our{" "}
-            <Link href="/" className="font-semibold">
-              privacy policy.
-            </Link>
-          </p>
-        </div>
-        {clientSecret && (
-          <div
-            className={`w-full mt-4 transition-all duration-300 ${
-              selectedOption === "Stripe" ? "block" : "hidden"
-            }`}
-          >
-            <PaymentElement />
+      {/* Payment Method Selection */}
+      <div className="mt-6 space-y-3">
+        <h4 className="text-sm font-bold uppercase tracking-wider text-gray-700">
+          Payment Method
+        </h4>
+
+        <label
+          className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+            selectedOption === "Cash On Delivery"
+              ? "border-[#B88E2F] bg-white shadow-2xs"
+              : "border-gray-200 bg-white/60 hover:bg-white"
+          }`}
+        >
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="Cash On Delivery"
+            checked={selectedOption === "Cash On Delivery"}
+            onChange={() => setSelectedOption("Cash On Delivery")}
+            className="mt-1 accent-[#B88E2F]"
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-2 font-semibold text-sm text-gray-900">
+              <FiTruck className="text-[#B88E2F]" />
+              <span>Cash On Delivery</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Pay in cash upon white-glove delivery at your doorstep.
+            </p>
+          </div>
+        </label>
+
+        <label
+          className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+            selectedOption === "Stripe"
+              ? "border-[#B88E2F] bg-white shadow-2xs"
+              : "border-gray-200 bg-white/60 hover:bg-white"
+          }`}
+        >
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="Stripe"
+            checked={selectedOption === "Stripe"}
+            onChange={() => setSelectedOption("Stripe")}
+            className="mt-1 accent-[#B88E2F]"
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-2 font-semibold text-sm text-gray-900">
+              <FiCreditCard className="text-[#B88E2F]" />
+              <span>Credit / Debit Card (Stripe)</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Instant encrypted payment via Stripe.
+            </p>
+          </div>
+        </label>
+
+        {selectedOption === "Stripe" && (
+          <div className="mt-3 p-4 bg-white rounded-xl border border-gray-200">
+            {clientSecret ? (
+              <PaymentElement />
+            ) : (
+              <p className="text-xs text-gray-500 text-center py-4">
+                Loading secure Stripe payment form...
+              </p>
+            )}
           </div>
         )}
-
-        <button
-          type="submit"
-          form="checkout-form"
-          className="block mx-auto w-[215px] sm:w-[230px] rounded-xl border border-black text-black px-2 py-3 text-xl hover:bg-[#fae9d3a6] transition my-5"
-          disabled={isProcessing}
-        >
-          {isProcessing ? "Processing..." : "Place Order"}
-        </button>
       </div>
+
+      <p className="text-xs text-gray-500 leading-relaxed mt-5">
+        Your personal data will be used to process your order and support your
+        experience throughout this website in accordance with our{" "}
+        <Link
+          href="/privacy-policy"
+          className="font-semibold text-[#B88E2F] hover:underline"
+        >
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
+      <button
+        type="submit"
+        form="checkout-form"
+        disabled={isProcessing}
+        className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold py-4 px-6 text-base shadow-sm transition-colors disabled:opacity-60"
+      >
+        <FiLock className="text-sm" />
+        <span>
+          {isProcessing
+            ? "Processing Order..."
+            : `Place Order — $${cartTotal.toFixed(2)}`}
+        </span>
+      </button>
     </div>
   );
 };

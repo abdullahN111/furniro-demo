@@ -2,10 +2,21 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import SecondaryHeader from "@/app/components/shared/SecondaryHeader";
 import ServiceBar from "@/app/components/shared/ServiceBar";
 import OurMission from "@/app/public/assets/images/featured/our-mission.webp";
 import OurTeam from "@/app/public/assets/images/featured/our-team.png";
+import ExploreImage2 from "@/app/public/assets/images/products/ExploreImage2.png";
+import {
+  FiAward,
+  FiFeather,
+  FiHeart,
+  FiCpu,
+  FiCheck,
+  FiArrowRight,
+  FiCompass,
+} from "react-icons/fi";
 
 const About = () => {
   const [activeValue, setActiveValue] = useState(0);
@@ -14,230 +25,278 @@ const About = () => {
     {
       title: "Quality Craftsmanship",
       description:
-        "Delivering the finest craftsmanship with attention to every detail",
-      icon: "🎯",
+        "Every joint, seam, and finish is hand-inspected by master artisans for heirloom durability.",
+      icon: FiAward,
     },
     {
-      title: "Sustainability",
+      title: "Sustainable Materials",
       description:
-        "Caring for the planet with eco-conscious designs and materials",
-      icon: "🌱",
+        "Responsibly harvested timber, low-VOC finishes, and eco-conscious packaging in every shipment.",
+      icon: FiFeather,
     },
     {
-      title: "Customer Focus",
-      description: "Putting your needs first every step of the way",
-      icon: "❤️",
+      title: "Customer-First Design",
+      description:
+        "Ergonomic comfort, modular flexibility, and attentive support from showroom to living room.",
+      icon: FiHeart,
     },
     {
-      title: "Innovation",
-      description: "Pushing boundaries in design and functionality",
-      icon: "💡",
+      title: "Timeless Innovation",
+      description:
+        "Blending Scandinavian-inspired minimalism with modern durability for everyday living.",
+      icon: FiCpu,
     },
   ];
 
   const stats = [
-    { number: "10K+", label: "Happy Customers" },
-    { number: "15+", label: "Years Experience" },
-    { number: "50+", label: "Award Wins" },
-    { number: "100%", label: "Satisfaction Guarantee" },
+    { number: "10K+", label: "Homes Furnished" },
+    { number: "15+", label: "Years of Craft" },
+    { number: "50+", label: "Design Awards" },
+    { number: "100%", label: "Quality Guarantee" },
   ];
 
   return (
-    <section className="bg-[#FFFFFF] max-w-[1440px] mx-auto shadow-md">
+    <section className="bg-white max-w-[1440px] mx-auto">
       <SecondaryHeader routeName="About" />
 
-      <div className="relative bg-gradient-to-br from-[#F9F1E7] to-[#FFE0B2] py-20">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">
+      {/* Editorial Intro Banner */}
+      <div className="bg-[#FCF8F3] border-b border-[#f0e4d3] py-16 sm:py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#B88E2F] bg-[#F9F1E7] px-4 py-1.5 rounded-full mb-4">
+            Est. 2008 &bull; Design Studio
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-5">
             Crafting Spaces, Creating Stories
           </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            At Furniro, we don&apos;t just sell furniture we help you create
-            environments that inspire, comfort, and reflect your unique
-            personality.
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            At Furniro, we don&apos;t just build furniture&mdash;we help you
+            shape warm, inviting environments that comfort, inspire, and reflect
+            how you live.
           </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4 lg:p-8 space-y-20">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20 space-y-24">
+        {/* Our Story */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-block bg-[#B88E2F] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              Our Journey
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800">
-              Our Story
+          <div className="space-y-5">
+            <span className="inline-flex items-center gap-2 bg-[#F9F1E7] text-[#B88E2F] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+              <FiCompass /> Our Journey
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              From a Small Workshop to Modern Homes Everywhere
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Born from a passion for exceptional design and quality
-              craftsmanship, Furniro began as a small workshop in 2008. Today,
-              we&apos;ve grown into a trusted name in furniture design, serving
-              thousands of customers worldwide while staying true to our core
-              values.
+            <p className="text-base text-gray-600 leading-relaxed">
+              Born from a passion for architectural lines and tactile warmth,
+              Furniro began as an independent woodworking studio in 2008. Today,
+              we partner with sustainable ateliers to bring thoughtfully
+              proportioned pieces into thousands of homes.
             </p>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Our journey has been guided by a simple belief: great furniture
-              should be beautiful, functional, and built to last. Every piece we
-              create tells a story of dedication, innovation, and love for the
-              craft.
+            <p className="text-base text-gray-600 leading-relaxed">
+              Our philosophy remains simple: great furniture should feel
+              effortless, age gracefully, and elevate daily rituals—from morning
+              coffee to family dinners.
             </p>
           </div>
-          <div className="relative h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative h-80 sm:h-96 rounded-2xl overflow-hidden shadow-xl border border-[#f0e4d3]">
             <Image
-              src={OurMission}
-              alt="Our Story"
+              src={ExploreImage2}
+              alt="Furniro signature living space"
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-[#CDE7FE] to-[#A5D6FF] rounded-2xl p-8 lg:p-12">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Brand Stats Banner */}
+        <div className="bg-[#F9F1E7] border border-[#f0e4d3] rounded-2xl p-8 sm:p-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-y sm:divide-y-0 sm:divide-x divide-[#e5d6c0]">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
+              <div
+                key={stat.label}
+                className={`text-center ${index > 0 ? "pt-6 sm:pt-0 sm:pl-6" : ""}`}
+              >
+                <div className="text-3xl sm:text-4xl font-bold text-[#B88E2F] mb-1.5">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-sm sm:text-base text-gray-700 font-medium">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Our Mission */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl order-2 lg:order-1">
+          <div className="relative h-80 sm:h-96 rounded-2xl overflow-hidden shadow-xl border border-[#f0e4d3] order-2 lg:order-1">
             <Image
               src={OurMission}
-              alt="Our Mission"
+              alt="Furniro craftsmanship and materials"
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
-          <div className="space-y-6 order-1 lg:order-2">
-            <div className="inline-block bg-[#B88E2F] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="space-y-5 order-1 lg:order-2">
+            <span className="inline-block bg-[#F9F1E7] text-[#B88E2F] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
               Our Purpose
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800">
-              Our Mission
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              Designed for Longevity, Built with Integrity
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              To transform houses into homes by creating beautiful, functional
-              furniture that resonates with your lifestyle. We combine timeless
-              aesthetics with sustainable practices to bring you products that
-              make life better—one piece at a time.
+            <p className="text-base text-gray-600 leading-relaxed">
+              To transform houses into sanctuaries by uniting timeless
+              proportions with responsible production. Every collection is
+              engineered for real life—easy to maintain, endlessly versatile,
+              and backed by our craftsmanship guarantee.
             </p>
-            <ul className="space-y-3">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               {[
-                "Ethically sourced materials",
-                "Lifetime craftsmanship warranty",
-                "Carbon-neutral shipping",
-                "Custom design services",
-              ].map((item, index) => (
-                <li key={index} className="flex items-center text-gray-600">
-                  <span className="w-2 h-2 bg-[#B88E2F] rounded-full mr-3"></span>
-                  {item}
+                "Ethically sourced solid hardwoods",
+                "2-year craftsmanship warranty",
+                "Carbon-conscious delivery",
+                "Complimentary styling advice",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-center gap-2.5 text-sm font-medium text-gray-700"
+                >
+                  <span className="w-5 h-5 rounded-full bg-[#F9F1E7] text-[#B88E2F] flex items-center justify-center shrink-0">
+                    <FiCheck className="text-xs" />
+                  </span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-block bg-[#B88E2F] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
+        {/* Core Values */}
+        <div className="space-y-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="inline-block bg-[#F9F1E7] text-[#B88E2F] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
               What Drives Us
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
               Our Core Values
             </h2>
-            <p className="text-lg text-gray-600">
-              These principles guide every decision we make and every piece we
-              create
+            <p className="text-base text-gray-600">
+              The principles that guide every sketch, material choice, and
+              customer delivery.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <div
-                key={index}
-                className={`p-6 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-                  activeValue === index
-                    ? "border-[#B88E2F] bg-[#F9F1E7] transform scale-105"
-                    : "border-gray-200 hover:border-[#B88E2F]"
-                }`}
-                onMouseEnter={() => setActiveValue(index)}
-              >
-                <div className="text-3xl mb-4">{value.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  {value.title}
-                </h3>
-                <p className="text-gray-600">{value.description}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {values.map((value, index) => {
+              const Icon = value.icon;
+              const isSelected = activeValue === index;
+              return (
+                <div
+                  key={value.title}
+                  onMouseEnter={() => setActiveValue(index)}
+                  onClick={() => setActiveValue(index)}
+                  className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    isSelected
+                      ? "border-[#B88E2F] bg-[#FCF8F3] shadow-lg -translate-y-1"
+                      : "border-gray-200 bg-white hover:border-[#B88E2F]/60"
+                  }`}
+                >
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+                      isSelected
+                        ? "bg-[#B88E2F] text-white"
+                        : "bg-[#F9F1E7] text-[#B88E2F]"
+                    }`}
+                  >
+                    <Icon className="text-xl" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {value.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {value.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
+        {/* Meet Our Team */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-block bg-[#B88E2F] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              The People Behind
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800">
-              Meet Our Team
+          <div className="space-y-5">
+            <span className="inline-block bg-[#F9F1E7] text-[#B88E2F] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+              The People Behind Furniro
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              Meet Our Artisans & Designers
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Behind Furniro is a passionate team of designers, artisans, and
-              innovators who share a common vision: to create furniture that
-              inspires and endures. Our diverse backgrounds and expertise come
-              together to push the boundaries of creativity and craftsmanship.
+            <p className="text-base text-gray-600 leading-relaxed">
+              Behind every Furniro collection is a collaborative team of
+              industrial designers, cabinetmakers, textile specialists, and
+              client advisors dedicated to making your home feel extraordinary.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 pt-2">
               {[
-                "Master Craftspeople",
-                "Interior Designers",
-                "Sustainability Experts",
-                "Customer Care Specialists",
-              ].map((role, index) => (
-                <div key={index} className="flex items-center text-gray-600">
-                  <span className="w-2 h-2 bg-[#B88E2F] rounded-full mr-3"></span>
-                  {role}
+                "Master Woodworkers",
+                "Interior Stylists",
+                "Sustainability Specialists",
+                "Client Concierge Team",
+              ].map((role) => (
+                <div
+                  key={role}
+                  className="flex items-center gap-2.5 text-sm font-medium text-gray-700 bg-[#FCF8F3] p-3 rounded-xl border border-[#f0e4d3]"
+                >
+                  <span className="w-2 h-2 bg-[#B88E2F] rounded-full shrink-0" />
+                  <span>{role}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="relative h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl">
+
+          <div className="relative h-80 sm:h-96 rounded-2xl overflow-hidden shadow-xl border border-[#f0e4d3]">
             <Image
               src={OurTeam}
-              alt="Our Team"
+              alt="The Furniro design and craftsmanship team"
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
               <div className="p-6 text-white">
-                <p className="text-sm opacity-90">
-                  Dedicated team of 50+ professionals
+                <p className="text-sm font-semibold">
+                  50+ designers, craftspeople & interior specialists
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-[#FFE0B2] to-[#FFC1C1] rounded-2xl p-8 lg:p-12 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+        {/* Bottom CTA Banner */}
+        <div className="bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-8 sm:p-14 text-center">
+          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3">
             Ready to Transform Your Space?
           </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied customers who have made Furniro their
-            trusted partner in creating beautiful, functional living spaces.
+          <p className="text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto leading-relaxed">
+            Explore our latest living, dining, and bedroom collections or speak
+            with our interior specialists for personalized recommendations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-[#B88E2F] text-white px-8 py-3 rounded-lg font-medium hover:bg-[#A07D2A] transition-colors">
-              Explore Our Collections
-            </button>
-            <button className="border-2 border-[#B88E2F] text-[#B88E2F] px-8 py-3 rounded-lg font-medium hover:bg-[#B88E2F] hover:text-white transition-colors">
-              Book a Consultation
-            </button>
+            <Link
+              href="/shop"
+              className="inline-flex items-center justify-center gap-2 bg-[#B88E2F] text-white px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base hover:bg-[#9f7924] transition-colors shadow-sm"
+            >
+              <span>Explore Our Collections</span>
+              <FiArrowRight />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 border-2 border-[#B88E2F] text-[#B88E2F] px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base hover:bg-[#B88E2F] hover:text-white transition-colors"
+            >
+              <span>Book a Consultation</span>
+            </Link>
           </div>
         </div>
       </div>

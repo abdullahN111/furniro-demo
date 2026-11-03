@@ -2,12 +2,23 @@
 
 import React, { useEffect, useState } from "react";
 import SecondaryHeader from "@/app/components/shared/SecondaryHeader";
+import ServiceBar from "@/app/components/shared/ServiceBar";
 import Image from "next/image";
 import { fetchOrdersByUserEmail } from "@/app/Data/orderData";
 import type { Order } from "@/app/Data/orderData";
 import { useSession } from "next-auth/react";
 import { fetchProducts, ProductCardData } from "../Data";
+import { useToast } from "@/app/context/ToastContext";
 import Link from "next/link";
+import {
+  FiPackage,
+  FiCheckCircle,
+  FiStar,
+  FiExternalLink,
+  FiImage,
+  FiShoppingBag,
+} from "react-icons/fi";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 const StarRating = ({
   rating,
@@ -18,53 +29,49 @@ const StarRating = ({
   onChange?: (n: number) => void;
   readOnly?: boolean;
 }) => (
-  <div className="flex gap-1">
+  <div className="inline-flex items-center gap-1">
     {[1, 2, 3, 4, 5].map((n) => (
-      <span
+      <button
         key={n}
+        type="button"
+        disabled={readOnly}
         onClick={() => !readOnly && onChange?.(n)}
-        className={`text-lg ${readOnly ? "" : "cursor-pointer"} ${n <= rating ? "text-yellow-500" : "text-gray-300"
-          }`}
+        className={`text-lg ${
+          readOnly
+            ? "cursor-default"
+            : "cursor-pointer hover:scale-110 transition-transform"
+        } ${n <= rating ? "text-[#FFC700]" : "text-gray-300"}`}
       >
-        ★
-      </span>
+        {n <= rating ? <FaStar /> : <FaRegStar />}
+      </button>
     ))}
   </div>
 );
 
 const OrderCard = ({
   order,
+  products,
   type,
   selectionMode,
   selectedProducts,
   toggleProduct,
 }: {
   order: Order;
+  products: ProductCardData[];
   type: "receive" | "delivered" | "review";
   selectionMode?: boolean;
   selectedProducts?: string[];
   toggleProduct?: (id: string) => void;
 }) => {
-  const [products, setProducts] = useState<ProductCardData[]>([]);
-
+  const { showToast } = useToast();
   const [existingReviews, setExistingReviews] = useState<
     Record<string, { rating: number; comment: string }>
   >({});
   const [draftRating, setDraftRating] = useState<Record<string, number>>({});
-  const [draftComment, setDraftComment] = useState<Record<string, string>>(
-    {},
+  const [draftComment, setDraftComment] = useState<Record<string, string>>({});
+  const [submittingProductId, setSubmittingProductId] = useState<string | null>(
+    null
   );
-  const [submittingProductId, setSubmittingProductId] = useState<
-    string | null
-  >(null);
-
-  useEffect(() => {
-    async function loadProducts() {
-      const fetchedProducts = await fetchProducts();
-      setProducts(fetchedProducts);
-    }
-    loadProducts();
-  }, []);
 
   useEffect(() => {
     if (type !== "review") return;
@@ -77,7 +84,7 @@ const OrderCard = ({
         (data.reviews ?? []).forEach(
           (r: { productId: string; rating: number; comment: string }) => {
             map[r.productId] = { rating: r.rating, comment: r.comment };
-          },
+          }
         );
         setExistingReviews(map);
       } catch (err) {
@@ -91,7 +98,10 @@ const OrderCard = ({
   const handleSubmitReview = async (productId: string) => {
     const rating = draftRating[productId] ?? 0;
     if (rating === 0) {
-      alert("Please select a rating before submitting.");
+      showToast({
+        message: "Please select a star rating before submitting",
+        type: "error",
+      });
       return;
     }
 
@@ -103,7 +113,7 @@ const OrderCard = ({
         body: JSON.stringify({
           orderId: order.orderId,
           productId,
-          userName: `${order.user.firstname} ${order.user.lastname}`,
+          userName: `${order.user.firstname} ${order.user.lastname}`.trim(),
           rating,
           comment: draftComment[productId] ?? "",
         }),
@@ -112,7 +122,10 @@ const OrderCard = ({
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Failed to submit review. Please try again.");
+        showToast({
+          message: data.error || "Failed to submit review",
+          type: "error",
+        });
         return;
       }
 
@@ -120,9 +133,17 @@ const OrderCard = ({
         ...prev,
         [productId]: { rating, comment: draftComment[productId] ?? "" },
       }));
+
+      showToast({
+        message: "Your verified review has been published!",
+        type: "success",
+      });
     } catch (err) {
       console.error("Failed to submit review:", err);
-      alert("Failed to submit review. Please try again.");
+      showToast({
+        message: "Network error while submitting review",
+        type: "error",
+      });
     } finally {
       setSubmittingProductId(null);
     }
@@ -138,174 +159,212 @@ const OrderCard = ({
   const currentIndex = steps.indexOf(order.status);
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
-      <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-        <div>
-          <h3 className="font-semibold text-gray-800">Furniro</h3>
-          <p
-            className={`text-sm ${order.status === "Delivered"
-                ? "text-green-600"
-                : order.status === "Pending"
-                  ? "text-yellow-600"
-                  : "text-blue-600"
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 mb-5 shadow-2xs hover:shadow-md transition-shadow">
+      {/* Order Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-gray-100">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              Order #{order.orderId}
+            </span>
+            <span
+              className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                order.status === "Delivered"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : order.status === "Pending"
+                    ? "bg-amber-50 text-amber-700"
+                    : "bg-[#F9F1E7] text-[#B88E2F]"
               }`}
-          >
-            {order.status}
-          </p>
-          <div className="flex items-center gap-2 text-xs mt-2 flex-wrap">
+            >
+              {order.status}
+            </span>
+            {order.paymentMethod && (
+              <span className="text-xs text-gray-400">
+                &bull; {order.paymentMethod}
+              </span>
+            )}
+          </div>
+
+          {/* Stepper */}
+          <div className="flex items-center gap-1.5 text-[11px] flex-wrap pt-1">
             {steps.map((step, index) => (
               <div key={step} className="flex items-center">
                 <span
-                  className={`px-2 py-1 rounded-full ${index <= currentIndex
+                  className={`px-2.5 py-0.5 rounded-full font-semibold ${
+                    index <= currentIndex
                       ? "bg-[#B88E2F] text-white"
-                      : "bg-gray-200 text-gray-500"
-                    }`}
+                      : "bg-gray-100 text-gray-400"
+                  }`}
                 >
                   {step}
                 </span>
                 {index < steps.length - 1 && (
-                  <div className="w-4 h-[2px] bg-gray-300 mx-1" />
+                  <div
+                    className={`w-3 sm:w-5 h-[2px] mx-1 ${
+                      index < currentIndex ? "bg-[#B88E2F]" : "bg-gray-200"
+                    }`}
+                  />
                 )}
               </div>
             ))}
           </div>
         </div>
-        <div className="text-sm text-gray-500">Order ID: {order.orderId}</div>
+
+        <div className="text-left sm:text-right">
+          <p className="text-xs text-gray-400">Order Total</p>
+          <p className="text-lg font-bold text-[#B88E2F]">
+            ${Number(order.total || 0).toFixed(2)}
+          </p>
+        </div>
       </div>
 
-      {order.items.map((item, index) => {
-        const product = products.find((p) => p._id === item._id);
-        const slug = product?.slug.current;
-        const existingReview = existingReviews[item._id];
+      {/* Items */}
+      <div className="divide-y divide-gray-100">
+        {order.items.filter(Boolean).map((item, index) => {
+          const product = products.find((p) => p._id === item._id);
+          const slug = product?.slug?.current || item._id;
+          const existingReview = existingReviews[item._id];
+          const unitPrice = Number(order.itemPrices?.[index] ?? item.price ?? 0);
+          const qty = Number(order.itemQuantities?.[index] ?? 1);
 
-        return (
-          <div
-            key={item._id}
-            className="py-4 border-b border-gray-100 last:border-b-0"
-          >
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
-              <div className="flex items-start space-x-4 w-full lg:w-auto">
-                {selectionMode &&
-                  type === "delivered" &&
-                  selectedProducts &&
-                  toggleProduct && (
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(item._id)}
-                      onChange={() => toggleProduct(item._id)}
-                      className="mr-2"
-                    />
-                  )}
-                <Link href={`/add-to-cart/${slug}`}>
-                  <div className="relative w-20 h-20 flex-shrink-0">
+          return (
+            <div key={`${item._id}-${index}`} className="py-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto min-w-0">
+                  {selectionMode &&
+                    type === "delivered" &&
+                    selectedProducts &&
+                    toggleProduct && (
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(item._id)}
+                        onChange={() => toggleProduct(item._id)}
+                        className="w-4 h-4 accent-[#B88E2F] rounded shrink-0"
+                      />
+                    )}
+                  <Link
+                    href={`/product/${slug}`}
+                    className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[#F9F1E7] shrink-0 border border-gray-100"
+                  >
                     <Image
                       src={item.productImage || "/placeholder-image.jpg"}
                       alt={item.title}
                       fill
-                      className="object-cover rounded-md"
+                      className="object-cover"
+                      sizes="80px"
                     />
-                  </div>
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <Link href={`/add-to-cart/${slug}`}>
-                    <h4 className="font-medium text-gray-900 text-[13px] sm:text-sm line-clamp-2">
-                      {item.title}
-                    </h4>
                   </Link>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Color Family: White Black
+                  <div className="min-w-0">
+                    <Link href={`/product/${slug}`}>
+                      <h4 className="font-bold text-gray-900 hover:text-[#B88E2F] transition-colors text-sm sm:text-base truncate">
+                        {item.title}
+                      </h4>
+                    </Link>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Unit Price: ${unitPrice.toFixed(2)} &bull; Quantity: {qty}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-left sm:text-right shrink-0 pl-20 sm:pl-0">
+                  <p className="font-bold text-gray-900 text-sm sm:text-base">
+                    ${(unitPrice * qty).toFixed(2)}
                   </p>
-                  <p className="text-xs text-gray-500">Size: Int: LM</p>
                 </div>
               </div>
 
-              <div className="flex justify-between w-full lg:w-auto mt-4 lg:mt-0 lg:flex-col lg:items-end">
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    Rs. {order.itemPrices[index] * order.itemQuantities[index]}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Qty: {order.itemQuantities[index]}
-                  </p>
+              {/* Review Drawer inside "To Review" Tab */}
+              {type === "review" && (
+                <div className="mt-4 sm:ml-24 bg-[#FCF8F3] border border-[#f0e4d3] rounded-xl p-4">
+                  {existingReview ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                          <FiCheckCircle /> You reviewed this piece
+                        </span>
+                        <StarRating rating={existingReview.rating} readOnly />
+                      </div>
+                      {existingReview.comment && (
+                        <p className="text-sm text-gray-700 mt-1">
+                          &ldquo;{existingReview.comment}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <p className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                          Rate & Review This Product
+                        </p>
+                        <StarRating
+                          rating={draftRating[item._id] ?? 0}
+                          onChange={(n) =>
+                            setDraftRating((prev) => ({
+                              ...prev,
+                              [item._id]: n,
+                            }))
+                          }
+                        />
+                      </div>
+                      <textarea
+                        rows={2}
+                        placeholder="Share your thoughts on craftsmanship, comfort, and style..."
+                        value={draftComment[item._id] ?? ""}
+                        onChange={(e) =>
+                          setDraftComment((prev) => ({
+                            ...prev,
+                            [item._id]: e.target.value,
+                          }))
+                        }
+                        className="w-full border border-gray-200 focus:border-[#B88E2F] outline-none bg-white p-3 rounded-lg text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSubmitReview(item._id)}
+                        disabled={submittingProductId === item._id}
+                        className="bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold px-5 py-2 rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-60"
+                      >
+                        {submittingProductId === item._id
+                          ? "Publishing..."
+                          : "Submit Verified Review"}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
+          );
+        })}
+      </div>
 
-           
-            {type === "review" && (
-              <div className="mt-3 ml-0 lg:ml-24 border-t pt-3">
-                {existingReview ? (
-                  <div>
-                    <p className="text-sm font-medium text-green-700 mb-1">
-                      ✓ You reviewed this item
-                    </p>
-                    <StarRating rating={existingReview.rating} readOnly />
-                    {existingReview.comment && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {existingReview.comment}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm font-medium mb-2">
-                      Leave a Review
-                    </p>
-                    <StarRating
-                      rating={draftRating[item._id] ?? 0}
-                      onChange={(n) =>
-                        setDraftRating((prev) => ({ ...prev, [item._id]: n }))
-                      }
-                    />
-                    <textarea
-                      placeholder="Write your review..."
-                      value={draftComment[item._id] ?? ""}
-                      onChange={(e) =>
-                        setDraftComment((prev) => ({
-                          ...prev,
-                          [item._id]: e.target.value,
-                        }))
-                      }
-                      className="w-full border p-2 rounded text-sm mt-2"
-                    />
-                    <button
-                      onClick={() => handleSubmitReview(item._id)}
-                      disabled={submittingProductId === item._id}
-                      className="mt-2 bg-[#B88E2F] text-white px-4 py-2 rounded text-sm disabled:opacity-60"
-                    >
-                      {submittingProductId === item._id
-                        ? "Submitting..."
-                        : "Submit Review"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      <div className="flex justify-between items-center pt-4">
-        <div className="text-sm text-gray-500">
-          Ordered on {new Date(order.createdAt).toLocaleDateString()}
-        </div>
-        <div className="flex flex-col items-center gap-[6px]">
-          <Link
-            href={`/track-order?orderId=${order.orderId}`}
-            className="text-sm text-blue-600 hover:text-blue-800 lg:block hidden"
-          >
-            View Details
-          </Link>
-        </div>
+      {/* Footer */}
+      <div className="flex flex-wrap justify-between items-center gap-3 pt-4 mt-2 border-t border-gray-100 text-xs sm:text-sm">
+        <span className="text-gray-500">
+          Placed on{" "}
+          {new Date(order.createdAt).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
+        <Link
+          href={`/track-order?orderId=${order.orderId}`}
+          className="inline-flex items-center gap-1.5 font-semibold text-[#B88E2F] hover:underline"
+        >
+          <span>Track Order & Receipt</span>
+          <FiExternalLink />
+        </Link>
       </div>
     </div>
   );
 };
 
-const Order = () => {
+const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<ProductCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const { data: session, status } = useSession();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<
     "receive" | "delivered" | "review"
   >("receive");
@@ -321,12 +380,12 @@ const Order = () => {
         ? prev.filter((id) => id !== productId)
         : prev.length < 8
           ? [...prev, productId]
-          : prev,
+          : prev
     );
   };
 
   useEffect(() => {
-    const loadOrders = async () => {
+    const loadData = async () => {
       if (status === "loading") return;
 
       if (!session?.user?.email) {
@@ -335,8 +394,12 @@ const Order = () => {
       }
 
       try {
-        const ordersData = await fetchOrdersByUserEmail(session.user.email);
+        const [ordersData, fetchedProducts] = await Promise.all([
+          fetchOrdersByUserEmail(session.user.email),
+          fetchProducts(),
+        ]);
         setOrders(ordersData);
+        setProducts(fetchedProducts);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
       } finally {
@@ -344,7 +407,7 @@ const Order = () => {
       }
     };
 
-    loadOrders();
+    loadData();
   }, [session, status]);
 
   useEffect(() => {
@@ -363,12 +426,16 @@ const Order = () => {
     checkExistingGallery();
   }, [session]);
 
-  const createGallery = async (): Promise<boolean> => {
+  const handleSaveGallery = async () => {
     if (selectedProducts.length < 4) {
-      alert("Please select at least 4 products to create a gallery");
-      return false;
+      showToast({
+        message: "Please select at least 4 delivered products for your gallery",
+        type: "error",
+      });
+      return;
     }
 
+    setIsSavingGallery(true);
     try {
       const res = await fetch("/api/gallery", {
         method: "POST",
@@ -380,29 +447,30 @@ const Order = () => {
       });
 
       if (!res.ok) {
-        alert("Failed to save gallery. Please try again.");
-        return false;
+        showToast({
+          message: "Failed to save gallery. Please try again.",
+          type: "error",
+        });
+        return;
       }
 
-      return true;
-    } catch (error) {
-      console.error("Failed to save gallery:", error);
-      alert("Failed to save gallery. Please try again.");
-      return false;
-    }
-  };
-
-  const handleSaveGallery = async () => {
-    setIsSavingGallery(true);
-    const success = await createGallery();
-    setIsSavingGallery(false);
-
-    if (success) {
       setHasGallery(true);
       setSelectionMode(false);
       setSelectedProducts([]);
+      showToast({
+        message: "Your #FuniroFurniture gallery has been updated on the Home page!",
+        type: "success",
+        actionLabel: "View Home",
+        actionHref: "/",
+      });
+    } catch {
+      showToast({
+        message: "Network error while saving gallery",
+        type: "error",
+      });
+    } finally {
+      setIsSavingGallery(false);
     }
-
   };
 
   const handleGalleryMode = async () => {
@@ -412,7 +480,7 @@ const Order = () => {
 
       if (data.gallery?.products) {
         setSelectedProducts(
-          data.gallery.products.map((product: { _id: string }) => product._id),
+          data.gallery.products.map((product: { _id: string }) => product._id)
         );
       }
     }
@@ -420,20 +488,29 @@ const Order = () => {
     setSelectionMode((prev) => !prev);
   };
 
-  if (!session) {
+  if (status !== "loading" && !session) {
     return (
-      <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
+      <section className="max-w-[1440px] bg-white mx-auto">
         <SecondaryHeader routeName="Orders" />
-        <div className="py-6 flex justify-center">
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-700">
-              Please log in to view your orders
+        <div className="py-20 px-4 flex justify-center">
+          <div className="max-w-md w-full text-center bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-10">
+            <FiShoppingBag className="text-3xl text-[#B88E2F] mx-auto mb-3" />
+            <h3 className="text-xl font-bold text-gray-900">
+              Sign In to View Your Orders
             </h3>
-            <p className="text-gray-500 mt-2">
-              You need to be logged in to see your order history.
+            <p className="text-sm text-gray-500 mt-2 mb-6">
+              Track active shipments, download receipts, and review delivered
+              furniture pieces.
             </p>
+            <Link
+              href="/login"
+              className="inline-block bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold text-sm px-8 py-3 rounded-xl transition-colors"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
+        <ServiceBar />
       </section>
     );
   }
@@ -441,10 +518,10 @@ const Order = () => {
   const toReceiveOrders = loading
     ? []
     : orders.filter((order) =>
-      ["Pending", "Processing", "Dispatched", "Shipped"].includes(
-        order.status,
-      ),
-    );
+        ["Pending", "Processing", "Dispatched", "Shipped"].includes(
+          order.status
+        )
+      );
 
   const deliveredOrders = loading
     ? []
@@ -453,114 +530,177 @@ const Order = () => {
   const reviewOrders = deliveredOrders;
 
   return (
-    <section className="max-w-[1440px] bg-white container mx-auto px-3 sm:px-6 lg:px-20 py-8">
+    <section className="max-w-[1440px] bg-white mx-auto">
       <SecondaryHeader routeName="Orders" />
-      <div className="py-6">
-        <div className="flex gap-4 border-b mb-4">
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-12">
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-3 sm:gap-6 border-b border-gray-200 mb-8">
           {[
-            { key: "receive", label: `To Receive (${toReceiveOrders.length})` },
+            {
+              key: "receive",
+              label: `In Progress (${toReceiveOrders.length})`,
+              icon: FiPackage,
+            },
             {
               key: "delivered",
               label: `Delivered (${deliveredOrders.length})`,
+              icon: FiCheckCircle,
             },
-            { key: "review", label: `To Review (${reviewOrders.length})` },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() =>
-                setActiveTab(tab.key as "receive" | "delivered" | "review")
-              }
-              className={`pb-2 text-sm font-medium ${activeTab === tab.key
-                ? "border-b-2 border-[#B88E2F] text-[#B88E2F]"
-                : "text-gray-500"
+            {
+              key: "review",
+              label: `To Review (${reviewOrders.length})`,
+              icon: FiStar,
+            },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() =>
+                  setActiveTab(tab.key as "receive" | "delivered" | "review")
+                }
+                className={`pb-3.5 px-2 text-sm sm:text-base font-bold flex items-center gap-2 transition-colors relative ${
+                  active
+                    ? "text-[#B88E2F] after:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-[#B88E2F] after:rounded-full"
+                    : "text-gray-400 hover:text-gray-700"
                 }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+              >
+                <Icon />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
+
         {loading ? (
           <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-52 rounded-lg bg-gray-200 animate-pulse"
+                className="h-52 rounded-2xl bg-gray-100 animate-pulse"
               />
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-gray-700">
-              No orders found
-            </h3>
-            <p className="text-gray-500 mt-2">
+          <div className="text-center py-16 bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-8">
+            <FiPackage className="text-3xl text-[#B88E2F] mx-auto mb-3" />
+            <h3 className="text-xl font-bold text-gray-900">No Orders Found</h3>
+            <p className="text-sm text-gray-500 mt-1 mb-6">
               You haven&apos;t placed any orders yet.
             </p>
+            <Link
+              href="/shop"
+              className="inline-block bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold text-sm px-7 py-3 rounded-xl transition-colors"
+            >
+              Explore Shop
+            </Link>
           </div>
         ) : (
           <div>
             {activeTab === "receive" &&
               (toReceiveOrders.length > 0 ? (
                 toReceiveOrders.map((order) => (
-                  <OrderCard key={order._id} order={order} type="receive" />
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    products={products}
+                    type="receive"
+                  />
                 ))
               ) : (
-                <p className="text-gray-500 text-center">
-                  No orders to receive
+                <p className="text-gray-500 text-center py-12">
+                  No active orders in transit.
                 </p>
               ))}
 
             {activeTab === "delivered" && (
-              <div className="mb-4 flex gap-3">
-                <button
-                  onClick={handleGalleryMode}
-                  className="bg-gray-800 text-white px-4 py-2 rounded"
-                >
-                  {selectionMode ? "Cancel" : hasGallery ? "Edit Gallery" : "Create Gallery"}
-                </button>
+              <>
+                {deliveredOrders.length > 0 && (
+                  <div className="mb-6 p-4 rounded-xl bg-[#FCF8F3] border border-[#f0e4d3] flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <FiImage className="text-[#B88E2F]" />
+                        <span>#FuniroFurniture Home Gallery</span>
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Select 4 to 8 delivered items to feature in your
+                        personalized gallery on the Home page.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGalleryMode}
+                        className="bg-white border border-gray-300 hover:border-[#B88E2F] text-gray-800 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {selectionMode
+                          ? "Cancel Selection"
+                          : hasGallery
+                            ? "Edit Gallery"
+                            : "Curate Gallery"}
+                      </button>
 
-                {selectionMode && (
-                  <button
-                    onClick={handleSaveGallery}
-                    disabled={isSavingGallery}
-                    className="bg-[#B88E2F] text-white px-4 py-2 rounded disabled:opacity-60"
-                  >
-                    {isSavingGallery
-                      ? "Saving..."
-                      : `Save Gallery (${selectedProducts.length}/8)`}
-                  </button>
+                      {selectionMode && (
+                        <button
+                          type="button"
+                          onClick={handleSaveGallery}
+                          disabled={isSavingGallery}
+                          className="bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-60"
+                        >
+                          {isSavingGallery
+                            ? "Saving..."
+                            : `Save Gallery (${selectedProducts.length}/8)`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )}
-              </div>
+
+                {deliveredOrders.length > 0 ? (
+                  deliveredOrders.map((order) => (
+                    <OrderCard
+                      key={order._id}
+                      order={order}
+                      products={products}
+                      type="delivered"
+                      selectionMode={selectionMode}
+                      selectedProducts={selectedProducts}
+                      toggleProduct={toggleProduct}
+                    />
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-12">
+                    No delivered orders yet.
+                  </p>
+                )}
+              </>
             )}
-            {activeTab === "delivered" &&
-              (deliveredOrders.length > 0 ? (
-                deliveredOrders.map((order) => (
-                  <OrderCard
-                    key={order._id}
-                    order={order}
-                    type="delivered"
-                    selectionMode={selectionMode}
-                    selectedProducts={selectedProducts}
-                    toggleProduct={toggleProduct}
-                  />
-                ))
-              ) : (
-                <p className="text-gray-500 text-center">No delivered orders</p>
-              ))}
 
             {activeTab === "review" &&
               (reviewOrders.length > 0 ? (
                 reviewOrders.map((order) => (
-                  <OrderCard key={order._id} order={order} type="review" />
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    products={products}
+                    type="review"
+                  />
                 ))
               ) : (
-                <p className="text-gray-500 text-center">No orders to review</p>
+                <p className="text-gray-500 text-center py-12">
+                  No delivered orders waiting for review.
+                </p>
               ))}
           </div>
         )}
       </div>
+
+      <ServiceBar />
     </section>
   );
 };
 
-export default Order;
+export default OrdersPage;
