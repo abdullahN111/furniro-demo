@@ -46,7 +46,7 @@ function LoginFormContent() {
       setLoading(false);
       setMessageType("error");
       setMessage(
-        "Invalid email or password. If you signed up with Google, click 'Continue with Google' or register a password."
+        "Invalid email or password. If you signed up with Google, click 'Continue with Google' or register a password.",
       );
       return;
     }
