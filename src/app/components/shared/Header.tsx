@@ -8,6 +8,8 @@ import { MdOutlineLocalGroceryStore } from "react-icons/md";
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { useFavorites } from "@/app/context/FavoritesContext";
 
@@ -25,6 +27,9 @@ interface User {
 }
 
 const Header = () => {
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+
   const [openMenu, setOpenMenu] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [openAccountInfo, setOpenAccountInfo] = useState(false);
@@ -37,9 +42,24 @@ const Header = () => {
 
   const totalCartUnits = cartItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
+  // Sync user from NextAuth session immediately when available
+  useEffect(() => {
+    if (session?.user) {
+      setUser({
+        name: session.user.name || undefined,
+        email: session.user.email || undefined,
+        image: session.user.image || undefined,
+      });
+    } else if (status === "unauthenticated") {
+      setUser(null);
+      setOrderCount(0);
+    }
+  }, [session, status]);
+
+  // Also refresh account info & order count on session status or route change
   useEffect(() => {
     const fetchUserAndOrders = async () => {
       try {
@@ -59,7 +79,7 @@ const Header = () => {
       }
     };
     fetchUserAndOrders();
-  }, []);
+  }, [status, pathname]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

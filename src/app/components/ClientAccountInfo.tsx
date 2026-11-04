@@ -1,6 +1,6 @@
 "use client";
 
-import { FiX } from "react-icons/fi";
+import { FiX, FiUserPlus, FiLogIn } from "react-icons/fi";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -104,16 +104,14 @@ const ClientAccountInfo = ({
           )}
         </Link>
 
-        {user && (
-          <Link
-            href="/track-order"
-            className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-[#F9F1E7] rounded-lg transition-colors"
-            onClick={close}
-          >
-            <CgTrack className="mr-3 text-[#B88E2F]" />
-            <span className="text-sm font-medium">Track Order</span>
-          </Link>
-        )}
+        <Link
+          href="/track-order"
+          className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-[#F9F1E7] rounded-lg transition-colors"
+          onClick={close}
+        >
+          <CgTrack className="mr-3 text-[#B88E2F]" />
+          <span className="text-sm font-medium">Track Order</span>
+        </Link>
       </div>
 
       <div className="border-t border-gray-100 my-2" />
@@ -129,13 +127,24 @@ const ClientAccountInfo = ({
             Logout
           </button>
         ) : (
-          <Link
-            href="/login"
-            onClick={close}
-            className="block w-full text-center text-sm font-semibold bg-[#B88E2F] text-white hover:bg-[#9f7924] py-2.5 px-4 rounded-full transition-colors"
-          >
-            Login / Register
-          </Link>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/login"
+              onClick={close}
+              className="flex items-center justify-center gap-2 w-full text-center text-sm font-semibold bg-[#B88E2F] text-white hover:bg-[#9f7924] py-2.5 px-4 rounded-full transition-colors"
+            >
+              <FiLogIn />
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              onClick={close}
+              className="flex items-center justify-center gap-2 w-full text-center text-sm font-semibold border border-[#B88E2F] text-[#B88E2F] hover:bg-[#F9F1E7] py-2.5 px-4 rounded-full transition-colors"
+            >
+              <FiUserPlus />
+              Create Account
+            </Link>
+          </div>
         )}
       </div>
     </div>

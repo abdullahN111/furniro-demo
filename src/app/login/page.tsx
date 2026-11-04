@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Logo from "@/app/public/assets/images/main/Logo.png";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useToast } from "@/app/context/ToastContext";
+import { FiEye, FiEyeOff, FiShield } from "react-icons/fi";
 
-const LoginPage = () => {
+function LoginFormContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const { showToast } = useToast();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +26,9 @@ const LoginPage = () => {
     e.preventDefault();
     setMessage("");
 
-    if (!email.trim() || !password) {
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail || !password) {
       setMessageType("error");
       setMessage("Please enter your email and password.");
       return;
@@ -28,45 +37,56 @@ const LoginPage = () => {
     setLoading(true);
 
     const result = await signIn("credentials", {
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       redirect: false,
     });
 
-    setLoading(false);
-
     if (result?.error) {
+      setLoading(false);
       setMessageType("error");
-      setMessage("Invalid email or password.");
+      setMessage(
+        "Invalid email or password. If you signed up with Google, click 'Continue with Google' or register a password."
+      );
       return;
     }
 
     setMessageType("success");
-    setMessage("Login successful! Redirecting...");
+    setMessage("Signed in! Redirecting...");
+    showToast({
+      message: "Welcome back to Furniro!",
+      type: "success",
+    });
 
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
+    router.push(callbackUrl);
+    router.refresh();
   };
 
   return (
     <section className="max-w-[1440px] mx-auto px-4 sm:px-8 py-12 lg:py-16">
       <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 rounded-2xl overflow-hidden border border-[#f0e4d3] shadow-lg bg-white">
         {/* Left Brand Panel */}
-        <div className="lg:col-span-5 bg-[#FCF8F3] p-8 sm:p-10 flex flex-col justify-center items-center text-center border-b lg:border-b-0 lg:border-r border-[#f0e4d3]">
-          <Image
-            src={Logo}
-            alt="Furniro Logo"
-            width={72}
-            height={72}
-            className="mb-4"
-          />
-          <h1 className="text-3xl font-bold text-[#B88E2F] mb-3">Furniro</h1>
-          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-            Elevate your living space with timeless, handcrafted furniture. Sign
-            in to manage your wishlist, track deliveries, and enjoy seamless
-            checkout.
-          </p>
+        <div className="lg:col-span-5 bg-[#FCF8F3] p-8 sm:p-10 flex flex-col justify-between items-center text-center border-b lg:border-b-0 lg:border-r border-[#f0e4d3]">
+          <div className="my-auto flex flex-col items-center">
+            <Image
+              src={Logo}
+              alt="Furniro Logo"
+              width={72}
+              height={72}
+              className="mb-4"
+            />
+            <h1 className="text-3xl font-bold text-[#B88E2F] mb-3">Furniro</h1>
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              Elevate your living space with timeless, handcrafted furniture.
+              Sign in to manage your wishlist, track deliveries, and enjoy
+              seamless checkout.
+            </p>
+          </div>
+
+          <div className="pt-6 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5">
+            <FiShield className="text-[#B88E2F]" />
+            <span>Encrypted & secured with NextAuth</span>
+          </div>
         </div>
 
         {/* Right Form Panel */}
@@ -76,11 +96,11 @@ const LoginPage = () => {
               Welcome Back
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Sign in to your Furniro account to continue.
+              Sign in with your email and password or Google account.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4" noValidate>
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="login-email"
@@ -91,6 +111,7 @@ const LoginPage = () => {
               <input
                 id="login-email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading || messageType === "success"}
@@ -110,6 +131,7 @@ const LoginPage = () => {
                 <input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading || messageType === "success"}
@@ -151,10 +173,14 @@ const LoginPage = () => {
           <p className="text-center text-sm text-gray-600 mt-5">
             Don&apos;t have an account?{" "}
             <Link
-              href="/create-account"
+              href={
+                callbackUrl !== "/"
+                  ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                  : "/register"
+              }
               className="text-[#B88E2F] font-semibold hover:underline"
             >
-              Create one
+              Register now
             </Link>
           </p>
 
@@ -168,7 +194,7 @@ const LoginPage = () => {
 
           <button
             type="button"
-            onClick={() => signIn("google")}
+            onClick={() => signIn("google", { callbackUrl })}
             className="flex items-center justify-center gap-3 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl py-3 px-6 text-sm sm:text-base font-semibold transition-colors w-full"
           >
             <svg
@@ -199,6 +225,20 @@ const LoginPage = () => {
         </div>
       </div>
     </section>
+  );
+}
+
+const LoginPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-[1440px] mx-auto py-20 text-center text-gray-500">
+          Loading Sign In...
+        </div>
+      }
+    >
+      <LoginFormContent />
+    </Suspense>
   );
 };
 
