@@ -60,7 +60,7 @@ export async function runFurniroAgent(
     };
   }
 
-  // Resolve current product if user is browsing /product/[id]
+  // Resolve current product from cached catalog if user is on /product/[id]
   let currentProduct: AiProductCard | null = null;
   if (pageContext?.currentProductId) {
     currentProduct = await findProductByQueryOrId(pageContext.currentProductId);
@@ -70,7 +70,6 @@ export async function runFurniroAgent(
   const collectedOrders: AiOrderSummary[] = [];
   const collectedClientActions: AiClientAction[] = [];
 
-  // Shared tool executor used by both Gemini Function Calling & Smart Local Agent
   async function executeToolCall(
     name: string,
     args: Record<string, unknown>
@@ -98,10 +97,6 @@ export async function runFurniroAgent(
           id: p.id,
           title: p.title,
           finalPrice: p.finalPrice,
-          originalPrice: p.price,
-          discountPercentage: p.discountPercentage,
-          isNew: p.isNew,
-          tags: p.tags.slice(0, 5),
         })),
       });
     }
@@ -115,11 +110,7 @@ export async function runFurniroAgent(
 
       if (action === "CLEAR_CART") {
         collectedClientActions.push({ type: "CLEAR_CART" });
-        return JSON.stringify({
-          status: "success",
-          action: "CLEAR_CART",
-          message: "Cleared the user's shopping cart.",
-        });
+        return JSON.stringify({ status: "success", action: "CLEAR_CART" });
       }
 
       const queryTarget =
@@ -130,10 +121,7 @@ export async function runFurniroAgent(
 
       const matchedProduct = await findProductByQueryOrId(queryTarget);
       if (!matchedProduct) {
-        return JSON.stringify({
-          status: "not_found",
-          message: `Could not find a product matching "${queryTarget}".`,
-        });
+        return JSON.stringify({ status: "not_found" });
       }
 
       collectedClientActions.push({
@@ -150,11 +138,7 @@ export async function runFurniroAgent(
         status: "success",
         action,
         quantity,
-        product: {
-          id: matchedProduct.id,
-          title: matchedProduct.title,
-          finalPrice: matchedProduct.finalPrice,
-        },
+        title: matchedProduct.title,
       });
     }
 
@@ -176,16 +160,7 @@ export async function runFurniroAgent(
       }
 
       return JSON.stringify({
-        authenticatedUser: Boolean(userEmail),
         orderCount: orders.length,
-        orders: orders.map((o) => ({
-          orderId: o.orderId,
-          status: o.orderStatus,
-          paymentStatus: o.paymentStatus,
-          totalPrice: o.totalPrice,
-          createdAt: o.createdAt,
-          items: o.items.map((i) => `${i.quantity}x ${i.title}`),
-        })),
       });
     }
 
@@ -200,9 +175,8 @@ export async function runFurniroAgent(
       }
 
       const reviews = await getProductReviewsForAi(product.id);
-      let pairings: AiProductCard[] = [];
       if (args.includePairings) {
-        pairings = await getComplementaryProducts(product, 3);
+        const pairings = await getComplementaryProducts(product, 3);
         for (const pair of pairings) {
           if (!collectedProducts.some((p) => p.id === pair.id)) {
             collectedProducts.push(pair);
@@ -213,90 +187,103 @@ export async function runFurniroAgent(
       }
 
       return JSON.stringify({
-        product: {
-          id: product.id,
-          title: product.title,
-          finalPrice: product.finalPrice,
-          discountPercentage: product.discountPercentage,
-          tags: product.tags,
-          description: (product.description || "").slice(0, 400),
-        },
+        title: product.title,
         reviewCount: reviews.length,
-        pairings: pairings.map((p) => ({
-          id: p.id,
-          title: p.title,
-          finalPrice: p.finalPrice,
-        })),
       });
     }
 
     return JSON.stringify({ error: `Unknown tool ${name}` });
   }
 
-  // 2. Try Google Gemini Interactions API with Function Calling if GEMINI_API_KEY is available
+  // 2. FAST-PATH HYBRID ROUTER:
+  // Resolve clear deterministic intents (order tracking, cart/wishlist commands,
+  // page-aware pairings, and direct catalog filter queries) in <150ms with 0 API token cost.
+  const fastResult = await tryFastDeterministicIntent({
+    message,
+    currentProduct,
+    userEmail,
+    userName,
+    executeToolCall,
+    collectedProducts,
+    collectedOrders,
+    collectedClientActions,
+  });
+
+  if (fastResult) {
+    return fastResult;
+  }
+
+  // 3. SINGLE-PASS GEMINI CALL (for open-ended / conversational questions):
+  // Uses `gemini-3.5-flash-lite` with `thinking_level: "minimal"` and 1 single round-trip.
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (apiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey });
 
       const contextBanner = [
-        userName ? `Signed-in shopper: ${userName} (${userEmail || ""})` : "Shopper: Guest",
-        pageContext?.pathname ? `Current page: ${pageContext.pathname}` : "",
+        userName ? `Shopper: ${userName}` : "",
         currentProduct
-          ? `Currently viewing product: "${currentProduct.title}" (ID: ${currentProduct.id}, Price: $${currentProduct.finalPrice}, Tags: ${currentProduct.tags.join(", ")})`
+          ? `Viewing: "${currentProduct.title}" ($${currentProduct.finalPrice}, Tags: ${currentProduct.tags.slice(0, 4).join(", ")})`
           : "",
       ]
         .filter(Boolean)
         .join(" | ");
 
       const contextualizedInput = contextBanner
-        ? `[Context: ${contextBanner}]\nUser: ${message}`
+        ? `[${contextBanner}] ${message}`
         : message;
 
-      let interaction = await ai.interactions.create({
+      const interaction = await ai.interactions.create({
         model: DEFAULT_GEMINI_MODEL,
         system_instruction: FURNIRO_AGENT_SYSTEM_INSTRUCTION,
         input: contextualizedInput,
         tools: FURNIRO_AGENT_TOOLS,
+        generation_config: {
+          thinking_level: "minimal",
+        },
         ...(previousInteractionId
           ? { previous_interaction_id: previousInteractionId }
           : {}),
       });
 
-      // Execute up to 2 rounds of function calls if requested by Gemini
-      for (let round = 0; round < 2; round++) {
-        const functionCallSteps = (interaction.steps || []).filter(
-          (step: { type?: string }) => step.type === "function_call"
-        ) as Array<{
-          type: "function_call";
-          id: string;
-          name: string;
-          arguments: Record<string, unknown>;
-        }>;
+      const functionCallSteps = (interaction.steps || []).filter(
+        (step: { type?: string }) => step.type === "function_call"
+      ) as Array<{
+        type: "function_call";
+        id: string;
+        name: string;
+        arguments: Record<string, unknown>;
+      }>;
 
-        if (functionCallSteps.length === 0) break;
-
-        const resultInputs = [];
+      // If Gemini invoked tools, execute them locally and format the reply immediately
+      // without a second slow LLM round-trip!
+      if (functionCallSteps.length > 0) {
         for (const fc of functionCallSteps) {
-          const toolOutput = await executeToolCall(
-            fc.name,
-            fc.arguments || {}
-          );
-          resultInputs.push({
-            type: "function_result" as const,
-            call_id: fc.id,
-            name: fc.name,
-            result: [{ type: "text" as const, text: toolOutput }],
-          });
+          await executeToolCall(fc.name, fc.arguments || {});
         }
 
-        interaction = await ai.interactions.create({
-          model: DEFAULT_GEMINI_MODEL,
-          system_instruction: FURNIRO_AGENT_SYSTEM_INSTRUCTION,
-          previous_interaction_id: interaction.id,
-          tools: FURNIRO_AGENT_TOOLS,
-          input: resultInputs,
-        });
+        const directText = (interaction.output_text || "").trim();
+        const synthesizedReply =
+          directText ||
+          buildInstantToolReply({
+            collectedProducts,
+            collectedOrders,
+            collectedClientActions,
+            currentProduct,
+            userEmail,
+          });
+
+        return {
+          reply: synthesizedReply,
+          interactionId: interaction.id,
+          products: collectedProducts.length > 0 ? collectedProducts : undefined,
+          orders: collectedOrders.length > 0 ? collectedOrders : undefined,
+          clientActions:
+            collectedClientActions.length > 0
+              ? collectedClientActions
+              : undefined,
+          aiMode: "gemini",
+        };
       }
 
       const replyText = (interaction.output_text || "").trim();
@@ -314,24 +301,70 @@ export async function runFurniroAgent(
         };
       }
     } catch (err) {
-      console.error("Gemini agent interaction error, falling back to local agent:", err);
+      console.error("Gemini agent interaction error, using local fallback:", err);
     }
   }
 
-  // 3. Deterministic Smart Local Agent (when GEMINI_API_KEY is not set)
-  return runSmartLocalAgent({
+  // 4. Fallback for general queries when offline or key quota reached
+  return runSmartLocalFallback({
     message,
     currentProduct,
-    userEmail,
-    userName,
     executeToolCall,
     collectedProducts,
-    collectedOrders,
-    collectedClientActions,
   });
 }
 
-async function runSmartLocalAgent(params: {
+function buildInstantToolReply(params: {
+  collectedProducts: AiProductCard[];
+  collectedOrders: AiOrderSummary[];
+  collectedClientActions: AiClientAction[];
+  currentProduct: AiProductCard | null;
+  userEmail?: string | null;
+}): string {
+  const {
+    collectedProducts,
+    collectedOrders,
+    collectedClientActions,
+    currentProduct,
+    userEmail,
+  } = params;
+
+  if (collectedClientActions.length > 0) {
+    const act = collectedClientActions[0];
+    if (act.type === "CLEAR_CART") {
+      return "I've cleared your shopping cart. Let me know what pieces you'd like to explore next!";
+    }
+    if (act.product) {
+      if (act.type === "ADD_TO_CART") {
+        return `Added **${act.quantity || 1}x ${act.product.title}** ($${act.product.finalPrice}) to your cart!`;
+      }
+      if (act.type === "REMOVE_FROM_CART") {
+        return `Removed **${act.product.title}** from your cart.`;
+      }
+      return `Updated **${act.product.title}** in your wishlist!`;
+    }
+  }
+
+  if (collectedOrders.length > 0) {
+    const latest = collectedOrders[0];
+    return `Found your order! Order **#${latest.orderId.slice(0, 8)}** is currently **${latest.orderStatus}** ($${latest.totalPrice.toLocaleString()}).`;
+  }
+
+  if (collectedProducts.length > 0) {
+    if (currentProduct && collectedProducts.every((p) => p.id !== currentProduct.id)) {
+      return `Here are our top pieces that pair harmoniously with **${currentProduct.title}**:`;
+    }
+    return `I found **${collectedProducts.length}** matching pieces in our collection for you:`;
+  }
+
+  if (!userEmail) {
+    return "Please sign in or share an Order ID so I can look that up for you.";
+  }
+
+  return "Here is what I found in our showroom catalog:";
+}
+
+async function tryFastDeterministicIntent(params: {
   message: string;
   currentProduct: AiProductCard | null;
   userEmail?: string | null;
@@ -340,7 +373,7 @@ async function runSmartLocalAgent(params: {
   collectedProducts: AiProductCard[];
   collectedOrders: AiOrderSummary[];
   collectedClientActions: AiClientAction[];
-}): Promise<AiChatResponse> {
+}): Promise<AiChatResponse | null> {
   const {
     message,
     currentProduct,
@@ -358,11 +391,10 @@ async function runSmartLocalAgent(params: {
   if (
     lower.includes("track") ||
     lower.includes("where is my order") ||
-    lower.includes("my order") ||
+    lower.includes("my latest order") ||
     lower.includes("order status") ||
     lower.includes("delivery status")
   ) {
-    // Check if user pasted a UUID or order ID token
     const idMatch = message.match(
       /([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|#[a-zA-Z0-9_-]{6,})/
     );
@@ -381,7 +413,7 @@ async function runSmartLocalAgent(params: {
             : `your ${collectedOrders.length} most recent orders`
         }! Order **#${latest.orderId.slice(0, 8)}** is currently **${
           latest.orderStatus
-        }** ($${latest.totalPrice.toLocaleString()}). You can view the live status card below:`,
+        }** ($${latest.totalPrice.toLocaleString()}).`,
         orders: collectedOrders,
         aiMode: "smart-local",
       };
@@ -390,24 +422,29 @@ async function runSmartLocalAgent(params: {
     if (!userEmail && !extractedId) {
       return {
         reply:
-          "Please sign in to view your recent orders automatically, or paste your **Order ID / Tracking ID** right here in the chat (e.g., `Track order #...`) and I'll look it up immediately!",
+          "Please sign in to view your recent orders automatically, or paste your **Order ID** right here (e.g., `Track order #...`) and I'll look it up immediately!",
         aiMode: "smart-local",
       };
     }
 
     return {
       reply: extractedId
-        ? `I couldn't find an order matching **#${extractedId}**. Double-check your Order ID on the My Orders page or try another ID.`
-        : `Hi ${userName || "there"}! You don't have any placed orders under **${userEmail}** yet. Once you place an order, I can track every step of its delivery here.`,
+        ? `I couldn't find an order matching **#${extractedId}**. Double-check your Order ID on the My Orders page.`
+        : `Hi ${userName || "there"}! You don't have any placed orders under **${userEmail}** yet.`,
       aiMode: "smart-local",
     };
   }
 
   // B. Clear Cart Intent
-  if (lower.includes("clear cart") || lower.includes("empty cart") || lower.includes("clear my cart")) {
+  if (
+    lower.includes("clear cart") ||
+    lower.includes("empty cart") ||
+    lower.includes("clear my cart")
+  ) {
     await executeToolCall("manage_cart_or_wishlist", { action: "CLEAR_CART" });
     return {
-      reply: "I've cleared your shopping cart for you. Let me know what pieces you'd like to explore next!",
+      reply:
+        "I've cleared your shopping cart for you. Let me know what pieces you'd like to explore next!",
       clientActions: collectedClientActions,
       aiMode: "smart-local",
     };
@@ -428,9 +465,10 @@ async function runSmartLocalAgent(params: {
 
   if (isAddCart || isRemoveCart || isAddFav) {
     const qtyMatch = lower.match(/\b(\d+)\b/);
-    const quantity = qtyMatch ? Math.min(10, Math.max(1, parseInt(qtyMatch[1], 10))) : 1;
+    const quantity = qtyMatch
+      ? Math.min(10, Math.max(1, parseInt(qtyMatch[1], 10)))
+      : 1;
 
-    // Strip command words to isolate product name
     const cleanedTarget = lower
       .replace(
         /\b(please|can you|add|put|remove|save|to|from|my|the|cart|bag|basket|wishlist|favorites|favorite|of|this|item|piece|product|\d+)\b/g,
@@ -469,7 +507,7 @@ async function runSmartLocalAgent(params: {
 
     return {
       reply:
-        "Which piece would you like me to add? Tell me the product name (for example, *'Add 1 Syltherine to my cart'* or *'Add Respira to my wishlist'*), or click **Add to Cart** on any recommended card!",
+        "Tell me the product name you'd like to add (for example, *'Add 1 Syltherine to my cart'*), or click **Add to Cart** on any product card!",
       aiMode: "smart-local",
     };
   }
@@ -477,15 +515,12 @@ async function runSmartLocalAgent(params: {
   // D. Page-Aware Product Context Intent (when viewing /product/[id])
   if (
     currentProduct &&
-    (lower.includes("this") ||
-      lower.includes("pair") ||
+    (lower.includes("pair") ||
       lower.includes("match") ||
-      lower.includes("small") ||
-      lower.includes("apartment") ||
-      lower.includes("worth") ||
-      lower.includes("about"))
+      lower.includes("small apartment") ||
+      lower.includes("fit a small"))
   ) {
-    if (lower.includes("pair") || lower.includes("match") || lower.includes("complem")) {
+    if (lower.includes("pair") || lower.includes("match")) {
       await executeToolCall("get_product_details", {
         productIdOrTitle: currentProduct.id,
         includePairings: true,
@@ -493,28 +528,24 @@ async function runSmartLocalAgent(params: {
       return {
         reply: `Because **${currentProduct.title}** ($${currentProduct.finalPrice}) features ${currentProduct.tags
           .slice(0, 3)
-          .join(", ")} styling, it pairs wonderfully with these complementary Furniro pieces:`,
+          .join(", ")} styling, it pairs wonderfully with these complementary pieces:`,
         products: collectedProducts,
         aiMode: "smart-local",
       };
     }
 
     return {
-      reply: `You're currently viewing **${currentProduct.title}** ($${
+      reply: `Yes — **${currentProduct.title}** ($${
         currentProduct.finalPrice
-      }${
-        currentProduct.discountPercentage > 0
-          ? `, ${currentProduct.discountPercentage}% off`
-          : ""
-      }). Its tailored proportions and ${currentProduct.tags
+      }) has a tailored footprint and ${currentProduct.tags
         .slice(0, 3)
-        .join(", ")} aesthetic make it an excellent fit for both compact apartments and open-concept rooms. Would you like me to add it to your cart or show matching pieces?`,
+        .join(", ")} silhouette that fits small apartments and studios without crowding the room.`,
       products: [currentProduct],
       aiMode: "smart-local",
     };
   }
 
-  // E. Product Search & Budget / Category / Sale Discovery
+  // E. Direct Catalog Filter / Quick Chip Queries (Price / Sale / New / Category)
   const priceMatch =
     lower.match(/(?:under|below|less than|max|budget)\s*\$?\s*(\d+)/) ||
     lower.match(/\$\s*(\d+)/);
@@ -524,47 +555,105 @@ async function runSmartLocalAgent(params: {
     lower.includes("discount") ||
     lower.includes("deal") ||
     lower.includes("offer");
-  const onlyNew = lower.includes("new arrival") || lower.includes("newest") || lower.includes("latest");
+  const onlyNew =
+    lower.includes("new arrival") ||
+    lower.includes("newest") ||
+    lower.includes("latest");
 
   let category = "";
-  for (const cat of ["living", "dining", "bedroom", "sofa", "chair", "table", "lamp"]) {
+  for (const cat of [
+    "living",
+    "dining",
+    "bedroom",
+    "sofa",
+    "chair",
+    "table",
+    "lamp",
+  ]) {
     if (lower.includes(cat)) {
       category = cat;
       break;
     }
   }
 
+  const isDirectCatalogSearch =
+    Boolean(maxPrice) ||
+    onlyDiscounted ||
+    onlyNew ||
+    (Boolean(category) &&
+      (lower.includes("show") ||
+        lower.includes("recommend") ||
+        lower.includes("find") ||
+        lower.includes("looking for") ||
+        lower.includes("need") ||
+        lower.split(/\s+/).length <= 7));
+
+  if (isDirectCatalogSearch) {
+    await executeToolCall("search_products", {
+      query: message,
+      category,
+      maxPrice,
+      onlyDiscounted,
+      onlyNew,
+      limit: 4,
+    });
+
+    if (collectedProducts.length > 0) {
+      const filterNotes = [
+        category ? `for **${category}**` : "",
+        maxPrice ? `under **$${maxPrice}**` : "",
+        onlyDiscounted ? "**currently on sale**" : "",
+        onlyNew ? "from our **new arrivals**" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      return {
+        reply: `Here are the top Furniro pieces ${
+          filterNotes || "from our collection"
+        } — you can add any item directly to your cart or wishlist below:`,
+        products: collectedProducts,
+        aiMode: "smart-local",
+      };
+    }
+  }
+
+  return null;
+}
+
+async function runSmartLocalFallback(params: {
+  message: string;
+  currentProduct: AiProductCard | null;
+  executeToolCall: (name: string, args: Record<string, unknown>) => Promise<string>;
+  collectedProducts: AiProductCard[];
+}): Promise<AiChatResponse> {
+  const { message, currentProduct, executeToolCall, collectedProducts } = params;
+
   await executeToolCall("search_products", {
     query: message,
-    category,
-    maxPrice,
-    onlyDiscounted,
-    onlyNew,
     limit: 4,
   });
 
   if (collectedProducts.length > 0) {
-    const filterNotes = [
-      category ? `for **${category}**` : "",
-      maxPrice ? `under **$${maxPrice}**` : "",
-      onlyDiscounted ? "**on sale**" : "",
-      onlyNew ? "from our **new arrivals**" : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-
     return {
-      reply: `Here are the top Furniro pieces ${
-        filterNotes || "handpicked from our catalog"
-      }. You can add any item directly to your cart or wishlist from the cards below:`,
+      reply:
+        "Here are the closest matching pieces from our showroom catalog. You can add any item to your cart or wishlist right from the cards below:",
       products: collectedProducts,
+      aiMode: "smart-local",
+    };
+  }
+
+  if (currentProduct) {
+    return {
+      reply: `You're viewing **${currentProduct.title}** ($${currentProduct.finalPrice}). Would you like me to add it to your cart or find complementary furniture pieces?`,
+      products: [currentProduct],
       aiMode: "smart-local",
     };
   }
 
   return {
     reply:
-      "I can help you discover furniture by room or budget, add items directly to your cart, match styles from a room photo, or track your orders. Try asking *'Show me chairs under $250'* or *'What's on sale?'*",
+      "I can help you discover furniture by room or budget, add items to your cart, match styles from a photo, or track your orders. Try asking *'Show me modern chairs under $250'* or *'What's currently on sale?'*",
     aiMode: "smart-local",
   };
 }

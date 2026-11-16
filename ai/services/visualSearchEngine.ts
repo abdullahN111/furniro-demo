@@ -130,6 +130,9 @@ export async function runVisualSearch(
       const ai = new GoogleGenAI({ apiKey });
       const interaction = await ai.interactions.create({
         model: DEFAULT_GEMINI_MODEL,
+        generation_config: {
+          thinking_level: "minimal",
+        },
         input: [
           {
             type: "user_input",

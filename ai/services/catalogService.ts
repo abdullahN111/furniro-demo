@@ -37,6 +37,11 @@ export interface RawSanityReview {
   createdAt?: string;
 }
 
+// 60-second in-memory catalog cache to eliminate redundant Sanity network calls
+const CATALOG_CACHE_TTL_MS = 60 * 1000;
+let cachedCatalog: { products: AiProductCard[]; timestamp: number } | null = null;
+const reviewCache = new Map<string, { reviews: RawSanityReview[]; timestamp: number }>();
+
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
   living: ["sofa", "couch", "living", "lounge", "set", "chair", "coffee", "table", "mug", "potty"],
   dining: ["dining", "table", "chair", "cafe", "stool", "mug", "wooden"],
@@ -72,6 +77,11 @@ export function toAiProductCard(
 }
 
 export async function fetchAllCatalogProducts(): Promise<AiProductCard[]> {
+  const now = Date.now();
+  if (cachedCatalog && now - cachedCatalog.timestamp < CATALOG_CACHE_TTL_MS) {
+    return cachedCatalog.products;
+  }
+
   try {
     const rawProducts = await client.fetch<RawSanityProduct[]>(
       `*[_type == "product"]{
@@ -85,10 +95,12 @@ export async function fetchAllCatalogProducts(): Promise<AiProductCard[]> {
         "imageUrl": productImage.asset->url
       }`
     );
-    return (rawProducts || []).map((p) => toAiProductCard(p));
+    const products = (rawProducts || []).map((p) => toAiProductCard(p));
+    cachedCatalog = { products, timestamp: now };
+    return products;
   } catch (err) {
     console.error("Failed to fetch catalog products for AI:", err);
-    return [];
+    return cachedCatalog?.products || [];
   }
 }
 
@@ -122,7 +134,29 @@ export async function searchCatalogProducts(
   const catLower = category.trim().toLowerCase();
   const queryTokens = qLower
     .split(/[\s,.-]+/)
-    .filter((t) => t.length > 1 && !["the", "and", "for", "with", "show", "me", "some", "find"].includes(t));
+    .filter(
+      (t) =>
+        t.length > 1 &&
+        ![
+          "the",
+          "and",
+          "for",
+          "with",
+          "show",
+          "me",
+          "some",
+          "find",
+          "under",
+          "below",
+          "modern",
+          "cozy",
+          "pieces",
+          "recommend",
+          "currently",
+          "what",
+          "whats",
+        ].includes(t)
+    );
 
   const catKeywords = CATEGORY_KEYWORDS[catLower] || (catLower ? [catLower] : []);
 
@@ -193,13 +227,11 @@ export async function findProductByQueryOrId(
   const allProducts = await fetchAllCatalogProducts();
   const target = productIdOrTitle.trim().toLowerCase();
 
-  // Exact ID or exact title match first
   const exact = allProducts.find(
     (p) => p.id.toLowerCase() === target || p.title.toLowerCase() === target
   );
   if (exact) return exact;
 
-  // Substring title match
   const partial = allProducts.find(
     (p) =>
       p.title.toLowerCase().includes(target) ||
@@ -207,7 +239,6 @@ export async function findProductByQueryOrId(
   );
   if (partial) return partial;
 
-  // Fallback to searchCatalogProducts top hit
   const searched = await searchCatalogProducts({ query: productIdOrTitle, limit: 1 });
   return searched[0] || null;
 }
@@ -226,7 +257,6 @@ export async function getComplementaryProducts(
       for (const tag of p.tags) {
         if (baseTags.has(tag.toLowerCase())) score += 4;
       }
-      // Price harmony bonus
       const priceDiffRatio =
         Math.abs(p.finalPrice - baseProduct.finalPrice) /
         Math.max(baseProduct.finalPrice, 1);
@@ -244,9 +274,15 @@ export async function getComplementaryProducts(
 export async function getProductReviewsForAi(
   productId: string
 ): Promise<RawSanityReview[]> {
+  const now = Date.now();
+  const cached = reviewCache.get(productId);
+  if (cached && now - cached.timestamp < 30 * 1000) {
+    return cached.reviews;
+  }
+
   try {
     const reviews = await client.fetch<RawSanityReview[]>(
-      `*[_type == "review" && product._ref == $productId] | order(createdAt desc)[0...20]{
+      `*[_type == "review" && product._ref == $productId] | order(createdAt desc)[0...15]{
         _id,
         rating,
         comment,
@@ -255,7 +291,9 @@ export async function getProductReviewsForAi(
       }`,
       { productId }
     );
-    return reviews || [];
+    const list = reviews || [];
+    reviewCache.set(productId, { reviews: list, timestamp: now });
+    return list;
   } catch (err) {
     console.error("Failed to fetch product reviews for AI:", err);
     return [];
