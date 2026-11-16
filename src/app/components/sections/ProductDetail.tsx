@@ -9,6 +9,7 @@ import { useCart } from "@/app/context/CartContext";
 import { useFavorites } from "@/app/context/FavoritesContext";
 import { useToast } from "@/app/context/ToastContext";
 import ProductCard from "@/app/components/cards/ProductCard";
+import ProductAiInsights from "@ai/components/ProductAiInsights";
 import { IoShareSocialOutline } from "react-icons/io5";
 import {
   FaRegHeart,
@@ -740,8 +741,15 @@ const ProductDetail = () => {
             </div>
           </div>
         ) : (
-          /* Upgraded Customer Reviews Section */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          /* Upgraded Customer Reviews & AI Insights Section */
+          <div>
+            <ProductAiInsights
+              productId={product._id}
+              productTitle={product.title}
+              reviewCount={reviewCount}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Left Column: Rating Breakdown & Write a Review Card */}
             <div className="lg:col-span-4 space-y-6">
               {/* Rating Summary Box */}
@@ -1065,6 +1073,7 @@ const ProductDetail = () => {
                   })}
                 </div>
               )}
+            </div>
             </div>
           </div>
         )}

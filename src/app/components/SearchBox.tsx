@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FiSearch, FiX, FiArrowRight } from "react-icons/fi";
+import { FiSearch, FiX, FiArrowRight, FiCamera } from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi2";
 import { fetchProducts, ProductCardData, staticRoutes } from "@/app/Data/index";
+import VisualSearchModal from "@ai/components/VisualSearchModal";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -19,6 +21,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
   );
   const [filteredRoutes, setFilteredRoutes] = useState<typeof staticRoutes>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [visualModalOpen, setVisualModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = useCallback(() => {
@@ -46,13 +49,13 @@ export default function SearchBox({ close }: { close?: () => void }) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !visualModalOpen) {
         handleClose();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleClose]);
+  }, [handleClose, visualModalOpen]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -81,6 +84,18 @@ export default function SearchBox({ close }: { close?: () => void }) {
 
   const quickTags = ["Sofa", "Dining", "Living", "Bedroom", "Lamp", "Chair"];
 
+  if (visualModalOpen) {
+    return (
+      <VisualSearchModal
+        isOpen={visualModalOpen}
+        onClose={() => {
+          setVisualModalOpen(false);
+          handleClose();
+        }}
+      />
+    );
+  }
+
   return (
     <div
       onClick={handleClose}
@@ -97,8 +112,8 @@ export default function SearchBox({ close }: { close?: () => void }) {
           isOpen ? "translate-y-0 scale-100" : "-translate-y-4 scale-95"
         }`}
       >
-        <div className="flex items-center border-b border-gray-100 px-4 py-3.5">
-          <FiSearch className="h-5 w-5 text-[#B88E2F] shrink-0 mr-3" />
+        <div className="flex items-center border-b border-gray-100 px-4 py-3.5 gap-2">
+          <FiSearch className="h-5 w-5 text-[#B88E2F] shrink-0 mr-1" />
           <input
             ref={inputRef}
             type="text"
@@ -111,11 +126,21 @@ export default function SearchBox({ close }: { close?: () => void }) {
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 mr-1"
+              className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
             >
               Clear
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setVisualModalOpen(true)}
+            title="AI Visual Search — Upload a room or furniture photo"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#FCF8F3] hover:bg-[#B88E2F] text-[#B88E2F] hover:text-white border border-[#e6d5bd] px-3 py-1.5 rounded-full transition-colors shrink-0"
+          >
+            <FiCamera className="text-sm" />
+            <span className="hidden sm:inline">Visual Search</span>
+            <HiSparkles className="text-xs" />
+          </button>
           <button
             type="button"
             onClick={handleClose}
@@ -128,21 +153,49 @@ export default function SearchBox({ close }: { close?: () => void }) {
 
         <div className="max-h-[65vh] overflow-y-auto">
           {!query.trim() ? (
-            <div className="p-5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                Popular Searches
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {quickTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setQuery(tag)}
-                    className="px-3.5 py-1.5 rounded-full text-sm bg-[#F9F1E7] text-gray-700 hover:bg-[#B88E2F] hover:text-white transition-colors"
-                  >
-                    {tag}
-                  </button>
-                ))}
+            <div className="p-5 space-y-5">
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  Popular Searches
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {quickTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setQuery(tag)}
+                      className="px-3.5 py-1.5 rounded-full text-sm bg-[#F9F1E7] text-gray-700 hover:bg-[#B88E2F] hover:text-white transition-colors"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Visual Search Banner inside Search Modal */}
+              <div className="rounded-xl bg-[#FCF8F3] border border-[#eee0cd] p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shrink-0">
+                    <FiCamera className="text-lg" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                      Shop by Photo (AI Visual Match)
+                      <HiSparkles className="text-[#B88E2F]" />
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Upload a photo of a room or furniture item to find
+                      matching pieces in our catalog.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVisualModalOpen(true)}
+                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
+                >
+                  Upload Photo
+                </button>
               </div>
             </div>
           ) : loading ? (
@@ -155,7 +208,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
                 No matches found for &ldquo;{query}&rdquo;
               </p>
               <p className="text-sm text-gray-400 mt-1">
-                Try searching by furniture type, tag, or room category.
+                Try searching by furniture type, tag, or use AI Visual Search.
               </p>
             </div>
           ) : (

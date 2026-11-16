@@ -5,6 +5,7 @@ import { FavoritesProvider } from "@/app/context/FavoritesContext";
 
 import Header from "@/app/components/shared/Header";
 import Footer from "@/app/components/shared/Footer";
+import ChatbotWidget from "@ai/components/ChatbotWidget";
 import "./globals.css";
 import { Montserrat } from "next/font/google";
 import { Providers } from "./providers/SessionProvider";
@@ -34,6 +35,7 @@ export default function RootLayout({
               <CartProvider>
                 <Header />
                 {children}
+                <ChatbotWidget />
                 <Footer />
               </CartProvider>
             </FavoritesProvider>
