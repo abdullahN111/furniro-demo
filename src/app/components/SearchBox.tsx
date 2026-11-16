@@ -15,11 +15,11 @@ export default function SearchBox({ close }: { close?: () => void }) {
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<ProductCardData[]>(
-    cachedProducts || []
+    cachedProducts || [],
   );
   const [loading, setLoading] = useState(!cachedProducts);
   const [filteredProducts, setFilteredProducts] = useState<ProductCardData[]>(
-    []
+    [],
   );
   const [filteredRoutes, setFilteredRoutes] = useState<typeof staticRoutes>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -77,11 +77,11 @@ export default function SearchBox({ close }: { close?: () => void }) {
         p.title.toLowerCase().includes(lower) ||
         p.tags.toLowerCase().includes(lower) ||
         (p.featured && p.featured.toLowerCase().includes(lower)) ||
-        p.description.toLowerCase().includes(lower)
+        p.description.toLowerCase().includes(lower),
     );
 
     const routes = staticRoutes.filter((r) =>
-      r.title.toLowerCase().includes(lower)
+      r.title.toLowerCase().includes(lower),
     );
 
     setFilteredProducts(prod.slice(0, 6));
@@ -144,7 +144,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
             type="button"
             onClick={() => setVisualModalOpen(true)}
             title="AI Visual Search — Upload a room or furniture photo"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#1C1917] hover:bg-[#B88E2F] text-[#F5D07A] hover:text-white border border-[#B88E2F]/50 px-3 py-1.5 rounded-full transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#FFF3E3] hover:bg-[#B88E2F] text-[#B88E2F] hover:text-white border border-[#E2CEB0] px-3 py-1.5 rounded-full transition-colors shrink-0"
           >
             <FiCamera className="text-sm" />
             <span className="hidden sm:inline">Visual Search</span>
@@ -182,17 +182,17 @@ export default function SearchBox({ close }: { close?: () => void }) {
               </div>
 
               {/* AI Visual Search Banner inside Search Modal */}
-              <div className="rounded-xl bg-[#1C1917] border border-[#B88E2F]/50 p-4 flex items-center justify-between gap-4 text-white">
+              <div className="rounded-xl bg-[#FFF3E3] border border-[#E6D5BD] p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shrink-0">
                     <FiCamera className="text-lg" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
                       Shop by Photo (AI Visual Match)
-                      <HiSparkles className="text-[#F5D07A]" />
+                      <HiSparkles className="text-[#B88E2F]" />
                     </p>
-                    <p className="text-xs text-[#D6C7B2]">
+                    <p className="text-xs text-gray-600">
                       Upload a photo of a room or furniture item to find
                       matching pieces in our catalog.
                     </p>
@@ -201,7 +201,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
                 <button
                   type="button"
                   onClick={() => setVisualModalOpen(true)}
-                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#d1a33b] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
+                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
                 >
                   Upload Photo
                 </button>
@@ -311,6 +311,6 @@ export default function SearchBox({ close }: { close?: () => void }) {
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

@@ -130,11 +130,11 @@ const ShopFilter = ({
             <button
               type="button"
               onClick={() => setVisualSearchOpen(true)}
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-[#1F1F1F] hover:bg-[#B88E2F] text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors"
             >
-              <FiCamera className="text-sm text-[#F9F1E7]" />
+              <FiCamera className="text-sm text-[#FFF3E3]" />
               <span>AI Visual Search</span>
-              <HiSparkles className="text-xs text-[#F9F1E7]" />
+              <HiSparkles className="text-xs text-[#FFF3E3]" />
             </button>
 
             <div className="flex items-center gap-2.5">
