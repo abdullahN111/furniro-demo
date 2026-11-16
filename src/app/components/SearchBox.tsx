@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { FiSearch, FiX, FiArrowRight, FiCamera } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 import { fetchProducts, ProductCardData, staticRoutes } from "@/app/Data/index";
@@ -11,6 +12,7 @@ import Link from "next/link";
 let cachedProducts: ProductCardData[] | null = null;
 
 export default function SearchBox({ close }: { close?: () => void }) {
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<ProductCardData[]>(
     cachedProducts || []
@@ -23,6 +25,10 @@ export default function SearchBox({ close }: { close?: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [visualModalOpen, setVisualModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -84,6 +90,8 @@ export default function SearchBox({ close }: { close?: () => void }) {
 
   const quickTags = ["Sofa", "Dining", "Living", "Bedroom", "Lamp", "Chair"];
 
+  if (!mounted) return null;
+
   if (visualModalOpen) {
     return (
       <VisualSearchModal
@@ -96,19 +104,20 @@ export default function SearchBox({ close }: { close?: () => void }) {
     );
   }
 
-  return (
+  return createPortal(
     <div
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
       aria-label="Search products and pages"
-      className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-[2000] flex justify-center items-start pt-16 sm:pt-24 px-4 transition-opacity duration-200 ${
+      style={{ zIndex: 9998 }}
+      className={`fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-start pt-16 sm:pt-24 px-4 transition-opacity duration-200 ${
         isOpen ? "opacity-100" : "opacity-0"
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full max-w-2xl rounded-xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all duration-200 ${
+        className={`bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-[#e6d5bd] overflow-hidden transform transition-all duration-200 ${
           isOpen ? "translate-y-0 scale-100" : "-translate-y-4 scale-95"
         }`}
       >
@@ -135,7 +144,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
             type="button"
             onClick={() => setVisualModalOpen(true)}
             title="AI Visual Search — Upload a room or furniture photo"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#FCF8F3] hover:bg-[#B88E2F] text-[#B88E2F] hover:text-white border border-[#e6d5bd] px-3 py-1.5 rounded-full transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#1C1917] hover:bg-[#B88E2F] text-[#F5D07A] hover:text-white border border-[#B88E2F]/50 px-3 py-1.5 rounded-full transition-colors shrink-0"
           >
             <FiCamera className="text-sm" />
             <span className="hidden sm:inline">Visual Search</span>
@@ -173,17 +182,17 @@ export default function SearchBox({ close }: { close?: () => void }) {
               </div>
 
               {/* AI Visual Search Banner inside Search Modal */}
-              <div className="rounded-xl bg-[#FCF8F3] border border-[#eee0cd] p-4 flex items-center justify-between gap-4">
+              <div className="rounded-xl bg-[#1C1917] border border-[#B88E2F]/50 p-4 flex items-center justify-between gap-4 text-white">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shrink-0">
                     <FiCamera className="text-lg" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-white flex items-center gap-1.5">
                       Shop by Photo (AI Visual Match)
-                      <HiSparkles className="text-[#B88E2F]" />
+                      <HiSparkles className="text-[#F5D07A]" />
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[#D6C7B2]">
                       Upload a photo of a room or furniture item to find
                       matching pieces in our catalog.
                     </p>
@@ -192,7 +201,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
                 <button
                   type="button"
                   onClick={() => setVisualModalOpen(true)}
-                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
+                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#d1a33b] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
                 >
                   Upload Photo
                 </button>
@@ -301,6 +310,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
