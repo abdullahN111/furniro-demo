@@ -27,16 +27,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${montserrat.className} antialiased text-gray-900 bg-white`}>
+    <html lang="en" className="overflow-x-hidden">
+      <body
+        className={`${montserrat.className} antialiased text-gray-900 bg-white w-full max-w-full overflow-x-hidden`}
+      >
         <Providers>
           <ToastProvider>
             <FavoritesProvider>
               <CartProvider>
-                <Header />
-                {children}
-                <ChatbotWidget />
-                <Footer />
+                <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-hidden">
+                  <Header />
+                  <main className="flex-1 w-full max-w-full overflow-x-hidden">
+                    {children}
+                  </main>
+                  <ChatbotWidget />
+                  <Footer />
+                </div>
               </CartProvider>
             </FavoritesProvider>
           </ToastProvider>

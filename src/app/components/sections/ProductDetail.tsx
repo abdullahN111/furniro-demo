@@ -387,11 +387,11 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="w-full mx-auto py-10 sm:py-14 px-5 sm:px-10 lg:px-16">
+    <div className="w-full max-w-full overflow-hidden mx-auto py-8 sm:py-14 px-4 sm:px-10 lg:px-16">
       {/* Top Product Hero Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14">
         {/* Left: Interactive Image Gallery (7 cols on lg) */}
-        <div className="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-4">
+        <div className="lg:col-span-7 min-w-0 flex flex-col-reverse sm:flex-row gap-4">
           {/* Angle / Crop Thumbnails */}
           <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
             {GALLERY_VIEWS.map((view, idx) => (
@@ -460,7 +460,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Right: Product Info & Actions (5 cols on lg) */}
-        <div className="lg:col-span-5 flex flex-col justify-between">
+        <div className="lg:col-span-5 min-w-0 flex flex-col justify-between">
           <div className="space-y-5">
             {/* Category & Stock Pill */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -749,9 +749,9 @@ const ProductDetail = () => {
               reviewCount={reviewCount}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
             {/* Left Column: Rating Breakdown & Write a Review Card */}
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-4 min-w-0 space-y-6">
               {/* Rating Summary Box */}
               <div className="bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
@@ -921,7 +921,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Right Column: Filter Bar & Review Feed */}
-            <div className="lg:col-span-8 space-y-6">
+            <div className="lg:col-span-8 min-w-0 space-y-6">
               {/* Filter & Sort Controls */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-100">
                 <div className="flex flex-wrap items-center gap-2">

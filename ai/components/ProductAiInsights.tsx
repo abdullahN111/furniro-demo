@@ -104,16 +104,16 @@ export default function ProductAiInsights({
   };
 
   return (
-    <div className="mb-10 rounded-2xl border border-[#e8d8c3] bg-gradient-to-br from-[#FCF8F3] via-white to-[#F9F1E7]/60 p-6 sm:p-8 shadow-xs">
+    <div className="mb-10 w-full max-w-full overflow-hidden rounded-2xl border border-[#e8d8c3] bg-gradient-to-br from-[#FCF8F3] via-white to-[#F9F1E7]/60 p-4 sm:p-8 shadow-xs">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#efe3d2]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#efe3d2]">
+        <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shadow-xs shrink-0">
             <HiSparkles className="text-lg" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm sm:text-lg font-bold text-gray-900">
                 AI Customer Insights &amp; Product Q&amp;A
               </h3>
               {insights && (
@@ -122,7 +122,7 @@ export default function ProductAiInsights({
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mt-0.5">
               Synthesized by Furniro AI from verified buyer reviews &amp;
               product specifications
             </p>
@@ -132,7 +132,7 @@ export default function ProductAiInsights({
         <button
           type="button"
           onClick={openInFullChatbot}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#B88E2F] hover:text-white bg-white hover:bg-[#B88E2F] border border-[#B88E2F] px-3.5 py-2 rounded-full transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-[#B88E2F] hover:text-white bg-white hover:bg-[#B88E2F] border border-[#B88E2F] px-3.5 py-2 rounded-full transition-colors shrink-0 w-full sm:w-auto"
         >
           <FiMessageCircle />
           Open in AI Concierge
@@ -148,43 +148,43 @@ export default function ProductAiInsights({
       ) : (
         insights && (
           <div className="pt-5 space-y-5">
-            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+            <p className="text-xs sm:text-base text-gray-700 leading-relaxed">
               {insights.summary}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Pros / Highlights */}
-              <div className="bg-white/90 border border-[#eee0cd] rounded-xl p-4">
+              <div className="bg-white/90 border border-[#eee0cd] rounded-xl p-4 min-w-0">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2.5 flex items-center gap-1.5">
-                  <FiCheckCircle />
-                  What Shoppers &amp; Stylists Highlight
+                  <FiCheckCircle className="shrink-0" />
+                  <span>What Shoppers &amp; Stylists Highlight</span>
                 </h4>
                 <ul className="space-y-1.5 text-xs sm:text-sm text-gray-700">
                   {insights.pros.map((pro, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="text-emerald-600 font-bold mt-0.5">
+                      <span className="text-emerald-600 font-bold mt-0.5 shrink-0">
                         ✓
                       </span>
-                      <span>{pro}</span>
+                      <span className="break-words">{pro}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* Considerations & Best For */}
-              <div className="bg-white/90 border border-[#eee0cd] rounded-xl p-4 flex flex-col justify-between">
+              <div className="bg-white/90 border border-[#eee0cd] rounded-xl p-4 flex flex-col justify-between min-w-0">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#B88E2F] mb-2.5 flex items-center gap-1.5">
-                    <FiInfo />
-                    Placement &amp; Care Notes
+                    <FiInfo className="shrink-0" />
+                    <span>Placement &amp; Care Notes</span>
                   </h4>
                   <ul className="space-y-1.5 text-xs sm:text-sm text-gray-700">
                     {insights.considerations.map((note, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="text-[#B88E2F] font-bold mt-0.5">
+                        <span className="text-[#B88E2F] font-bold mt-0.5 shrink-0">
                           •
                         </span>
-                        <span>{note}</span>
+                        <span className="break-words">{note}</span>
                       </li>
                     ))}
                   </ul>
@@ -210,20 +210,20 @@ export default function ProductAiInsights({
       )}
 
       {/* Ask AI About This Product (Amazon Rufus style) */}
-      <div className="mt-6 pt-5 border-t border-[#efe3d2]">
+      <div className="mt-6 pt-5 border-t border-[#efe3d2] w-full min-w-0">
         <p className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-2.5">
           Have a specific question about {productTitle}? Ask AI:
         </p>
 
         {/* Quick Question Chips */}
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
           {PRODUCT_QA_CHIPS.map((chip) => (
             <button
               key={chip}
               type="button"
               disabled={asking}
               onClick={() => handleAskQuestion(chip)}
-              className="text-xs font-medium bg-white hover:bg-[#F9F1E7] text-gray-700 hover:text-[#B88E2F] border border-[#e5d5be] px-3 py-1.5 rounded-full transition-colors"
+              className="text-[11px] sm:text-xs font-medium bg-white hover:bg-[#F9F1E7] text-gray-700 hover:text-[#B88E2F] border border-[#e5d5be] px-2.5 sm:px-3 py-1.5 rounded-full transition-colors text-left"
             >
               {chip}
             </button>
@@ -236,20 +236,20 @@ export default function ProductAiInsights({
             e.preventDefault();
             handleAskQuestion(question);
           }}
-          className="flex gap-2"
+          className="flex gap-2 w-full min-w-0"
         >
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder={`Ask anything about ${productTitle}...`}
+            placeholder={`Ask about ${productTitle}...`}
             disabled={asking}
-            className="flex-1 text-xs sm:text-sm bg-white border border-[#decbb0] focus:border-[#B88E2F] rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none"
+            className="flex-1 min-w-0 text-xs sm:text-sm bg-white border border-[#decbb0] focus:border-[#B88E2F] rounded-xl px-3.5 py-2.5 text-gray-900 focus:outline-none"
           />
           <button
             type="submit"
             disabled={asking || !question.trim()}
-            className="inline-flex items-center gap-1.5 bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold px-3.5 sm:px-4 py-2.5 rounded-xl disabled:opacity-50 transition-colors shrink-0"
           >
             <FiSend />
             <span>{asking ? "Asking..." : "Ask AI"}</span>
@@ -260,7 +260,7 @@ export default function ProductAiInsights({
         {(asking || qaAnswer) && (
           <div className="mt-3 bg-white border border-[#e2cfa9] rounded-xl p-4 text-xs sm:text-sm">
             {askedQuestion && (
-              <p className="font-semibold text-gray-900 mb-1">
+              <p className="font-semibold text-gray-900 mb-1 break-words">
                 Q: {askedQuestion}
               </p>
             )}
@@ -269,7 +269,9 @@ export default function ProductAiInsights({
                 Furniro AI is analyzing {productTitle} details...
               </p>
             ) : (
-              <p className="text-gray-700 leading-relaxed">{qaAnswer}</p>
+              <p className="text-gray-700 leading-relaxed break-words">
+                {qaAnswer}
+              </p>
             )}
           </div>
         )}

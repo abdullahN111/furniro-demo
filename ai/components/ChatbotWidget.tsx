@@ -333,45 +333,44 @@ export default function ChatbotWidget() {
 
   return createPortal(
     <>
-      {/* Vertical Portrait Chat Window — Light, Warm Cream & Gold Theme */}
+      {/* Vertical Portrait Chat Window — Strictly Bounded to Viewport on Mobile & Desktop */}
       {isOpen && (
         <aside
           aria-label="Furniro AI Concierge Chat"
           style={{
-            width: "min(380px, calc(100vw - 24px))",
-            height: "min(540px, calc(100vh - 116px))",
+            height: "min(535px, calc(100dvh - 108px))",
             zIndex: 9990,
           }}
-          className="fixed bottom-[86px] right-3 sm:right-6 rounded-2xl bg-[#FAF4EC] border border-[#DEC7A4] ring-1 ring-[#B88E2F]/20 shadow-[0_20px_50px_rgba(140,104,30,0.22)] flex flex-col overflow-hidden"
+          className="fixed bottom-[82px] left-3 right-3 sm:left-auto sm:right-6 sm:w-[380px] max-w-full rounded-2xl bg-[#FAF4EC] border border-[#DEC7A4] ring-1 ring-[#B88E2F]/20 shadow-[0_20px_50px_rgba(140,104,30,0.22)] flex flex-col overflow-hidden"
         >
           {/* Warm Gold & Cream Header */}
-          <div className="bg-gradient-to-r from-[#B88E2F] to-[#C89D3C] text-white px-4 py-3.5 flex items-center justify-between shrink-0 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-xl bg-[#FFF6E8] text-[#B88E2F] flex items-center justify-center shadow-xs shrink-0">
-                <HiSparkles className="text-xl" />
+          <div className="bg-gradient-to-r from-[#B88E2F] to-[#C89D3C] text-white px-3.5 sm:px-4 py-3 flex items-center justify-between gap-2 shrink-0 shadow-xs w-full min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FFF6E8] text-[#B88E2F] flex items-center justify-center shadow-xs shrink-0">
+                <HiSparkles className="text-lg sm:text-xl" />
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#B88E2F]" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold tracking-wide text-white">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-xs sm:text-sm font-bold tracking-wide text-white truncate">
                     Furniro AI Concierge
                   </h3>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-1.5 py-0.5 rounded-full shrink-0">
                     Live
                   </span>
                 </div>
-                <p className="text-[11px] text-[#FFF6E8]/90 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-[#FFF6E8]/90 mt-0.5 truncate">
                   Shop • Visual Match • Cart &amp; Orders
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
                 onClick={resetChat}
                 title="Reset conversation"
-                className="p-2 rounded-lg text-white/85 hover:text-white hover:bg-white/15 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg text-white/85 hover:text-white hover:bg-white/15 transition-colors"
               >
                 <FiRefreshCw className="text-sm" />
               </button>
@@ -379,7 +378,7 @@ export default function ChatbotWidget() {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label="Minimize AI Concierge"
-                className="p-2 rounded-lg text-white/85 hover:text-white hover:bg-white/15 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg text-white/85 hover:text-white hover:bg-white/15 transition-colors"
               >
                 <FiChevronDown className="text-lg" />
               </button>
@@ -388,8 +387,8 @@ export default function ChatbotWidget() {
 
           {/* Page-Aware Co-Browsing Banner */}
           {currentProductId && (
-            <div className="bg-[#FFF3E3] border-b border-[#E8D5B7] px-4 py-2 flex items-center justify-between text-xs text-gray-800 shrink-0">
-              <div className="flex items-center gap-1.5 truncate">
+            <div className="bg-[#FFF3E3] border-b border-[#E8D5B7] px-3.5 py-2 flex items-center justify-between gap-2 text-xs text-gray-800 shrink-0 w-full min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
                 <FiCompass className="text-[#B88E2F] shrink-0" />
                 <span className="truncate">
                   Viewing <strong className="text-[#B88E2F]">Product Page</strong>
@@ -400,24 +399,24 @@ export default function ChatbotWidget() {
                 onClick={() =>
                   sendMessage("What furniture pairs well with this item?")
                 }
-                className="text-[11px] font-bold text-[#B88E2F] hover:underline shrink-0 ml-2"
+                className="text-[11px] font-bold text-[#B88E2F] hover:underline shrink-0"
               >
                 Match Pairings →
               </button>
             </div>
           )}
 
-          {/* Messages Stream — Soft Warm Cream Interior (#FAF4EC) with Crisp White Assistant Cards */}
-          <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-3.5 bg-[#FAF4EC]">
+          {/* Messages Stream — Strictly Constrained Width */}
+          <div className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden px-3 sm:px-3.5 py-3.5 space-y-3.5 bg-[#FAF4EC]">
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex flex-col ${
+                className={`flex flex-col w-full min-w-0 ${
                   msg.role === "user" ? "items-end" : "items-start"
                 }`}
               >
                 <div
-                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed shadow-2xs ${
+                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed shadow-2xs break-words ${
                     msg.role === "user"
                       ? "bg-[#B88E2F] text-white font-medium rounded-br-xs"
                       : "bg-white text-gray-800 border border-[#E8D9C5] rounded-bl-xs"
@@ -433,7 +432,7 @@ export default function ChatbotWidget() {
                       />
                     </div>
                   )}
-                  <p className="whitespace-pre-line">
+                  <p className="whitespace-pre-line break-words">
                     {msg.role === "assistant"
                       ? renderFormattedText(msg.content)
                       : msg.content}
@@ -443,11 +442,11 @@ export default function ChatbotWidget() {
                 {/* Visual Analysis Chips (when photo was analyzed) */}
                 {msg.visualAnalysis && (
                   <div className="mt-2 w-full max-w-[92%] bg-[#FFF8EE] border border-[#E6D3B3] rounded-xl p-2.5 text-xs text-gray-800">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-[#B88E2F]">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-bold text-[#B88E2F] truncate">
                         {msg.visualAnalysis.detectedStyle}
                       </span>
-                      <span className="text-[10px] uppercase tracking-wider bg-white px-2 py-0.5 rounded-full text-gray-600 border border-[#E6D3B3]">
+                      <span className="text-[10px] uppercase tracking-wider bg-white px-2 py-0.5 rounded-full text-gray-600 border border-[#E6D3B3] shrink-0">
                         {msg.visualAnalysis.detectedCategory}
                       </span>
                     </div>
@@ -466,13 +465,13 @@ export default function ChatbotWidget() {
 
                 {/* Client Actions Confirmation Pill */}
                 {msg.clientActions && msg.clientActions.length > 0 && (
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  <div className="mt-1.5 flex flex-wrap gap-1.5 max-w-full">
                     {msg.clientActions.map((act, idx) => (
                       <span
                         key={idx}
                         className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full"
                       >
-                        <FiCheckCircle className="text-emerald-600" />
+                        <FiCheckCircle className="text-emerald-600 shrink-0" />
                         {act.type === "ADD_TO_CART" &&
                           `Added ${act.quantity || 1}x to Cart`}
                         {act.type === "REMOVE_FROM_CART" && "Removed from Cart"}
@@ -485,13 +484,13 @@ export default function ChatbotWidget() {
 
                 {/* Interactive Product Cards */}
                 {msg.products && msg.products.length > 0 && (
-                  <div className="mt-2.5 w-full space-y-2">
+                  <div className="mt-2.5 w-full min-w-0 space-y-2">
                     {msg.products.map((product) => {
                       const fav = isFavorite(product.id);
                       return (
                         <div
                           key={product.id}
-                          className="bg-white border border-[#E6D5BD] hover:border-[#B88E2F] rounded-xl p-2.5 flex items-center gap-3 shadow-2xs transition-all"
+                          className="bg-white border border-[#E6D5BD] hover:border-[#B88E2F] rounded-xl p-2.5 flex items-center gap-2.5 sm:gap-3 shadow-2xs transition-all w-full min-w-0"
                         >
                           <Link
                             href={`/product/${product.id}`}
@@ -541,7 +540,7 @@ export default function ChatbotWidget() {
                                 className="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-2.5 py-1 rounded-md transition-colors"
                               >
                                 <FiShoppingBag className="text-[10px]" />
-                                Add to Cart
+                                <span>Add</span>
                               </button>
                               <button
                                 type="button"
@@ -578,7 +577,7 @@ export default function ChatbotWidget() {
 
                 {/* Interactive Live Order Tracking Cards */}
                 {msg.orders && msg.orders.length > 0 && (
-                  <div className="mt-2.5 w-full space-y-2">
+                  <div className="mt-2.5 w-full min-w-0 space-y-2">
                     {msg.orders.map((order: AiOrderSummary) => {
                       const stepIdx = Math.max(
                         0,
@@ -590,14 +589,14 @@ export default function ChatbotWidget() {
                       return (
                         <div
                           key={order.orderId}
-                          className="bg-white border border-[#E6D5BD] rounded-xl p-3 shadow-2xs text-xs"
+                          className="bg-white border border-[#E6D5BD] rounded-xl p-3 shadow-2xs text-xs w-full min-w-0"
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-bold text-gray-900 flex items-center gap-1.5">
-                              <FiTruck className="text-[#B88E2F]" />
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="font-bold text-gray-900 flex items-center gap-1.5 truncate">
+                              <FiTruck className="text-[#B88E2F] shrink-0" />
                               Order #{order.orderId.slice(0, 8)}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF3E3] text-[#B88E2F]">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF3E3] text-[#B88E2F] shrink-0">
                               {order.orderStatus}
                             </span>
                           </div>
@@ -605,7 +604,7 @@ export default function ChatbotWidget() {
                           {/* Mini Progress Bar */}
                           <div className="grid grid-cols-5 gap-1 my-2">
                             {ORDER_STEPS.map((step, idx) => (
-                              <div key={step} className="flex flex-col gap-1">
+                              <div key={step} className="flex flex-col gap-1 min-w-0">
                                 <div
                                   className={`h-1.5 rounded-full ${
                                     idx <= stepIdx
@@ -660,7 +659,7 @@ export default function ChatbotWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Prompt Chips — Touch/Swipe & Wheel Scrollable with NO visible scrollbar */}
+          {/* Quick Prompt Chips — Constrained w-full min-w-0 so it never stretches the flex column */}
           <div
             ref={chipsContainerRef}
             onWheel={(e) => {
@@ -669,7 +668,7 @@ export default function ChatbotWidget() {
               }
             }}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            className="no-scrollbar px-3 py-2 bg-[#F5EBDD] border-t border-[#E6D5BD] flex items-center gap-1.5 overflow-x-auto shrink-0 select-none"
+            className="no-scrollbar w-full max-w-full min-w-0 px-3 py-2 bg-[#F5EBDD] border-t border-[#E6D5BD] flex items-center gap-1.5 overflow-x-auto shrink-0 select-none"
           >
             {quickPrompts.map((prompt) => (
               <button
@@ -686,22 +685,22 @@ export default function ChatbotWidget() {
 
           {/* Attached Image Preview Bar */}
           {attachedImage && (
-            <div className="px-3 py-2 bg-[#FFF3E3] border-t border-[#E6D5BD] flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
+            <div className="w-full min-w-0 px-3 py-2 bg-[#FFF3E3] border-t border-[#E6D5BD] flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={attachedImage.previewUrl}
                   alt="Preview"
-                  className="w-9 h-9 rounded-lg object-cover border border-[#B88E2F]"
+                  className="w-9 h-9 rounded-lg object-cover border border-[#B88E2F] shrink-0"
                 />
-                <span className="text-xs text-gray-800 font-medium">
+                <span className="text-xs text-gray-800 font-medium truncate">
                   Photo ready for AI Visual Match
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setAttachedImage(null)}
-                className="p-1 text-gray-500 hover:text-red-500"
+                className="p-1 text-gray-500 hover:text-red-500 shrink-0"
               >
                 <FiX />
               </button>
@@ -714,7 +713,7 @@ export default function ChatbotWidget() {
               e.preventDefault();
               sendMessage();
             }}
-            className="p-3 bg-white border-t border-[#E6D5BD] flex items-center gap-2 shrink-0"
+            className="w-full min-w-0 p-2.5 sm:p-3 bg-white border-t border-[#E6D5BD] flex items-center gap-2 shrink-0"
           >
             <input
               ref={fileInputRef}
@@ -742,7 +741,7 @@ export default function ChatbotWidget() {
                   : "Ask for furniture, cart, or orders..."
               }
               disabled={isLoading}
-              className="flex-1 text-xs sm:text-sm text-gray-800 placeholder-gray-400 bg-[#FAF4EC] border border-[#E2CEB0] focus:border-[#B88E2F] focus:bg-white rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors"
+              className="flex-1 min-w-0 text-xs sm:text-sm text-gray-800 placeholder-gray-400 bg-[#FAF4EC] border border-[#E2CEB0] focus:border-[#B88E2F] focus:bg-white rounded-xl px-3 py-2.5 focus:outline-none transition-colors"
             />
 
             <button
@@ -757,10 +756,10 @@ export default function ChatbotWidget() {
         </aside>
       )}
 
-      {/* Floating Bottom-Right Launcher Button — Warm Gold & Cream (No Black!) */}
+      {/* Floating Bottom-Right Launcher Button */}
       <div
         style={{ zIndex: 9990 }}
-        className="fixed bottom-6 right-3 sm:right-6"
+        className="fixed bottom-5 right-3 sm:bottom-6 sm:right-6 max-w-[calc(100vw-24px)]"
       >
         <button
           type="button"
@@ -768,7 +767,7 @@ export default function ChatbotWidget() {
           aria-label={
             isOpen ? "Close Furniro AI Concierge" : "Open Furniro AI Concierge"
           }
-          className={`group flex items-center gap-2.5 rounded-full border-2 border-[#FFF3E3] bg-gradient-to-r from-[#B88E2F] to-[#C89D3C] hover:from-[#a37c26] hover:to-[#b88e2f] text-white shadow-[0_12px_30px_rgba(184,142,47,0.4)] transition-all duration-300 hover:scale-105 ${
+          className={`group flex items-center gap-2.5 rounded-full border-2 border-[#FFF3E3] bg-gradient-to-r from-[#B88E2F] to-[#C89D3C] hover:from-[#a37c26] hover:to-[#b88e2f] text-white shadow-[0_12px_30px_rgba(184,142,47,0.4)] transition-all duration-300 ${
             isOpen ? "p-3" : "pl-2.5 pr-4 py-2"
           }`}
         >
