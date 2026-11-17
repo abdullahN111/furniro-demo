@@ -10,11 +10,11 @@ export async function GET() {
   }
 
   const user = await serverClient.fetch(
-    `*[_type=="user" && email==$email][0]{
+    `*[_type=="user" && lower(email)==$email][0]{
       favorites
     }`,
     {
-      email: session.user.email,
+      email: session.user.email.trim().toLowerCase(),
     },
   );
 

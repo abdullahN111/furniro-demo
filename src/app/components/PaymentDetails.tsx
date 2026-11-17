@@ -4,13 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { CartItem } from "../context/CartContext";
-import { FiLock, FiCreditCard, FiTruck } from "react-icons/fi";
+import { FiLock, FiCreditCard, FiTruck, FiAlertCircle } from "react-icons/fi";
 
 interface PaymentDetailsProps {
   selectedOption: string;
   setSelectedOption: React.Dispatch<React.SetStateAction<string>>;
   amount: number;
   clientSecret?: string;
+  stripeError?: string;
   isProcessing: boolean;
   items: CartItem[];
 }
@@ -19,6 +20,7 @@ const PaymentDetails = ({
   selectedOption,
   setSelectedOption,
   clientSecret,
+  stripeError,
   isProcessing,
   items,
 }: PaymentDetailsProps) => {
@@ -29,6 +31,8 @@ const PaymentDetails = ({
         : item.price;
     return total + (isNaN(price) ? 0 : price * item.quantity);
   }, 0);
+
+  const isStripeWaiting = selectedOption === "Stripe" && !clientSecret;
 
   return (
     <div className="bg-[#FCF8F3] border border-[#f0e4d3] rounded-2xl p-6 sm:p-8 shadow-xs sticky top-28">
@@ -154,10 +158,15 @@ const PaymentDetails = ({
 
         {selectedOption === "Stripe" && (
           <div className="mt-3 p-4 bg-white rounded-xl border border-gray-200">
-            {clientSecret ? (
+            {stripeError ? (
+              <div className="flex items-start gap-2 text-xs text-red-600 py-2">
+                <FiAlertCircle className="text-base shrink-0 mt-0.5" />
+                <span>{stripeError}</span>
+              </div>
+            ) : clientSecret ? (
               <PaymentElement />
             ) : (
-              <p className="text-xs text-gray-500 text-center py-4">
+              <p className="text-xs text-gray-500 text-center py-4 animate-pulse">
                 Loading secure Stripe payment form...
               </p>
             )}
@@ -180,14 +189,16 @@ const PaymentDetails = ({
       <button
         type="submit"
         form="checkout-form"
-        disabled={isProcessing}
+        disabled={isProcessing || isStripeWaiting}
         className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#B88E2F] hover:bg-[#9f7924] text-white font-semibold py-4 px-6 text-base shadow-sm transition-colors disabled:opacity-60"
       >
         <FiLock className="text-sm" />
         <span>
           {isProcessing
             ? "Processing Order..."
-            : `Place Order — $${cartTotal.toFixed(2)}`}
+            : isStripeWaiting
+              ? "Initializing Stripe..."
+              : `Place Order — $${cartTotal.toFixed(2)}`}
         </span>
       </button>
     </div>

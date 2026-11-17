@@ -44,7 +44,6 @@ export const order = defineType({
       type: "array",
       of: [{ type: "number" }],
     },
-
     {
       name: "total",
       title: "Total",
@@ -68,8 +67,31 @@ export const order = defineType({
       name: "paymentMethod",
       title: "Payment Method",
       type: "string",
+      options: {
+        list: ["Cash On Delivery", "Stripe"],
+      },
+      initialValue: "Cash On Delivery",
     },
-
+    {
+      name: "paid",
+      title: "Paid",
+      type: "boolean",
+      initialValue: false,
+    },
+    {
+      name: "paymentStatus",
+      title: "Payment Status",
+      type: "string",
+      options: {
+        list: ["Pending", "Paid", "Failed", "Refunded"],
+      },
+      initialValue: "Pending",
+    },
+    {
+      name: "stripePaymentIntentId",
+      title: "Stripe PaymentIntent ID",
+      type: "string",
+    },
     {
       name: "createdAt",
       title: "Created At",
@@ -77,4 +99,3 @@ export const order = defineType({
     },
   ],
 });
-

@@ -1,10 +1,16 @@
 import { auth } from "@/auth/authSetup";
 import { NextResponse } from "next/server";
 
+const PROTECTED_ROUTES = ["/checkout", "/orders", "/track-order"];
+
 export default auth((req) => {
   const { pathname, search } = req.nextUrl;
 
-  if (!req.auth && pathname === "/checkout") {
+  const isProtected = PROTECTED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+
+  if (!req.auth && isProtected) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
@@ -18,7 +24,9 @@ export default auth((req) => {
   ) {
     const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
     const target =
-      callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
+      callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+        ? callbackUrl
+        : "/";
     return NextResponse.redirect(new URL(target, req.nextUrl.origin));
   }
 

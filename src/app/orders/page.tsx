@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import SecondaryHeader from "@/app/components/shared/SecondaryHeader";
 import ServiceBar from "@/app/components/shared/ServiceBar";
 import Image from "next/image";
-import { fetchOrdersByUserEmail } from "@/app/Data/orderData";
 import type { Order } from "@/app/Data/orderData";
 import { useSession } from "next-auth/react";
 import { fetchProducts, ProductCardData } from "../Data";
@@ -179,10 +178,27 @@ const OrderCard = ({
               {order.status}
             </span>
             {order.paymentMethod && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-500">
                 &bull; {order.paymentMethod}
               </span>
             )}
+            <span
+              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                order.paid ||
+                order.paymentStatus === "Paid" ||
+                order.paymentMethod === "Stripe" ||
+                order.status === "Delivered"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {order.paid ||
+              order.paymentStatus === "Paid" ||
+              order.paymentMethod === "Stripe" ||
+              order.status === "Delivered"
+                ? "Paid"
+                : "Pay on Delivery"}
+            </span>
           </div>
 
           {/* Stepper */}
@@ -394,11 +410,12 @@ const OrdersPage = () => {
       }
 
       try {
-        const [ordersData, fetchedProducts] = await Promise.all([
-          fetchOrdersByUserEmail(session.user.email),
+        const [orderRes, fetchedProducts] = await Promise.all([
+          fetch("/api/order", { cache: "no-store" }),
           fetchProducts(),
         ]);
-        setOrders(ordersData);
+        const orderJson = orderRes.ok ? await orderRes.json() : { orders: [] };
+        setOrders(Array.isArray(orderJson.orders) ? orderJson.orders : []);
         setProducts(fetchedProducts);
       } catch (error) {
         console.error("Failed to fetch orders:", error);

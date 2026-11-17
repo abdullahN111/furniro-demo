@@ -34,7 +34,13 @@ import {
   AiProductCard,
 } from "@ai/types";
 
-const ORDER_STEPS = ["Pending", "Processing", "Shipped", "Delivered"];
+const ORDER_STEPS = [
+  "Pending",
+  "Processing",
+  "Dispatched",
+  "Shipped",
+  "Delivered",
+];
 
 export default function ChatbotWidget() {
   const pathname = usePathname();
@@ -597,7 +603,7 @@ export default function ChatbotWidget() {
                           </div>
 
                           {/* Mini Progress Bar */}
-                          <div className="grid grid-cols-4 gap-1 my-2">
+                          <div className="grid grid-cols-5 gap-1 my-2">
                             {ORDER_STEPS.map((step, idx) => (
                               <div key={step} className="flex flex-col gap-1">
                                 <div

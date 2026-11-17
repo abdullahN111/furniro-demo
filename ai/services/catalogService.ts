@@ -1,10 +1,12 @@
 import { client } from "@/sanity/lib/client";
+import { serverClient } from "@/sanity/lib/serverClient";
 import { AiOrderSummary, AiProductCard } from "@ai/types";
 
 interface RawSanityProduct {
   _id: string;
   title: string;
   price: number;
+  dicountPercentage?: number;
   discountPercentage?: number;
   isNew?: boolean;
   tags?: string[];
@@ -16,6 +18,8 @@ interface RawSanityOrder {
   _id: string;
   orderId: string;
   paymentMethod?: string;
+  paid?: boolean;
+  paymentStatus?: string;
   status?: string;
   total?: number;
   createdAt?: string;
@@ -56,16 +60,17 @@ export function toAiProductCard(
   raw: RawSanityProduct,
   matchReason?: string
 ): AiProductCard {
-  const discount = raw.discountPercentage || 0;
-  const finalPrice =
+  const discount = Number(raw.dicountPercentage ?? raw.discountPercentage ?? 0) || 0;
+  const finalPrice = Number(raw.price) || 0;
+  const originalPrice =
     discount > 0
-      ? Math.round(raw.price - (raw.price * discount) / 100)
-      : raw.price;
+      ? Math.round(finalPrice * (1 + discount / 100) * 100) / 100
+      : finalPrice;
 
   return {
     id: raw._id,
     title: raw.title,
-    price: raw.price,
+    price: originalPrice,
     discountPercentage: discount,
     finalPrice,
     imageUrl: raw.imageUrl || "/placeholder.svg",
@@ -88,7 +93,7 @@ export async function fetchAllCatalogProducts(): Promise<AiProductCard[]> {
         _id,
         title,
         price,
-        discountPercentage,
+        dicountPercentage,
         isNew,
         tags,
         description,
@@ -311,11 +316,13 @@ export async function lookupOrdersForAi(options: {
     let rawOrders: RawSanityOrder[] = [];
 
     if (cleanId) {
-      rawOrders = await client.fetch<RawSanityOrder[]>(
+      rawOrders = await serverClient.fetch<RawSanityOrder[]>(
         `*[_type == "order" && (orderId == $cleanId || _id == $cleanId)] | order(createdAt desc)[0...3]{
           _id,
           orderId,
           paymentMethod,
+          paid,
+          paymentStatus,
           status,
           total,
           createdAt,
@@ -331,11 +338,13 @@ export async function lookupOrdersForAi(options: {
         { cleanId }
       );
     } else if (userEmail) {
-      rawOrders = await client.fetch<RawSanityOrder[]>(
+      rawOrders = await serverClient.fetch<RawSanityOrder[]>(
         `*[_type == "order" && lower(user.email) == $email] | order(createdAt desc)[0...3]{
           _id,
           orderId,
           paymentMethod,
+          paid,
+          paymentStatus,
           status,
           total,
           createdAt,
@@ -361,15 +370,18 @@ export async function lookupOrdersForAi(options: {
         imageUrl: item?.imageUrl,
       }));
 
+      const isPaid =
+        Boolean(order.paid) ||
+        order.paymentStatus === "Paid" ||
+        order.paymentMethod === "Stripe" ||
+        order.status === "Delivered";
+
       return {
         orderId: order.orderId || order._id,
         trackingNumber: order.orderId || order._id,
         orderStatus: order.status || "Pending",
-        paymentStatus:
-          order.paymentMethod === "cod" && order.status !== "Delivered"
-            ? "Pay on Delivery"
-            : "Paid",
-        paymentMethod: order.paymentMethod || "stripe",
+        paymentStatus: isPaid ? "Paid" : "Pay on Delivery",
+        paymentMethod: order.paymentMethod || "Cash On Delivery",
         totalPrice: order.total || 0,
         createdAt: order.createdAt || new Date().toISOString(),
         items,

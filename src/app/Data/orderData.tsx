@@ -26,6 +26,9 @@ export interface Order {
   status: string;
   dispatchedAt: string;
   paymentMethod: string;
+  paid?: boolean;
+  paymentStatus?: string;
+  stripePaymentIntentId?: string;
   createdAt: string;
 }
 

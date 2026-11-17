@@ -22,12 +22,12 @@ export async function POST(req: Request) {
       );
     }
     const user = await serverClient.fetch(
-      `*[_type == "user" && email == $email][0]{
+      `*[_type == "user" && lower(email) == $email][0]{
         _id,
         favorites
       }`,
       {
-        email: session.user.email,
+        email: session.user.email.trim().toLowerCase(),
       },
     );
 
@@ -97,8 +97,8 @@ export async function GET(req: Request) {
 
   if (productId) {
     const user = await serverClient.fetch(
-      `*[_type=="user" && email==$email][0]{ favorites }`,
-      { email: session?.user?.email },
+      `*[_type=="user" && lower(email)==$email][0]{ favorites }`,
+      { email: session?.user?.email?.trim().toLowerCase() },
     );
 
     const isFavorite =
@@ -114,7 +114,7 @@ export async function GET(req: Request) {
   }
 
   const favorites = await serverClient.fetch(
-    `*[_type=="user" && email==$email][0]{
+    `*[_type=="user" && lower(email)==$email][0]{
     favorites[]->{
       _id,
       title,
@@ -128,7 +128,7 @@ export async function GET(req: Request) {
     }
   }.favorites`,
     {
-      email: session.user.email,
+      email: session.user.email.trim().toLowerCase(),
     },
   );
 

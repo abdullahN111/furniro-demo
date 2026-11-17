@@ -14,12 +14,12 @@ export async function GET() {
       `count(
         *[
           _type == "order" &&
-          user.email == $email &&
+          lower(user.email) == $email &&
           status != "Delivered"
         ]
       )`,
       {
-        email: session.user.email,
+        email: session.user.email.trim().toLowerCase(),
       },
     );
 

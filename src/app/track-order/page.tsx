@@ -26,10 +26,13 @@ interface OrderItem {
 interface OrderDetails {
   orderId: string;
   paymentMethod: string;
+  paid?: boolean;
+  paymentStatus?: string;
   status: string;
   total: number;
   user: string;
   items: OrderItem[];
+  itemPrices?: number[];
   itemQuantities: number[];
 }
 
@@ -72,6 +75,7 @@ function OrderTrackingContent() {
         ...orderData,
         items: (orderData.items || []).map((item: OrderItem, index: number) => ({
           ...item,
+          price: orderData.itemPrices?.[index] ?? item.price ?? 0,
           quantity: orderData.itemQuantities?.[index] || 1,
         })),
       });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import Link from "next/link";
@@ -20,44 +20,86 @@ const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 const Page = () => {
   const [selectedOption, setSelectedOption] = useState("Cash On Delivery");
   const [clientSecret, setClientSecret] = useState("");
+  const [stripeError, setStripeError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const { cartItems, selectedItems, removeSelectedItems } = useCart();
   const { showToast } = useToast();
   const router = useRouter();
 
-  const selectedCartItems = cartItems.filter((item) =>
-    selectedItems.includes(item.id)
+  const selectedCartItems = useMemo(
+    () => cartItems.filter((item) => selectedItems.includes(item.id)),
+    [cartItems, selectedItems]
   );
 
-  const cartTotal = selectedCartItems.reduce((total, item) => {
-    const price =
-      typeof item.price === "string"
-        ? parseFloat(item.price.replace(/[^0-9.]+/g, ""))
-        : item.price;
+  const cartTotal = useMemo(
+    () =>
+      selectedCartItems.reduce((total, item) => {
+        const price =
+          typeof item.price === "string"
+            ? parseFloat(item.price.replace(/[^0-9.]+/g, ""))
+            : item.price;
 
-    return total + (isNaN(price) ? 0 : price * item.quantity);
-  }, 0);
+        return total + (isNaN(price) ? 0 : price * item.quantity);
+      }, 0),
+    [selectedCartItems]
+  );
+
+  const itemsSignature = useMemo(
+    () =>
+      selectedCartItems
+        .map((i) => `${i.id}:${i.quantity}`)
+        .sort()
+        .join("|"),
+    [selectedCartItems]
+  );
 
   useEffect(() => {
-    if (selectedOption === "Stripe" && cartTotal > 0) {
+    if (selectedOption === "Stripe" && cartTotal > 0 && selectedCartItems.length > 0) {
+      let active = true;
+      setStripeError("");
       fetch("/api/payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: cartTotal }),
+        body: JSON.stringify({
+          amount: cartTotal,
+          items: selectedCartItems.map((i) => ({
+            productId: i.id,
+            quantity: i.quantity,
+          })),
+        }),
       })
-        .then((res) => res.json())
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || "Could not initialize Stripe payment");
+          }
+          return data;
+        })
         .then((data) => {
+          if (!active) return;
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           }
         })
         .catch((err) => {
+          if (!active) return;
           console.error("Failed to initialize Stripe PaymentIntent:", err);
+          setStripeError(
+            err instanceof Error
+              ? err.message
+              : "Unable to load Stripe right now. Please try Cash On Delivery or refresh."
+          );
         });
+
+      return () => {
+        active = false;
+      };
     } else {
       setClientSecret("");
+      setStripeError("");
     }
-  }, [selectedOption, cartTotal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOption, cartTotal, itemsSignature]);
 
   const handleOrderCreated = (orderId: string) => {
     localStorage.setItem("lastOrderId", orderId);
@@ -132,6 +174,7 @@ const Page = () => {
                 setSelectedOption={setSelectedOption}
                 amount={cartTotal}
                 clientSecret={clientSecret}
+                stripeError={stripeError}
                 isProcessing={isProcessing}
                 items={selectedCartItems}
               />

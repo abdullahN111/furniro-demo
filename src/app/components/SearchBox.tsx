@@ -15,11 +15,11 @@ export default function SearchBox({ close }: { close?: () => void }) {
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<ProductCardData[]>(
-    cachedProducts || [],
+    cachedProducts || []
   );
   const [loading, setLoading] = useState(!cachedProducts);
   const [filteredProducts, setFilteredProducts] = useState<ProductCardData[]>(
-    [],
+    []
   );
   const [filteredRoutes, setFilteredRoutes] = useState<typeof staticRoutes>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -77,11 +77,11 @@ export default function SearchBox({ close }: { close?: () => void }) {
         p.title.toLowerCase().includes(lower) ||
         p.tags.toLowerCase().includes(lower) ||
         (p.featured && p.featured.toLowerCase().includes(lower)) ||
-        p.description.toLowerCase().includes(lower),
+        p.description.toLowerCase().includes(lower)
     );
 
     const routes = staticRoutes.filter((r) =>
-      r.title.toLowerCase().includes(lower),
+      r.title.toLowerCase().includes(lower)
     );
 
     setFilteredProducts(prod.slice(0, 6));
@@ -111,31 +111,32 @@ export default function SearchBox({ close }: { close?: () => void }) {
       aria-modal="true"
       aria-label="Search products and pages"
       style={{ zIndex: 9998 }}
-      className={`fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-start pt-16 sm:pt-24 px-4 transition-opacity duration-200 ${
+      className={`fixed inset-0 bg-black/55 backdrop-blur-xs flex justify-center items-start pt-3 sm:pt-20 px-2.5 sm:px-4 transition-opacity duration-200 ${
         isOpen ? "opacity-100" : "opacity-0"
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-[#e6d5bd] overflow-hidden transform transition-all duration-200 ${
+        className={`bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-[#e6d5bd] overflow-hidden transform transition-all duration-200 flex flex-col max-h-[90dvh] sm:max-h-[80vh] ${
           isOpen ? "translate-y-0 scale-100" : "-translate-y-4 scale-95"
         }`}
       >
-        <div className="flex items-center border-b border-gray-100 px-4 py-3.5 gap-2">
-          <FiSearch className="h-5 w-5 text-[#B88E2F] shrink-0 mr-1" />
+        {/* Top Search Input Row */}
+        <div className="flex items-center border-b border-gray-100 px-3 sm:px-4 py-2.5 sm:py-3.5 gap-1.5 sm:gap-2 shrink-0">
+          <FiSearch className="h-4 w-4 sm:h-5 sm:w-5 text-[#B88E2F] shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search furniture, room styles, or pages..."
-            className="block w-full py-1 text-base sm:text-lg text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+            placeholder="Search furniture, styles, or pages..."
+            className="block w-full min-w-0 py-1 text-sm sm:text-base text-gray-800 placeholder-gray-400 outline-none bg-transparent"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
+              className="text-xs font-medium text-gray-400 hover:text-gray-700 px-1.5 py-1 shrink-0"
             >
               Clear
             </button>
@@ -144,36 +145,37 @@ export default function SearchBox({ close }: { close?: () => void }) {
             type="button"
             onClick={() => setVisualModalOpen(true)}
             title="AI Visual Search — Upload a room or furniture photo"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#FFF3E3] hover:bg-[#B88E2F] text-[#B88E2F] hover:text-white border border-[#E2CEB0] px-3 py-1.5 rounded-full transition-colors shrink-0"
+            className="inline-flex items-center gap-1 text-xs font-semibold bg-[#FFF3E3] hover:bg-[#B88E2F] text-[#B88E2F] hover:text-white border border-[#E2CEB0] px-2.5 sm:px-3 py-1.5 rounded-full transition-colors shrink-0"
           >
-            <FiCamera className="text-sm" />
-            <span className="hidden sm:inline">Visual Search</span>
-            <HiSparkles className="text-xs" />
+            <FiCamera className="text-xs sm:text-sm" />
+            <span className="text-[11px] sm:text-xs">Photo</span>
+            <HiSparkles className="text-[10px] sm:text-xs" />
           </button>
           <button
             type="button"
             onClick={handleClose}
             aria-label="Close search"
-            className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
           >
             <FiX className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="max-h-[65vh] overflow-y-auto">
+        {/* Scrollable Content Area */}
+        <div className="overflow-y-auto flex-1">
           {!query.trim() ? (
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                <p className="text-[11px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
                   Popular Searches
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {quickTags.map((tag) => (
                     <button
                       key={tag}
                       type="button"
                       onClick={() => setQuery(tag)}
-                      className="px-3.5 py-1.5 rounded-full text-sm bg-[#F9F1E7] text-gray-700 hover:bg-[#B88E2F] hover:text-white transition-colors"
+                      className="px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm bg-[#F9F1E7] text-gray-700 hover:bg-[#B88E2F] hover:text-white transition-colors"
                     >
                       {tag}
                     </button>
@@ -181,27 +183,27 @@ export default function SearchBox({ close }: { close?: () => void }) {
                 </div>
               </div>
 
-              {/* AI Visual Search Banner inside Search Modal */}
-              <div className="rounded-xl bg-[#FFF3E3] border border-[#E6D5BD] p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shrink-0">
-                    <FiCamera className="text-lg" />
+              {/* AI Visual Search Banner inside Search Modal — Responsive Stack on Mobile */}
+              <div className="rounded-xl bg-[#FFF3E3] border border-[#E6D5BD] p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#B88E2F] text-white flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                    <FiCamera className="text-base sm:text-lg" />
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                      Shop by Photo (AI Visual Match)
-                      <HiSparkles className="text-[#B88E2F]" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-gray-900 flex items-center gap-1.5 flex-wrap">
+                      <span>Shop by Photo (AI Visual Match)</span>
+                      <HiSparkles className="text-[#B88E2F] shrink-0" />
                     </p>
-                    <p className="text-xs text-gray-600">
-                      Upload a photo of a room or furniture item to find
-                      matching pieces in our catalog.
+                    <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5 leading-relaxed">
+                      Upload a photo of a room or furniture piece to find
+                      matching items in our catalog.
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setVisualModalOpen(true)}
-                  className="text-xs font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-3.5 py-2 rounded-lg transition-colors shrink-0"
+                  className="w-full sm:w-auto text-center text-xs font-semibold bg-[#B88E2F] hover:bg-[#9f7924] text-white px-3.5 py-2.5 sm:py-2 rounded-lg transition-colors shrink-0"
                 >
                   Upload Photo
                 </button>
@@ -212,11 +214,11 @@ export default function SearchBox({ close }: { close?: () => void }) {
               Searching catalog...
             </div>
           ) : filteredProducts.length === 0 && filteredRoutes.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-600 font-medium">
+            <div className="p-6 sm:p-8 text-center">
+              <p className="text-gray-600 font-medium text-sm sm:text-base">
                 No matches found for &ldquo;{query}&rdquo;
               </p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-400 mt-1">
                 Try searching by furniture type, tag, or use AI Visual Search.
               </p>
             </div>
@@ -224,7 +226,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
             <div>
               {filteredProducts.length > 0 && (
                 <div>
-                  <p className="px-5 py-2.5 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wider">
+                  <p className="px-4 sm:px-5 py-2 text-[11px] sm:text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wider">
                     Products
                   </p>
                   <div className="divide-y divide-gray-100">
@@ -233,10 +235,10 @@ export default function SearchBox({ close }: { close?: () => void }) {
                         key={p._id}
                         href={`/product/${p.slug.current}`}
                         onClick={handleClose}
-                        className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-[#FCF8F3] transition-colors group"
+                        className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-[#FCF8F3] transition-colors group"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                             <Image
                               src={p.image}
                               alt={p.title}
@@ -246,20 +248,20 @@ export default function SearchBox({ close }: { close?: () => void }) {
                             />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm sm:text-base font-semibold text-gray-800 group-hover:text-[#B88E2F] transition-colors truncate">
+                            <p className="text-xs sm:text-base font-semibold text-gray-800 group-hover:text-[#B88E2F] transition-colors truncate">
                               {p.title}
                             </p>
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-[11px] sm:text-xs text-gray-500 truncate">
                               {p.featured || p.tags}
                             </p>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-sm sm:text-base font-bold text-[#B88E2F]">
+                          <span className="text-xs sm:text-base font-bold text-[#B88E2F]">
                             ${Number(p.price).toFixed(2)}
                           </span>
                           {p.oldPrice && (
-                            <span className="block text-xs text-gray-400 line-through">
+                            <span className="block text-[10px] sm:text-xs text-gray-400 line-through">
                               ${p.oldPrice}
                             </span>
                           )}
@@ -272,7 +274,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
 
               {filteredRoutes.length > 0 && (
                 <div>
-                  <p className="px-5 py-2.5 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wider">
+                  <p className="px-4 sm:px-5 py-2 text-[11px] sm:text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wider">
                     Pages
                   </p>
                   <div className="divide-y divide-gray-100">
@@ -281,7 +283,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
                         key={r.path}
                         href={r.path}
                         onClick={handleClose}
-                        className="flex items-center justify-between px-5 py-3 hover:bg-[#FCF8F3] transition-colors text-sm sm:text-base font-medium text-gray-700 hover:text-[#B88E2F]"
+                        className="flex items-center justify-between px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-[#FCF8F3] transition-colors text-xs sm:text-base font-medium text-gray-700 hover:text-[#B88E2F]"
                       >
                         <span>{r.title}</span>
                         <FiArrowRight className="text-gray-400" />
@@ -295,7 +297,7 @@ export default function SearchBox({ close }: { close?: () => void }) {
         </div>
 
         {query.trim() && (
-          <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs sm:text-sm text-gray-500">
+          <div className="px-4 sm:px-5 py-2.5 sm:py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs sm:text-sm text-gray-500 shrink-0">
             <span>
               Showing {filteredProducts.length + filteredRoutes.length} result
               {filteredProducts.length + filteredRoutes.length === 1 ? "" : "s"}
@@ -311,6 +313,6 @@ export default function SearchBox({ close }: { close?: () => void }) {
         )}
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

@@ -65,14 +65,14 @@ const ShopFilter = ({
     <>
       <div
         ref={filterRef}
-        className="flex flex-col gap-4 px-4 sm:px-8 lg:px-12 py-5 max-w-[1440px] bg-[#F9F1E7] shadow-xs border-y border-[#f0e4d3] w-full mb-10"
+        className="flex flex-col gap-3.5 px-4 sm:px-8 lg:px-12 py-4 sm:py-5 max-w-[1440px] bg-[#F9F1E7] shadow-xs border-y border-[#f0e4d3] w-full mb-8 sm:mb-10"
       >
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5 lg:gap-4">
           {/* Left: Category Pills & Result Summary */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+          <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3">
             {onSelectCategory && (
-              <div className="flex flex-wrap items-center gap-2 pr-2 lg:border-r lg:border-[#e2d3be]">
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 mr-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pr-0 lg:pr-2 lg:border-r lg:border-[#e2d3be]">
+                <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-gray-700 mr-0.5">
                   <FiSliders className="text-[#B88E2F]" />
                   Room:
                 </span>
@@ -85,7 +85,7 @@ const ShopFilter = ({
                       key={cat}
                       type="button"
                       onClick={() => onSelectCategory(value)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+                      className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                         isActive
                           ? "bg-[#B88E2F] text-white shadow-xs"
                           : "bg-white text-gray-700 hover:bg-[#fff9f0] border border-gray-200"
@@ -103,7 +103,7 @@ const ShopFilter = ({
                     <button
                       type="button"
                       onClick={() => onSelectCategory("")}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-[#B88E2F] text-white shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-[#B88E2F] text-white shadow-xs"
                     >
                       <span>&ldquo;{selectedCategory}&rdquo;</span>
                       <FiX />
@@ -112,7 +112,7 @@ const ShopFilter = ({
               </div>
             )}
 
-            <div className="text-sm text-gray-600 px-3 py-1.5 rounded-lg bg-white/80 border border-gray-200">
+            <div className="text-xs sm:text-sm text-gray-600 px-3 py-1.5 rounded-lg bg-white/80 border border-gray-200">
               Showing{" "}
               <span className="font-semibold text-gray-900">
                 {displayStart}&ndash;{displayEnd}
@@ -126,110 +126,117 @@ const ShopFilter = ({
           </div>
 
           {/* Right: AI Visual Search, Show & Sort Controls */}
-          <div className="flex flex-wrap justify-center lg:justify-end items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 sm:gap-4 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#eadbc6]">
             <button
               type="button"
               onClick={() => setVisualSearchOpen(true)}
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#B88E2F] hover:bg-[#9f7924] text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors"
             >
-              <FiCamera className="text-sm text-[#FFF3E3]" />
-              <span>AI Visual Search</span>
+              <FiCamera className="text-xs sm:text-sm text-[#FFF3E3]" />
+              <span>Visual Search</span>
               <HiSparkles className="text-xs text-[#FFF3E3]" />
             </button>
 
-            <div className="flex items-center gap-2.5">
-              <label className="text-sm font-medium text-gray-700">Show</label>
-              <div className="relative w-[84px]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSortOpen(false);
-                    setShowOpen((prev) => !prev);
-                  }}
-                  className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-sm font-semibold text-gray-800 shadow-2xs hover:border-[#B88E2F] transition-all"
-                >
-                  <span>
-                    {showOptions.find((o) => o.value === productsPerPage)?.label}
-                  </span>
-                  <span
-                    className={`text-xs text-gray-400 transition-transform duration-200 ${
-                      showOpen ? "rotate-180" : ""
-                    }`}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-700">
+                  Show
+                </label>
+                <div className="relative w-[68px] sm:w-[80px]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSortOpen(false);
+                      setShowOpen((prev) => !prev);
+                    }}
+                    className="w-full h-9 sm:h-10 px-2.5 sm:px-3 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-xs sm:text-sm font-semibold text-gray-800 shadow-2xs hover:border-[#B88E2F] transition-all"
                   >
-                    ▼
-                  </span>
-                </button>
+                    <span>
+                      {
+                        showOptions.find((o) => o.value === productsPerPage)
+                          ?.label
+                      }
+                    </span>
+                    <span
+                      className={`text-[10px] text-gray-400 transition-transform duration-200 ${
+                        showOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  </button>
 
-                {showOpen && (
-                  <div className="absolute top-11 left-0 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
-                    {showOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => {
-                          setProductsPerPage(option.value);
-                          setShowOpen(false);
-                        }}
-                        className={`text-sm w-full text-left px-3 py-2 transition-colors ${
-                          option.value === productsPerPage
-                            ? "bg-[#F9F1E7] font-semibold text-[#B88E2F]"
-                            : "hover:bg-[#F9F1E7] text-gray-700"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {showOpen && (
+                    <div className="absolute top-10 sm:top-11 left-0 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+                      {showOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setProductsPerPage(option.value);
+                            setShowOpen(false);
+                          }}
+                          className={`text-xs sm:text-sm w-full text-left px-3 py-2 transition-colors ${
+                            option.value === productsPerPage
+                              ? "bg-[#F9F1E7] font-semibold text-[#B88E2F]"
+                              : "hover:bg-[#F9F1E7] text-gray-700"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2.5">
-              <label className="text-sm font-medium text-gray-700">
-                Sort by
-              </label>
-              <div className="relative w-[175px]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowOpen(false);
-                    setSortOpen((prev) => !prev);
-                  }}
-                  className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-sm font-semibold text-gray-800 shadow-2xs hover:border-[#B88E2F] transition-all"
-                >
-                  <span className="truncate">
-                    {sortOptions.find((o) => o.value === sortBy)?.label}
-                  </span>
-                  <span
-                    className={`text-xs text-gray-400 transition-transform duration-200 ${
-                      sortOpen ? "rotate-180" : ""
-                    }`}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-700 hidden xsx:inline">
+                  Sort
+                </label>
+                <div className="relative w-[145px] sm:w-[175px]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOpen(false);
+                      setSortOpen((prev) => !prev);
+                    }}
+                    className="w-full h-9 sm:h-10 px-2.5 sm:px-3 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-xs sm:text-sm font-semibold text-gray-800 shadow-2xs hover:border-[#B88E2F] transition-all"
                   >
-                    ▼
-                  </span>
-                </button>
+                    <span className="truncate">
+                      {sortOptions.find((o) => o.value === sortBy)?.label}
+                    </span>
+                    <span
+                      className={`text-[10px] text-gray-400 transition-transform duration-200 ${
+                        sortOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  </button>
 
-                {sortOpen && (
-                  <div className="absolute top-11 right-0 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => {
-                          setSortBy(option.value);
-                          setSortOpen(false);
-                        }}
-                        className={`text-sm w-full text-left px-3 py-2 transition-colors ${
-                          option.value === sortBy
-                            ? "bg-[#F9F1E7] font-semibold text-[#B88E2F]"
-                            : "hover:bg-[#F9F1E7] text-gray-700"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {sortOpen && (
+                    <div className="absolute top-10 sm:top-11 right-0 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(option.value);
+                            setSortOpen(false);
+                          }}
+                          className={`text-xs sm:text-sm w-full text-left px-3 py-2 transition-colors ${
+                            option.value === sortBy
+                              ? "bg-[#F9F1E7] font-semibold text-[#B88E2F]"
+                              : "hover:bg-[#F9F1E7] text-gray-700"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
